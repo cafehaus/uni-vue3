@@ -1,4 +1,4 @@
-import { version } from './package'
+import { versionName } from './manifest'
 
 // 环境变量和接口域名
 let env = 'pro'
@@ -49,12 +49,12 @@ platform = 'MP-360'
 
 // 接口通用请求参数
 export const params = {
-  version,
+  version: versionName,
   platform,
 }
 
 export default {
-  version,
+  version: versionName,
   platform,
   isProd: process.env.NODE_ENV === 'production',
   env,

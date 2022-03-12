@@ -46,10 +46,7 @@ module.exports = {
     getApp: false,
     getPage: false,
     getCurrentPages: false,
-    __wxConfig: false,
-    wx: true,
     uni: true,
     plus: true,
-    ROUTES: false,
   },
 }
