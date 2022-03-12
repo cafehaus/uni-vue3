@@ -1,0 +1,34 @@
+@charset 'utf-8'
+@import './reset'
+
+body
+  text-size-adjust 100%
+  font-size 32rpx
+  user-select none
+  -webkit-tap-highlight-color transparent
+  -webkit-font-smoothing antialiased
+  -moz-osx-font-smoothing grayscale
+
+::-webkit-scrollbar
+  width 0
+  height 0
+
+// ====================================================================== 主样式
+.page,.view
+  color $black
+  background #fff
+
+// 通用按钮
+.m-btn
+	box-sizing border-box
+	display inline-block
+	padding 0 1em
+	height 80rpx
+	line-height (@height - 2rpx)
+	border 1rpx solid $blue
+	border-radius 4px
+	outline none
+	text-align center
+	font-size 28rpx
+	color #FFF
+	background $blue

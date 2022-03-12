@@ -1,0 +1,84 @@
+// ====================================================================== 变量
+$base-color = #FFD121
+$black = #161718
+$gray = #999
+$red = #FF4C21
+$blue = #116DF3
+$green = #57bc78
+$yellow = #FDB03D
+
+$primary = #007aff
+$success = #4cd964
+$warning = #f0ad4e
+$error = #dd524d
+
+$box-shadow = 0 0 8px rgba(240, 240, 240, 1)
+$linear-gradient = linear-gradient(90deg, #f67e20, #fe5004)
+$assets = 'https://www.xxx.com'
+
+// ====================================================================== 混合
+iconfont(size = inherit color = inherit)
+  font-family 'iconfont' !important
+  font-size size
+  font-style normal
+  color color
+  -webkit-font-smoothing antialiased
+  -moz-osx-font-smoothing grayscale
+
+stripe(even = #fff, odd = #eee)
+  tr
+    background-color odd
+    &.even
+    &:nth-child(even)
+      background-color even
+
+// 三角
+arrow(direction = top, n = 12rpx, color = currentColor)
+  display inline-block
+  border n solid transparent
+  width 0
+  height 0
+  line-height 0
+  vertical-align middle
+  {'border-' + direction + '-color'} color
+
+// 文字超出显示省略号
+ellipsis(no-wrap = true)
+  if no-wrap
+    white-space nowrap
+  overflow hidden
+  text-overflow ellipsis
+
+// overflow 添加 ellipsis 值，如：overflow: ellipsis
+overflow()
+  if arguments[0] == ellipsis
+    ellipsis()
+  else
+    overflow arguments
+
+// flex 布局水平居中
+flexCenter()
+  display flex
+  justify-content center
+
+// flex 布局超出自动换行
+flexLeftWarp()
+  display flex
+  flex-wrap wrap
+  justify-content flex-start
+  align-content flex-start
+
+// flex 水平均匀分布
+flexLeftRight()
+  display flex
+  justify-content space-between
+
+// flex 垂直方向排列
+flexVertical()
+  display flex
+  flex-direction column
+
+// flex 水平垂直居中
+flexCenterMiddle()
+  flexCenter()
+  align-items center
