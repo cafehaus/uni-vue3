@@ -1,43 +1,102 @@
 {
 	"pages": [ //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
-		{
-			"path": "pages/home/home",
-			"style": {
-				"navigationBarTitleText": "首页"
-			}
-		}, {
-			"path": "pages/me/me",
-			"style": {
-				"navigationBarTitleText": "我的"
-			}
-		}
+		    {
+		      "path": "pages/home/home",
+		      "name": "home",
+		      "style": {
+		        "navigationBarTitleText": "微慕",
+		        "enablePullDownRefresh": true
+		      }
+		    },
+		    {
+		      "path": "pages/cate/cate",
+		      "style": {
+		        "navigationBarTitleText": "分类"
+		      }
+		    },
+		    {
+		      "path": "pages/cate/cate-article",
+		      "style": {
+		        "navigationBarTitleText": "分类文章",
+		        "enablePullDownRefresh": true
+		      }
+		    },
+		    {
+		      "path": "pages/hot/hot",
+		      "style": {
+		        "navigationBarTitleText": "热门"
+		      }
+		    },
+		    {
+		      "path": "pages/me/me",
+		      "style": {
+		        "navigationBarTitleText": "我的"
+		      }
+		    },
+		    {
+		      "path": "pages/me/userinfo",
+		      "style": {
+		        "navigationBarTitleText": "个人资料",
+		        "navigationStyle": "custom"
+		      }
+		    },
+		    {
+		      "path": "pages/login/login",
+		      "style": {
+		        "navigationBarTitleText": "登录"
+		      }
+		    },
+		    {
+		      "path": "pages/common/article-detail",
+		      "style": {
+		        "navigationBarTitleText": "文章详情"
+		      }
+		    },
+		    {
+		      "path": "pages/common/page-detail",
+		      "style": {
+		        "navigationBarTitleText": "页面详情"
+		      }
+		    }
 	],
 	"globalStyle": {
 		"navigationBarTextStyle": "black",
 		"navigationBarTitleText": "uni-app",
 		"navigationBarBackgroundColor": "#FFF",
-		"backgroundColor": "#FFFF"
+		"backgroundColor": "#FFF"
 	},
-	"tabBar": {
-		"color": "#7A7E83",
-		"selectedColor": "#333",
-		"borderStyle": "black",
-		"backgroundColor": "#FFF",
-		"list": [
-			{
-				"pagePath": "pages/home/home",
-				"iconPath": "static/tab-home.png",
-				"selectedIconPath": "static/tab-home-on.png",
-				"text": "首页"
-			},
-			{
-				"pagePath": "pages/me/me",
-				"iconPath": "static/tab-me.png",
-				"selectedIconPath": "static/tab-me-on.png",
-				"text": "我的"
-			}
-		]
-	},
+  "tabBar": {
+    "color": "#999",
+    "selectedColor": "#fd8f45",
+    "borderStyle": "black",
+    "backgroundColor": "#fff",
+    "list": [
+      {
+        "pagePath": "pages/home/home",
+        "iconPath": "static/tab-home.png",
+        "selectedIconPath": "static/tab-home-on.png",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/cate/cate",
+        "iconPath": "static/tab-cate.png",
+        "selectedIconPath": "static/tab-cate-on.png",
+        "text": "分类"
+      },
+      {
+        "pagePath": "pages/hot/hot",
+        "iconPath": "static/tab-hot.png",
+        "selectedIconPath": "static/tab-hot-on.png",
+        "text": "热门"
+      },
+      {
+        "pagePath": "pages/me/me",
+        "iconPath": "static/tab-me.png",
+        "selectedIconPath": "static/tab-me-on.png",
+        "text": "我的"
+      }
+    ]
+  },
 	"easycom": {
 		"custom": {
 			"w-(.*)": "@/components/w-$1.vue"

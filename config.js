@@ -2,7 +2,7 @@ import { versionName } from './manifest'
 
 // 环境变量和接口域名
 let env = 'pro'
-let api = 'https://www.xxx.com/api/'
+let api = 'https://plus.minapper.com/'
 
 // switch (process.env.NODE_ENV) { // 开发环境
 //   case 'development':
