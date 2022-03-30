@@ -1,8 +1,8 @@
 @font-face {
-  font-family: "iconfont";
-  src: url('//at.alicdn.com/t/font_2369472_zekam70pjgc.woff2?t=1635933527501') format('woff2'),
-       url('//at.alicdn.com/t/font_2369472_zekam70pjgc.woff?t=1635933527501') format('woff'),
-       url('//at.alicdn.com/t/font_2369472_zekam70pjgc.ttf?t=1635933527501') format('truetype');
+  font-family: "iconfont"; /* Project id 1736375 */
+  src: url('//at.alicdn.com/t/font_1736375_yi2se7iwu6i.woff2?t=1647164585615') format('woff2'),
+       url('//at.alicdn.com/t/font_1736375_yi2se7iwu6i.woff?t=1647164585615') format('woff'),
+       url('//at.alicdn.com/t/font_1736375_yi2se7iwu6i.ttf?t=1647164585615') format('truetype');
 }
 
 .iconfont {
@@ -13,18 +13,22 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-.icon-play:before {
-  content: "\e6ce";
+.icon-empty:before {
+  content: "\e642";
 }
 
-.icon-time:before {
-  content: "\e6d8";
+.icon-contact-girl:before {
+  content: "\e603";
 }
 
-.icon-next:before {
-  content: "\e6e7";
+.icon-contact:before {
+  content: "\e68c";
 }
 
-.icon-warning:before {
-  content: "\e6e5";
+.icon-search:before {
+  content: "\e6d2";
+}
+
+.icon-miniapp-logo:before {
+  content: "\e61e";
 }
