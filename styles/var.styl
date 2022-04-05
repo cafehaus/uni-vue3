@@ -14,7 +14,9 @@ $error = #dd524d
 
 $box-shadow = 0 0 8px rgba(240, 240, 240, 1)
 $linear-gradient = linear-gradient(90deg, #f67e20, #fe5004)
-$assets = 'https://www.xxx.com'
+
+$link = #576b95
+// $assets = 'https://www.xxx.com'
 
 // ====================================================================== 混合
 iconfont(size = inherit color = inherit)
@@ -42,12 +44,19 @@ arrow(direction = top, n = 12rpx, color = currentColor)
   vertical-align middle
   {'border-' + direction + '-color'} color
 
-// 文字超出显示省略号
-ellipsis(no-wrap = true)
-  if no-wrap
-    white-space nowrap
+
+// 单行省略号
+nowrap()
+  white-space nowrap
   overflow hidden
   text-overflow ellipsis
+
+// 多行省略号
+multi-nowrap($col = 2)
+  display -webkit-box
+  -webkit-box-orient vertical
+  -webkit-line-clamp $col
+  overflow hidden
 
 // overflow 添加 ellipsis 值，如：overflow: ellipsis
 overflow()

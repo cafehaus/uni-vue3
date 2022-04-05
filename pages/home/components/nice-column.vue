@@ -55,12 +55,14 @@
             url
           })
         }
+        // #ifdef MP
         if (type === 'miniapp') { // 其他小程序
           uni.navigateToMiniProgram({
             appId: appid,
             path
           })
         }
+        // #endif
       }
     }
   }

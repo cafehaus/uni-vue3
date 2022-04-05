@@ -7,6 +7,7 @@ import config from './config'
 import uni from './libs/uni'
 import storage from './libs/storage'
 import tips from './libs/tips'
+import util from './libs/util'
 import * as user from './libs/user'
 import * as api from './common/api'
 
@@ -18,6 +19,7 @@ export function createApp() {
   app.config.globalProperties.$tips = tips
   app.config.globalProperties.$user = user
   app.config.globalProperties.$api = api
+  app.config.globalProperties.$util = util
 
   app.use(store)
   return {

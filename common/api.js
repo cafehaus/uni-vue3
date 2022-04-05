@@ -42,3 +42,16 @@ export const getHotArticle = params => http.get(`${wm}post/${params.type}?apptyp
 // =================================================================== 我的
 // 获取wp页面详情|get
 export const getWpPageDetail = id => http.get(`${wp}pages/${id}`)
+
+// 获取文章评论|get
+export const getArticleComment = params => http.get(`${wm}comment/getcomments`, params)
+
+// 获取标签相关文章|get
+export const getTagArticle = params => http.get(`${wp}posts`, params)
+
+// 点赞|post
+export const submitLike = params => http.post(`${wm}post/like`, params)
+
+// 获取是否点赞|post
+export const getIsLike = params => http.post(`${wm}post/islike`, params)
+

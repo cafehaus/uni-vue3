@@ -1,8 +1,8 @@
 @font-face {
   font-family: "iconfont"; /* Project id 1736375 */
-  src: url('//at.alicdn.com/t/font_1736375_yi2se7iwu6i.woff2?t=1647164585615') format('woff2'),
-       url('//at.alicdn.com/t/font_1736375_yi2se7iwu6i.woff?t=1647164585615') format('woff'),
-       url('//at.alicdn.com/t/font_1736375_yi2se7iwu6i.ttf?t=1647164585615') format('truetype');
+  src: url('//at.alicdn.com/t/font_1736375_q4kyvsqfqfn.woff2?t=1649172725494') format('woff2'),
+       url('//at.alicdn.com/t/font_1736375_q4kyvsqfqfn.woff?t=1649172725494') format('woff'),
+       url('//at.alicdn.com/t/font_1736375_q4kyvsqfqfn.ttf?t=1649172725494') format('truetype');
 }
 
 .iconfont {
@@ -11,6 +11,34 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-lucky-money:before {
+  content: "\e641";
+}
+
+.icon-like:before {
+  content: "\e660";
+}
+
+.icon-zan-fill:before {
+  content: "\e721";
+}
+
+.icon-zan:before {
+  content: "\e7b3";
+}
+
+.icon-preview:before {
+  content: "\e65c";
+}
+
+.icon-comment:before {
+  content: "\e65d";
+}
+
+.icon-cate:before {
+  content: "\e65e";
 }
 
 .icon-empty:before {

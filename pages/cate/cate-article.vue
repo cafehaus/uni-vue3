@@ -3,7 +3,7 @@
     <!-- 文章分类 -->
     <view class="topic-common-list">
       <view class="topic-list-item">
-        <image :src="cateInfo.category_thumbnail_image" class="cover" mode="aspectFill" />
+        <image :src="cateInfo.category_thumbnail_image || $config.defaultImg" class="cover" mode="aspectFill" />
         <view class='topic-item-content'>
           <view class="topic-content-brief">
             <text>{{ cateInfo.description }}</text>
@@ -70,7 +70,7 @@
 
     methods: {
       initData() {
-        this.cateId = this.$Route.query.id
+        this.cateId = this.$route.query.id
 
         this.getCategoryInfo()
         this.getCateArticle()

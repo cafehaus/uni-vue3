@@ -47,7 +47,7 @@
 		      }
 		    },
 		    {
-		      "path": "pages/common/article-detail",
+		      "path": "pages/common/detail",
 		      "style": {
 		        "navigationBarTitleText": "文章详情"
 		      }

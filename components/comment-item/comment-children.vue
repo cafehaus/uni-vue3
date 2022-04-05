@@ -1,0 +1,65 @@
+<template>
+  <view>
+    <template v-for="item in list" :key="item.id">
+      <view class="item">
+        <text class="author">{{item.author_name}}</text>
+        <text>回复</text>
+        <text class="author">{{father.author_name}}</text>
+        <text>：{{item.content}}</text>
+      </view>
+
+      <CommentChildren :list="item.child" :father="item" />
+    </template>
+  </view>
+</template>
+
+<script>
+  // import CommentChildren from './comment-children'
+  export default {
+    name: 'CommentChildren',
+    components: {
+      // CommentChildren,
+    },
+    props: {
+      list: {
+        type: Array,
+        default: []
+      },
+      father: {
+        type: Object,
+        default: () => ({})
+      }
+    },
+
+    data() {
+      return {}
+    },
+
+    onLoad() {
+      // this.initData()
+    },
+
+    methods: {
+      // initData() {},
+
+      // 去文章详情
+      goDetail(id) {
+        uni.navigateTo({
+          url: `/pages/common/article-detail?id=${id}`
+        })
+      }
+    }
+  }
+</script>
+
+<style lang="stylus" scoped>
+@import '../../styles/var'
+
+.item
+  font-size 28rpx
+  line-height 1.8
+  color #333
+  .author
+    color $base-color
+    font-weight 500
+</style>

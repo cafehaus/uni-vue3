@@ -19,7 +19,7 @@
         </div>
       </div>
       <div class="img-box">
-        <img :src="item.post_medium_image" mode="aspectFill" class="cover" />
+        <img :src="item.post_medium_image || $config.defaultImg" mode="aspectFill" class="cover" />
       </div>
     </div>
   </div>
@@ -49,7 +49,7 @@
       // 去文章详情
       goDetail(id) {
         uni.navigateTo({
-          url: `/pages/common/article-detail?id=${id}`
+          url: `/pages/common/detail?id=${id}`
         })
       }
     }

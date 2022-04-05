@@ -1,5 +1,5 @@
 <template>
-  <div class="page article-detail">
+  <div class="page detail">
     <h2 class="article-title">{{ title }}</h2>
     <!-- <Parser :html="content" class="article-content" /> -->
   </div>
@@ -44,7 +44,7 @@
 </script>
 
 <style lang="stylus" scoped>
-  .article-detail
+  .detail
     padding 0 40rpx
     .article-title
       font-size 20px

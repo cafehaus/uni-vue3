@@ -104,8 +104,13 @@ export default {
 
     // 标签
     async getTagList() {
-      const res = await this.$api.getTagList();
-      this.tagList = res || [];
+      const res = await this.$api.getTagList({
+        per_page: 7,
+        page: 1,
+        orderby: 'count',
+        order: 'desc',
+      })
+      this.tagList = res || []
     },
 
     // 自定义广告
@@ -142,7 +147,7 @@ export default {
     // 去文章详情
     goSwiperDetail(id) {
       uni.navigateTo({
-        url: `/pages/common/article-detail?id=${id}`
+        url: `/pages/common/detail?id=${id}`
       })
     }
   }

@@ -59,4 +59,5 @@ export default {
   isProd: process.env.NODE_ENV === 'production',
   env,
   api,
+  defaultImg: '/static/default.jpg', // 默认封面图
 }

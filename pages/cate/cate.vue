@@ -24,8 +24,7 @@
         @click="goDetail(itm)"
       >
         <div class="cate-img">
-          <image v-if="itm.category_thumbnail_image" :src="itm.category_thumbnail_image" class="img" mode="aspectFill"></image>
-          <image v-else src="@/static/post_default_image.jpg" class="img" mode="aspectFill"></image>
+          <image :src="itm.category_thumbnail_image || $config.defaultImg" class="img" mode="aspectFill" />
         </div>
 
         <!-- 分类名、描述 -->

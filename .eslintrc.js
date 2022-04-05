@@ -7,7 +7,9 @@ module.exports = {
     parser: 'babel-eslint',
   },
   extends: [
-    'plugin:vue/strongly-recommended',
+    // 'plugin:vue/strongly-recommended',
+    // 'plugin:vue/vue3-recommended',
+    'plugin:vue/vue3-strongly-recommended',
     '@vue/standard',
   ],
   rules: {
