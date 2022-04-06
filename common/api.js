@@ -32,9 +32,6 @@ export const getCategory = params => http.get(`${wm}category?apptype=wx`, params
 // 获取分类信息|get
 export const getCategoryInfo = id => http.get(`${wp}categories/${id}`)
 
-// 获取分类文章|get
-export const getCateArticle = params => http.get(`${wp}posts`, params)
-
 // =================================================================== 热门
 // 获取热门文章|get
 export const getHotArticle = params => http.get(`${wm}post/${params.type}?apptype=wx`, params)
@@ -54,4 +51,7 @@ export const submitLike = params => http.post(`${wm}post/like`, params)
 
 // 获取是否点赞|post
 export const getIsLike = params => http.post(`${wm}post/islike`, params)
+
+// 获取标签详情|get
+export const getTagDetail = id => http.get(`${wp}tags/${id}`)
 

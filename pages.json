@@ -15,7 +15,7 @@
 		      }
 		    },
 		    {
-		      "path": "pages/cate/cate-article",
+		      "path": "pages/common/list",
 		      "style": {
 		        "navigationBarTitleText": "分类文章",
 		        "enablePullDownRefresh": true

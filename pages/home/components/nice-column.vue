@@ -7,19 +7,19 @@
 
     <scroll-view :scroll-x="true">
       <view class="top-Nav">
-          <view
-            v-for="(item, index) in navList"
-            :key="index"
-            class="top-item"
-            @click="goto(item)"
-          >
-            <view>
-              <image class="img" mode="aspectFill" :src="item.image" />
-            </view>
-            <view>
-              <text class="title">{{ item.title }}</text>
-            </view>
+        <view
+          v-for="(item, index) in navList"
+          :key="index"
+          class="top-item"
+          @click="goto(item)"
+        >
+          <view>
+            <image class="img" mode="aspectFill" :src="item.image" />
           </view>
+          <view>
+            <text class="title">{{ item.title }}</text>
+          </view>
+        </view>
       </view>
     </scroll-view>
   </view>

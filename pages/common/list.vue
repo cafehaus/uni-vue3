@@ -1,100 +1,186 @@
 <template>
-  <div class="page cate">
-    <!-- 左边一级分类菜单 -->
-    <div class="cate-left">
-      <div class="cate-left-box">
-        <div
-          class="cate-name"
-          :class="{ 'active': activeIndex === index}"
-          v-for="(item, index) in categoriesList"
-          :key="index"
-          @click="switchCate(index)"
-        >
-          {{ item.name }}
-        </div>
-      </div>
-    </div>
+  <div class="page">
+    <view v-if="type < 4" class="header">
+      <image class="img" :src="info.img" mode="aspectFill" />
+      <view class='info'>
+        <view class="des">
+          <text>{{ info.des }}</text>
+        </view>
+        <view v-if="info.count" class="num">共有 {{ info.count }} 篇文章</view>
+      </view>
+    </view>
 
-    <!-- 右边二级分类列表 -->
-    <div class="cate-right">
-      <div
-        class="list-item"
-        v-for="(itm, idx) in cateSubList"
-        :key="idx"
-        @click="goDetail(itm)"
-      >
-        <div class="cate-img">
-          <image :src="itm.category_thumbnail_image" class="img" mode="aspectFill"></image>
-        </div>
-
-        <!-- 分类名、描述 -->
-        <div class="content-title">
-          <span>{{ itm.name }}</span>
-        </div>
-        <div class="content-brief">
-          <span>{{ itm.description }}</span>
-        </div>
-
-      </div>
-    </div>
+    <ArticleList :article-list="articleList" />
   </div>
 </template>
 
 <script>
+  import ArticleList from '@/components/article-list'
   export default {
+    components: {
+      ArticleList
+    },
     data() {
       return {
-        categoriesList: [],
-        cateSubList: [],
-        activeIndex: 0
+        type: '1', // 1 分类 2 标签 3 搜索 4 我的浏览 5 我的评论 6 我的点赞 7 我的订阅
+        curId: '',
+        articleList: [],
+        info: {},
+
+        page: {
+          index: 1,
+          size: 5
+        },
+        isLastPage: false,
+        isPullDown: false
       }
     },
     onLoad() {
       this.initData()
     },
 
+    // 下拉刷新
+    onPullDownRefresh() {
+      this.articleList = []
+      this.page.index = 1
+      this.isPullDown = true
+      this.isLastPage = false
+
+      this.getCateArticle()
+    },
+
+    // 上拉加载
+    onReachBottom() {
+      if (this.isLastPage) {
+        uni.showToast({
+          icon: 'none',
+          title: '已经是最后一页了',
+          duration: 1000
+        })
+        return
+      }
+      
+      this.page.index++
+      this.getCateArticle()
+    },
+
     methods: {
       initData() {
-        this.getCategory()
+        this.curId = this.$route.query.id || ''
+        this.type = this.$route.query.type || '1'
+
+        // 分类
+        if (this.type === '1') {
+          this.getCategoryInfo()
+          this.getCateArticle()
+        }
+
+        // 标签
+        if (this.type === '2') {
+          this.getTagDetail()
+          this.getTagArticle()
+        }
       },
 
       // 获取分类
-      async getCategory() {
-        const res = await this.$api.getCategory()
-        if (res.length) {
-          let list = res.map(item => {
-            if (!item.children.length) {
-              item.children[0] = { ...item, children: []}
-            }
-            return item
-          })
-
-          let index = this.activeIndex
-          this.categoriesList = list
-          this.cateSubList = list[index].children
-        }
-      },
-
-      // 左边分类菜单切换
-      switchCate(index) {
-        let cateChildren = this.categoriesList[index]
-
-        // 只有一级分类，右侧显示出一级分类
-        if (!cateChildren.children.length) {
-          cateChildren = [cateChildren]
-        } else {
-          cateChildren = this.categoriesList[index].children
-        }
-
-        this.activeIndex = index
-        this.cateSubList = cateChildren
-      },
-
-      //跳转分类详情
-      goDetail(item) {
-        uni.navigateTo({
-          url: `/pages/cate/cate-article?id=${item.id}`
+      async getCateArticle() {
+        const res = await this.$api.getArticleList({
+          orderby: 'date',
+          order: 'desc',
+          page: this.page.index,
+          per_page: this.page.size,
+          categories: this.curId
         })
+
+        if (res.length) {
+          this.articleList.push(...res)
+        }
+
+        if(this.isPullDown) {
+          uni.stopPullDownRefresh()
+          this.isPullDown = false
+        }
+
+        if ((res.length < 5) || (res.code === 'rest_post_invalid_page_number')) {
+          this.isLastPage = true
+        }
+      },
+
+      // 获取分类信息
+      async getCategoryInfo() {
+        const res = await this.$api.getCategoryInfo(this.curId)
+        this.info = {
+          ...res,
+          img: res.category_thumbnail_image || this.$config.defaultImg,
+          des: res.description,
+        }
+
+        // 设置页面标题
+        uni.setNavigationBarTitle({
+          title: res.name
+        })
+      },
+
+      async getTagDetail() {
+        // per_page=' + pageCount + '&orderby=date&order=desc&page=' + args.page + '&tags=' + args.tag
+        const res = await this.$api.getTagDetail(this.curId)
+        this.info = {
+          ...res,
+          img: res.tag_thumbnail_image || this.$config.defaultImg,
+          des: res.name,
+        }
+
+        // 设置页面标题
+        uni.setNavigationBarTitle({
+          title: res.name
+        })
+      },
+
+      async getTagArticle() {
+        const res = await this.$api.getTagArticle({
+          per_page: this.page.size,
+          page: this.page.index,
+          orderby: 'date',
+          order: 'desc',
+          tags: this.curId
+        })
+        let data = res.data || []
+        data = data(m => {
+          m.post_thumbnail_image = m.post_thumbnail_image || this.$config.defaultImg
+          m.date = this.$util.fmtDate(res.date, 'yyyy-MM-dd')
+        })
+        if (data.length) {
+          this.articleList.push(...data)
+        }
+
+        // 设置页面标题
+        uni.setNavigationBarTitle({
+          title: res.name
+        })
+      },
+
+      // 搜索
+      async searchArticle() {
+        const res = await this.$api.getCateArticle({
+          orderby: 'date',
+          order: 'desc',
+          page: this.page.index,
+          per_page: this.page.size,
+          search: this.curId
+        })
+
+        if (res.length) {
+          this.articleList.push(...res)
+        }
+
+        if(this.isPullDown) {
+          uni.stopPullDownRefresh()
+          this.isPullDown = false
+        }
+
+        if ((res.length < 5) || (res.code === 'rest_post_invalid_page_number')) {
+          this.isLastPage = true
+        }
       }
     }
   }
@@ -103,85 +189,35 @@
 <style lang="stylus" scoped>
 @import '../../styles/var'
 
-  page 
-    background #f5f7f7
-  .cate
+.header
+  position relative
+  overflow hidden
+  background #f4f6f9
+  .img
+    display block
     width 100%
+    height 240rpx
+    filter brightness(88%)
+  .info
     position absolute
-    top 0
-    bottom 0
-    display flex
-    .cate-left
-      width 200rpx
-      font-size 28rpx
-      background #fff
-      position fixed
-      height 100%
-      .cate-left-box
-        width 200rpx
-        position absolute
-        height 100%
-        overflow auto
-        .cate-name
-          height 100rpx
-          line-height 100rpx
-          padding 0 24rpx
-          position relative
-          overflow hidden
-          text-overflow ellipsis
-          white-space nowrap
-          &.active
-            color $maincolor
-            font-weight 500
-            background #f5f7f7
-            &::before
-              content ''
-              display block
-              width 3px
-              height 30rpx
-              background $maincolor
-              position absolute
-              top 35rpx
-              left 0
-    .cate-right
-      flex 1
-      height 100%
-      padding 40rpx 40rpx 0
-      overflow auto
-      background #f5f7f7
-      margin-left 200rpx
-      .list-item
-        position relative
-        overflow hidden
-        margin-bottom 40rpx
-        background #fff
-        border-radius 10rpx
-        box-shadow 2px 2px 10px #eee
-        .cate-img
-          .img
-            width 100%
-            height 160rpx
-            display block
-        .content-title
-          padding 20rpx 30rpx 0
-          overflow hidden
-          text-overflow ellipsis
-          white-space nowrap
-          display flex
-          justify-content space-between
-          align-items center
-          span
-            font-size 15px
-            line-height 1
-            font-weight 500
-            color #333
-        .content-brief
-          width 70%
-          padding 4rpx 0 30rpx 30rpx
-          font-size 13px
-          overflow hidden
-          text-overflow ellipsis
-          white-space nowrap
-          color #333
+    z-index 2
+    left 50%
+    top 50%
+    transform translate(-50%, -50%)
+    text-align center
+    vertical-align middle
+    width 90%
+    .des
+      font-size 30rpx
+      font-weight 500
+      line-height 1.4
+      color #fff
+      margin-bottom 16rpx
+      multi-nowarp(2)
+    .num
+      font-size 24rpx
+      line-height 24rpx
+      color #fff
+      margin-bottom 24rpx  
  
 </style>

@@ -176,6 +176,33 @@
           let tagIds =  res.tags.join(',')
           this.getTagArticle(tagIds)
         }
+
+        // 缓存浏览记录
+        this.setReadLog(info)
+      },
+
+      setReadLog(info) {
+        if (!this.title && !this.content) return
+
+        let logs = this.$storage('readLogs') || []
+        // 过滤重复值
+        if (logs.length > 0) {
+          logs = logs.filter(m =>  m.id !== this.articleId)
+        }
+        // 最多20条
+        if (logs.length > 19) {
+          logs.pop()
+        }
+        let info = {
+          id: this.articleId,
+          total_comments: this.commentNum,
+          pageviews: info.pageviews,
+          like_count: this.likeNum,
+          title: this.title,
+          post_medium_image: info.post_medium_image || $config.defaultImg
+        }
+        logs.unshift(info)
+        this.$storage('readLogs', logs)
       },
 
       async getArticleComment() {

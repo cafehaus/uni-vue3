@@ -78,7 +78,7 @@
 
       // 获取分类
       async getCateArticle() {
-        const res = await this.$api.getCateArticle({
+        const res = await this.$api.getArticleList({
           orderby: 'date',
           order: 'desc',
           page: this.page.index,
