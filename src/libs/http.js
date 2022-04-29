@@ -1,5 +1,5 @@
 // uni-app 网络请求封装
-import config from '/config'
+import config from '@/config'
 import storage from './storage'
 import Tips from './tips'
 import { clearLogin, login } from './user'
@@ -48,7 +48,7 @@ export default {
         statusCode,
         errMsg,
         failed,
-        options = {},
+        // options = {},
         data = {},
       } = response
       // 请求出错

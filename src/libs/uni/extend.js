@@ -1,5 +1,5 @@
 // uni-app api 封装
-import config from '/config'
+import config from '@/config'
 import Tips from '../tips'
 import http from '../http'
 import { clearLogin, login } from '../user'
@@ -214,6 +214,42 @@ export function upload(url, { data = {}, name = 'file', filePath }) {
       },
       fail: res => {
         Tips.loaded()
+        resolve(res)
+      },
+    })
+  })
+}
+
+// 增强的上传文件方法
+export function uploadPlus(url, { data = {}, name = 'file', filePath }) {
+  return new Promise((resolve, reject) => {
+    let isFullUrl = /^https?:\/\//.test(url)
+    uni.uploadFile({
+      url: isFullUrl ? url : config.api + url,
+      header: http.getHeader(),
+      formData: data, // 添加通用参数
+      name, // 文件对应的 key，开发者在服务端可以通过这个 key 获取文件的二进制内容
+      filePath,
+      success: res => {
+        res = res.data ? JSON.parse(res.data) : {}
+
+        // 未登录转到登录页
+        let status = res.status || res.code
+        let nologin = ['-1', '10000004'].includes(status)
+        if (nologin) {
+          Tips.loaded()
+          Tips.toast('请先登录')
+          clearLogin()
+          login()
+          return
+        }
+
+        resolve(res)
+      },
+      fail: res => {
+        Tips.loaded()
+        console.error('上传失败：', res)
+        // Tips.toast(`上传失败：${res.errMsg}`)
         resolve(res)
       },
     })
