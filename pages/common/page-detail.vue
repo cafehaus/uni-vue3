@@ -1,15 +1,15 @@
 <template>
   <div class="page detail">
     <h2 class="article-title">{{ title }}</h2>
-    <!-- <Parser :html="content" class="article-content" /> -->
+    <mpHtml :content="content" />
   </div>
 </template>
 
 <script>
-  // import Parser from "@/components/jyf-parser/jyf-parser"
+  import mpHtml from '@/components/mp-html/mp-html'
   export default {
     components: {
-      // Parser
+      mpHtml
     },
     data() {
       return {

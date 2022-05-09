@@ -13,8 +13,8 @@
       <text class="txt">{{ likeNum }}</text>
     </section>
 
-    <!-- <Parser :html="content" class="article-content" /> -->
-    <rich-text :nodes="content" />
+    <mpHtml :content="content" />
+    <!-- <rich-text :nodes="content" /> -->
 
     <!-- 点赞 -->
     <section class="like">
@@ -89,11 +89,11 @@
 </template>
 
 <script>
-  // import Parser from "@/components/jyf-parser/jyf-parser"
+  import mpHtml from '@/components/mp-html/mp-html'
   import CommentItem from '@/components/comment-item'
   export default {
     components: {
-      // Parser
+      mpHtml,
       CommentItem,
     },
     data() {
