@@ -25,6 +25,9 @@ export const getArticleDetail = id => http.get(`${wp}posts/${id}`)
 // 获取标签列表|get
 export const getTagList = params => http.get(`${wp}tags?per_page=7&orderby=count&order=desc&page=1`)
 
+// 获取最新评论|get
+export const getCommentList = params => http.get(`${wm}comment/new`)
+
 // =================================================================== 分类
 // 获取分类树|get
 export const getCategory = params => http.get(`${wm}category?apptype=wx`, params)
@@ -54,4 +57,16 @@ export const getIsLike = params => http.post(`${wm}post/islike`, params)
 
 // 获取标签详情|get
 export const getTagDetail = id => http.get(`${wp}tags/${id}`)
+
+// 阅读记录-我的评论|get
+export const getCommentArticle = params => http.get(`${wp}comment/get?openid=${params.openid}&apptype=${params.apptype}`)
+
+// 阅读记录-我的点赞|get
+export const getLikeArticle = params => http.get(`${wp}post/mylike?openid=${params.openid}&apptype=${params.apptype}`)
+
+// 阅读记录-我的赞赏|get
+export const getPraiseArticle = params => http.get(`${wp}post/mypraise?openid=${params.openid}&apptype=${params.apptype}`)
+
+// 阅读记录-我的订阅|get
+export const getSubscribeArticle = params => http.get(`${wp}category/getsubscription?openid=${params.openid}`)
 
