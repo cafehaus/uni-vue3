@@ -214,8 +214,8 @@
           <view class="url">链接：{{ n.attrs.href }}</view>
           <view class="code">提取码：{{ n.attrs.code }}</view>
           <view class="footer">
-            <view class="btn btn-copy" :code="{{n.attrs.code}}" @tap="onbaiPanCopy">复制提取码</view>
-            <view class="btn" :key="{{n.attrs.key}}"  @tap="onbaiduPanOpen">打开网盘</view>
+            <view class="btn btn-copy" :code="n.attrs.code" @tap="onbaiPanCopy">复制提取码</view>
+            <view class="btn" :key="n.attrs.key"  @tap="onbaiduPanOpen">打开网盘</view>
           </view>
         </view>
       </block>

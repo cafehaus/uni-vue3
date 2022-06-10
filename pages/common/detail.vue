@@ -149,7 +149,25 @@
 
       // 获取文章详情
       async getArticleDetail() {
-        const res = await this.$api.getArticleDetail(this.articleId)
+        let key = 'wxexcitation'
+        // #ifdef MP-WEIXIN
+        key = 'wxexcitation'
+        // #endif
+        // #ifdef MP-ALIPAY
+        key = 'alexcitation'
+        // #endif
+        // #ifdef MP-BAIDU
+        key = 'bdexcitation'
+        // #endif
+        // #ifdef MP-TOUTIAO
+        key = 'ttexcitation'
+        // #endif
+        // #ifdef MP-QQ
+        key = 'qqexcitation'
+        // #endif
+        const res = await this.$api.getArticleDetail({
+          id: this.articleId
+        }, { header: { [key]: '1' }})
         let info = {
           ...res,
           preArticle: {
@@ -397,7 +415,7 @@
       left 0
       bottom -2rpx
     .num
-      font-size 26rpx 
+      font-size 26rpx
 
   // 上下文
   .pre-next

@@ -7,7 +7,7 @@
     <NiceColumn :nav-list="navList" />
 
     <!-- 搜索 -->
-    <VSearch />
+    <VSearch from="home" />
 
     <!-- 标签 -->
     <VTag :tag-list="tagList" />

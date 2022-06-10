@@ -2,7 +2,7 @@
   <div class="search-box" :class="{'search-box-home': from === 'home'}">
     <!-- 最新评论和新手指南 -->
     <view v-if="from === 'home'" class="nav">
-      <view class="nav-item" @click="goto('/pages/common/new-comment')">
+      <view class="nav-item" @click="goto('/pages/common/comment')">
         <image class="img" src="@/static/comment.jpg" mode="aspectFill" />
         <view class="info">
           <view class="title">最新评论</view>

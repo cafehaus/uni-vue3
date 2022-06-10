@@ -36,6 +36,24 @@ export default {
       config.header = {
         ...config.header,
         Token: storage('token') || '',
+        // #ifdef H5
+        clentkey: 'wx',
+        // #endif
+        // #ifdef MP-WEIXIN
+        clentkey: 'wx',
+        // #endif
+        // #ifdef MP-ALIPAY
+        clentkey: 'alipay',
+        // #endif
+        // #ifdef MP-BAIDU
+        clentkey: 'bd',
+        // #endif
+        // #ifdef MP-TOUTIAO
+        clentkey: 'tt',
+        // #endif
+        // #ifdef MP-QQ
+        clentkey: 'qq',
+        // #endif
       }
     },
 
