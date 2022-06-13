@@ -1,5 +1,5 @@
 <template>
-  <div class="page detail">
+  <view class="page detail">
     <h2 class="article-title">{{ title }}</h2>
     <section class="article-date">
       <text class="txt">{{ info.dateName }}</text>
@@ -85,16 +85,22 @@
       :key="c.id"
       :item="c"
     />
-  </div>
+
+    <!-- 评论框 -->
+    <CommentBar />
+  </view>
 </template>
 
 <script>
   import mpHtml from '@/components/mp-html/mp-html'
   import CommentItem from '@/components/comment-item'
+  import CommentBar from '@/components/comment-bar'
+
   export default {
     components: {
       mpHtml,
       CommentItem,
+      CommentBar,
     },
     data() {
       return {
@@ -211,7 +217,7 @@
         if (logs.length > 19) {
           logs.pop()
         }
-        let info = {
+        let obj = {
           id: this.articleId,
           total_comments: this.commentNum,
           pageviews: info.pageviews,
@@ -219,7 +225,7 @@
           title: this.title,
           post_medium_image: info.post_medium_image || $config.defaultImg
         }
-        logs.unshift(info)
+        logs.unshift(obj)
         this.$storage('readLogs', logs)
       },
 

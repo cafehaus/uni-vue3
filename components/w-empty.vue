@@ -1,10 +1,10 @@
 <template>
-  <div class="w-empty">
+  <view class="w-empty">
     <image v-if="isImage" class="image" :src="icon" mode="widthFix" />
     <i v-else :class="icon" class="iconfont" />
     <p class="txt"><slot>{{ text }}</slot></p>
     <view class="footer"><slot name="footer" /></view>
-  </div>
+  </view>
 </template>
 
 <script>

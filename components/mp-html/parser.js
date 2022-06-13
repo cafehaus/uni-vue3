@@ -186,7 +186,7 @@ Parser.prototype.expose = function () {
   for (let i = this.stack.length; i--;) {
     const item = this.stack[i]
     // wm-custom
-    if (customTagList.includs(item.name)) return
+    if (customTagList.includes(item.name)) return
 
     if (item.c || item.name === 'a' || item.name === 'video' || item.name === 'audio') return
     item.c = 1

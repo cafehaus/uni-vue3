@@ -1,8 +1,8 @@
 <template>
-  <div class="page detail">
+  <view class="page detail">
     <h2 class="article-title">{{ title }}</h2>
     <mpHtml :content="content" />
-  </div>
+  </view>
 </template>
 
 <script>

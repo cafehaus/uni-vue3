@@ -1,5 +1,5 @@
 <template>
-  <div class="page">
+  <view class="page">
     <view
       class="tag"
       v-for="tag in tagList"
@@ -15,7 +15,7 @@
         <view class="num">{{ item.count }}篇文章</view>
       </view>
     </view>
-  </div>
+  </view>
 </template>
 
 <script>

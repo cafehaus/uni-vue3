@@ -1,9 +1,9 @@
 <template>
-  <div class="page cate">
+  <view class="page cate">
     <!-- 左边一级分类菜单 -->
-    <div class="cate-left">
-      <div class="cate-left-box">
-        <div
+    <view class="cate-left">
+      <view class="cate-left-box">
+        <view
           class="cate-name"
           :class="{ 'active': activeIndex === index}"
           v-for="(item, index) in categoriesList"
@@ -11,33 +11,33 @@
           @click="switchCate(index)"
         >
           {{ item.name }}
-        </div>
-      </div>
-    </div>
+        </view>
+      </view>
+    </view>
 
     <!-- 右边二级分类列表 -->
-    <div class="cate-right">
-      <div
+    <view class="cate-right">
+      <view
         class="list-item"
         v-for="(itm, idx) in cateSubList"
         :key="idx"
         @click="goDetail(itm)"
       >
-        <div class="cate-img">
+        <view class="cate-img">
           <image :src="itm.category_thumbnail_image || $config.defaultImg" class="img" mode="aspectFill" />
-        </div>
+        </view>
 
         <!-- 分类名、描述 -->
-        <div class="content-title">
+        <view class="content-title">
           <span>{{ itm.name }}</span>
-        </div>
-        <div class="content-brief">
+        </view>
+        <view class="content-brief">
           <span>{{ itm.description }}</span>
-        </div>
+        </view>
 
-      </div>
-    </div>
-  </div>
+      </view>
+    </view>
+  </view>
 </template>
 
 <script>

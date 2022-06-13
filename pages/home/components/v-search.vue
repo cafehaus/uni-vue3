@@ -1,5 +1,5 @@
 <template>
-  <div class="search-box" :class="{'search-box-home': from === 'home'}">
+  <view class="search-box" :class="{'search-box-home': from === 'home'}">
     <!-- 最新评论和新手指南 -->
     <view v-if="from === 'home'" class="nav">
       <view class="nav-item" @click="goto('/pages/common/comment')">
@@ -24,7 +24,7 @@
       <input :value="value" placeholder="你感兴趣的内容..." />
       <i class="iconfont icon-search" @click="goto('/pages/common/search')" />
     </view>
-  </div>
+  </view>
 </template>
 
 <script>

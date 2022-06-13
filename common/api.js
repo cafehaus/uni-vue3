@@ -20,7 +20,7 @@ export const getCustomAd = params => http.get(`${wm}options/adconfig`, params)
 export const getArticleList = params => http.get(`${wp}posts`, params)
 
 // 获取文章详情|get
-export const getArticleDetail = (params, config) => http.get(`${wp}posts/${params.id}`, params, config)
+export const getArticleDetail = (params, config) => http.get(`${wm}posts/${params.id}`, params, config)
 
 // 获取标签列表|get
 export const getTagList = params => http.get(`${wp}tags?per_page=7&orderby=count&order=desc&page=1`)

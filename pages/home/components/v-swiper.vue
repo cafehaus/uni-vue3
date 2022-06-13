@@ -1,5 +1,5 @@
 <template>
-  <div class="swiper-box">
+  <view class="swiper-box">
     <swiper
       v-if="swiperList.length"
       class="swiper"
@@ -23,7 +23,7 @@
         </view>
       </swiper-item>
     </swiper>
-  </div>
+  </view>
 </template>
 
 <script>

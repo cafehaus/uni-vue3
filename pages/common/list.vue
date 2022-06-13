@@ -1,5 +1,5 @@
 <template>
-  <div class="page">
+  <view class="page">
     <view v-if="type < 4" class="header">
       <image class="img" :src="info.img" mode="aspectFill" />
       <view class='info'>
@@ -11,7 +11,7 @@
     </view>
 
     <ArticleList :article-list="articleList" />
-  </div>
+  </view>
 </template>
 
 <script>
@@ -59,7 +59,7 @@
         })
         return
       }
-      
+
       this.page.index++
       this.getCateArticle()
     },

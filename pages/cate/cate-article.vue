@@ -1,5 +1,5 @@
 <template>
-  <div class="page cate">
+  <view class="page cate">
     <!-- 文章分类 -->
     <view class="topic-common-list">
       <view class="topic-list-item">
@@ -16,7 +16,7 @@
     </view>
 
     <ArticleList :article-list="articleList" />
-  </div>
+  </view>
 </template>
 
 <script>

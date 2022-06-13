@@ -1,28 +1,28 @@
 <template>
-  <div class="article">
-    <div
+  <view class="article">
+    <view
       class='article-item'
       v-for="(item, index) in articleList"
       :key="index"
       @click="goDetail(item.id)"
     >
-      <div class="content-box">
-        <div class="title">
+      <view class="content-box">
+        <view class="title">
           <span>{{ item.title.rendered || item.title }}</span>
-        </div>
-        <div class="des">
-          <div class="des-inner">
+        </view>
+        <view class="des">
+          <view class="des-inner">
             <span>浏览 {{item.pageviews}}</span>
             <span>评论 {{item.total_comments}}</span>
             <span>点赞 {{item.like_count}}</span>
-          </div>
-        </div>
-      </div>
-      <div class="img-box">
+          </view>
+        </view>
+      </view>
+      <view class="img-box">
         <img :src="item.post_medium_image || $config.defaultImg" mode="aspectFill" class="cover" />
-      </div>
-    </div>
-  </div>
+      </view>
+    </view>
+  </view>
 </template>
 
 <script>

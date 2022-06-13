@@ -1,7 +1,7 @@
 <template>
-  <div class="w-tabs">
-    <div class="navbar">
-      <div
+  <view class="w-tabs">
+    <view class="navbar">
+      <view
         v-for="(item, index) in tabs"
         :key="index"
         class="navbar-item"
@@ -9,13 +9,13 @@
         @click="switchTab(index)"
       >
         <span class="navbar-title">{{ item.name }}</span>
-      </div>
-      <div class="navbar-slider" :class="'navbar-slider-' + activeTab" />
-    </div>
-   <div class="tab-content">
+      </view>
+      <view class="navbar-slider" :class="'navbar-slider-' + activeTab" />
+    </view>
+   <view class="tab-content">
       <slot></slot>
-    </div>
-  </div>
+    </view>
+  </view>
 </template>
 
 <script>

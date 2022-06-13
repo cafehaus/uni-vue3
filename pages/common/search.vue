@@ -1,5 +1,5 @@
 <template>
-  <div class="page">
+  <view class="page">
     <VSearch v-model="searchKey" @search="onSearch" />
 
     <!-- 搜索历史 -->
@@ -17,7 +17,7 @@
     </view>
 
     <ArticleList :article-list="articleList" />
-  </div>
+  </view>
 </template>
 
 <script>

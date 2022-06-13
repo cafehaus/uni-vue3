@@ -34,7 +34,7 @@
         <view class="btn">{{ btnText }}</view>
       </view>
     </view>
-  </div>
+  </view>
 </template>
 
 <script>
