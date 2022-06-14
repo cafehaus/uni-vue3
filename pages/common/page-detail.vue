@@ -19,13 +19,13 @@
         content: ''
       }
     },
-    onLoad() {
+    onLoad(e) {
+      this.pageId = e.id
       this.initData()
     },
 
     methods: {
       initData() {
-        this.pageId = this.$Route.query.id
         this.getPageDetail()
       },
 

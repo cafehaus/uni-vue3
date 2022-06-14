@@ -39,7 +39,8 @@
         isPullDown: false
       }
     },
-    onLoad() {
+    onLoad(e) {
+      this.cateId = e.id
       this.initData()
     },
 
@@ -70,8 +71,6 @@
 
     methods: {
       initData() {
-        this.cateId = this.$route.query.id
-
         this.getCategoryInfo()
         this.getCateArticle()
       },

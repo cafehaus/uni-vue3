@@ -35,7 +35,9 @@
         isPullDown: false
       }
     },
-    onLoad() {
+    onLoad(e) {
+      this.curId = e.id || ''
+      this.type = e.type || '1'
       this.initData()
     },
 
@@ -66,9 +68,6 @@
 
     methods: {
       initData() {
-        this.curId = this.$route.query.id || ''
-        this.type = this.$route.query.type || '1'
-
         // 分类
         if (this.type === '1') {
           this.getCategoryInfo()

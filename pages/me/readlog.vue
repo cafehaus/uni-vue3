@@ -20,7 +20,8 @@ export default {
       listData: [],
     }
   },
-  onLoad() {
+  onLoad(e) {
+    this.curType = e.type || '1'
     this.initData()
   },
 
@@ -32,7 +33,6 @@ export default {
 
   methods: {
     initData() {
-      this.curType = this.$route.query.type || '1'
       let typeList = ['我的浏览', '我的评论', '我的点赞', '我的赞赏', '我的订阅']
       uni.setNavigationBarTitle({
         title: typeList[this.curType - 1]

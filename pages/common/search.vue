@@ -10,7 +10,7 @@
       </view>
 
       <view class='content'>
-        <view class="item" v-for="(item, index) in history" key="index">
+        <view class="item" v-for="(item, index) in history" :key="index">
           {{ item }}
         </view>
       </view>
@@ -43,7 +43,8 @@
         searchKey: '',
       }
     },
-    onLoad() {
+    onLoad(e) {
+      this.searchKey = e.search || ''
       this.initData()
     },
 
@@ -74,8 +75,6 @@
 
     methods: {
       initData() {
-        this.searchKey = this.$route.query.search || ''
-
         if (this.searchKey) {
           this.onSearch()
         }

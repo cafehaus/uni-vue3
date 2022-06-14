@@ -19,7 +19,7 @@
         </view>
       </view>
       <view class="img-box">
-        <img :src="item.post_medium_image || $config.defaultImg" mode="aspectFill" class="cover" />
+        <image :src="item.post_medium_image || $config.defaultImg" mode="aspectFill" class="cover" />
       </view>
     </view>
   </view>
@@ -89,7 +89,7 @@
       height 180rpx
       background #f5f7f7
       margin-left auto
-      img
+      .cover
         width 240rpx
         height 180rpx
 </style>

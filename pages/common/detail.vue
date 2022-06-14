@@ -120,13 +120,13 @@
         isLike: false,
       }
     },
-    onLoad() {
+    onLoad(e) {
+      this.articleId = e.id
       this.initData()
     },
 
     methods: {
       initData() {
-        this.articleId = this.$route.query.id
         this.getArticleDetail()
         this.getArticleComment()
       },

@@ -12,11 +12,13 @@
     data() {
       return {
         code: '',
-        userInfo: {}
+        userInfo: {},
+        redirect: '',
       }
     },
 
-    onLoad() {
+    onLoad(e) {
+      this.redirect = e.redirect
       this.initData()
     },
 
@@ -159,19 +161,21 @@
       onLoginSuccess({
         openid: userId
       }) {
-        const query = this.$Route.query
-        const redirect = query.redirect
+        // const query = this.$Route.query
+        // const redirect = query.redirect
 
         this.$tips.success('登录成功')
         this.$user.setLogin({
           userId
         })
 
-        if (redirect) {
-          this.$Router.replace(decodeURIComponent(redirect))
+        if (this.redirect) {
+          uni.redirectTo({
+            url: decodeURIComponent(this.redirect)
+          })
         } else if (this.$wx.hasPrevPage()) {
           this.$wx.refreshtPrevPage()
-          this.$Router.back()
+          uni.navigateBack()
         } else {
           this.$wx.relaunch(query.relaunch || '/pages/home/home')
         }
@@ -179,7 +183,7 @@
 
       // 返回
       goBack() {
-        this.$Router.back()
+        uni.navigateBack()
       }
     }
   }
