@@ -123,7 +123,7 @@ export default {
   background-color #fff
   box-shadow 0 0 6px rgba(30, 20, 20, 0.1)
   z-index 100
-  padding-bottom env(safe-area-inset-bottom)
+  padding-bottom calc(20rpx + env(safe-area-inset-bottom))
   .icon-img
     width 36rpx
     height 36rpx
