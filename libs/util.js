@@ -51,6 +51,8 @@ export function goto(v) {
   if (type === 'apppage' && path) { // 小程序页面
     // 兼容老版本的跳转路径
     path = path.replace('/pages/detail/detail', '/pages/common/detail')
+    path = path.replace('/pages/postags/postags', '/pages/common/tags')
+    path = path.replace('/pages/list/list?categoryID=', '/pages/common/list?id=')
 
     uni.navigateTo({
       url: path

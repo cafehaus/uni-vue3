@@ -93,7 +93,8 @@
       //跳转分类详情
       goDetail(item) {
         uni.navigateTo({
-          url: `/pages/cate/cate-article?id=${item.id}`
+          // url: `/pages/cate/cate-article?id=${item.id}`
+          url: `/pages/common/list?id=${item.id}`
         })
       }
     }

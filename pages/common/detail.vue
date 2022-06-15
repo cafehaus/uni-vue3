@@ -16,17 +16,16 @@
     </section>
 
     <mpHtml :content="content" />
-    <!-- <rich-text :nodes="content" /> -->
 
     <!-- 点赞 -->
     <section class="like">
+      <!-- #ifdef MP-WEIXIN ||  MP-ALIPAY || MP-QQ || MP-TOUTIAO || MP-BAIDU -->
       <view class="btn" :class="{ 'btn-active': isLike }" @click="onLike">
         <i class="iconfont" :class="[isLike ? 'icon-zan-fill' : 'icon-zan']" />
         <text class="txt">{{ isLike ? '已点赞' : '点个赞' }}</text>
       </view>
-      <view class="num"
-        ><text>{{ likeNum }} 人已赞</text></view
-      >
+      <!-- #endif -->
+      <view class="num" v-if="likeNum"><text>{{ likeNum }} 人已赞</text></view>
       <view class="avatar">
         <view class="avatar-item" v-for="(item, i) in likeList" :key="i">
           <image class="img" :src="item.avatarurl" />
@@ -92,11 +91,14 @@
     <CommentItem v-for="c in commentList" :key="c.id" :item="c" />
 
     <!-- 评论框 -->
-    <CommentBar />
+    <!-- #ifdef MP-WEIXIN ||  MP-ALIPAY || MP-QQ || MP-TOUTIAO || MP-BAIDU -->
+    <CommentBar @send="submitComment" />
+    <!-- #endif -->
   </view>
 </template>
 
 <script>
+import { mapState } from 'vuex'
 import mpHtml from '@/components/mp-html/mp-html'
 import CommentItem from '@/components/comment-item'
 import CommentBar from '@/components/comment-bar'
@@ -125,6 +127,9 @@ export default {
       isLike: false,
       likeList: [],
     }
+  },
+  computed: {
+    ...mapState('app', ['appInfo', 'systemInfo'])
   },
   onLoad(e) {
     this.articleId = e.id
@@ -167,8 +172,9 @@ export default {
           userType = 'qq'
           // #endif
 
+          let user = uni.getStorageSync('userInfo') || {}
           this.likeList.unshift({
-            avatarurl: uni.getStorageSync('userInfo').avatarUrl,
+            avatarurl: user.avatarUrl,
             userType,
           })
 
@@ -244,7 +250,11 @@ export default {
 
       let likeList = info.avatarurls || []
       this.likeList = likeList.map(m => {
-        m.userType = m.userTypeImg.split('-')[1]
+        let curUserTypeArr = m.userTypeImg.split('-') || []
+        let curUserType = curUserTypeArr[1] || ''
+        m.userType = curUserType.replace('.jpg', '')
+
+        return m
       })
 
       // 根据标签获取相关文章
@@ -315,12 +325,8 @@ export default {
     },
 
     onPraise() {
-      let global = getApp().globalData
-      var minAppType = global.wx_enterprise_minapp
-      var system = self.data.system;
-
       // #ifdef MP-WEIXIN
-      if (minAppType == "1" && system == 'Android') {
+      if (this.appInfo.isCompany && this.systemInfo.osName === 'Android') {
         if (this.$user.isLogin()) {
           let openid = uni.getStorageSync('openid') || ''
           uni.navigateTo({
@@ -330,25 +336,22 @@ export default {
           this.$user.login('navigateTo')
         }
       } else {
-        let src = global.wx_praiseQrCode
         uni.previewImage({
-          urls: [src],
+          urls: [this.appInfo.qrCode],
         })
       }
       // #endif
 
       // #ifndef MP-WEIXIN
-      let src = global.wx_praiseQrCode
       uni.previewImage({
-        urls: [src],
+        urls: [this.appInfo.qrCode],
       })
       // #endif
     },
 
     // 去网页
     gotoWeb() {
-      let minAppType =  getApp().globalData.wx_enterprise_minapp
-      if (minAppType === '1') {
+      if (this.appInfo.isCompany) {
         let url = '/pages/common/web'
         uni.navigateTo({
           url: url + '?url=' + this.info.link
@@ -375,6 +378,127 @@ export default {
           })
         }
       })
+    },
+
+    submitComment(content) {
+      var self = this
+      let e = this.commentUser
+
+      var parent = self.data.parentID;
+      var postID = e.detail.value.inputPostID;
+      var formId = e.detail.formId;
+      if (formId == "the formId is a mock one") {
+        formId = ''
+      }
+      var userid = self.data.userid;
+
+      if (this.$user.isLogin()) {
+        var name = self.data.userInfo.nickName;
+        var author_url = self.data.userInfo.avatarUrl;
+        var email = self.data.openid + "@weixin.com";
+        var openid = self.data.openid;
+
+        var data = {
+          post: postID,
+          author_name: name,
+          author_email: email,
+          content,
+          author_url: author_url,
+          parent: parent,
+          openid: openid,
+          userid: userid,
+          formId: formId
+        };
+
+        var postCommentRequest = this.$api.submitComment(data)
+        var postCommentMessage = "";
+        postCommentRequest
+          .then(res => {
+            console.log(res)
+            if (res.statusCode == 200) {
+              if (res.data.status == '200') {
+                self.setData({
+                  content: '',
+                  parentID: "0",
+                  userid: 0,
+                  placeholder: "写评论...",
+                  focus: false,
+                  commentsList: [],
+                  toUsertype: ""
+
+                });
+                postCommentMessage = res.data.message;
+                
+                var commentCounts = parseInt(self.data.total_comments) + 1;
+                self.setData({
+                  total_comments: commentCounts,
+                  commentCount: "有" + commentCounts + "条评论"
+
+                });
+              } else if (res.data.status == '500') {
+                self.setData({
+                  'dialog.hidden': false,
+                  'dialog.title': '提示',
+                  'dialog.content': '评论失败，请稍后重试。'
+
+                });
+              }
+            } else {
+
+              if (res.data.code == 'rest_comment_login_required') {
+                self.setData({
+                  'dialog.hidden': false,
+                  'dialog.title': '提示',
+                  'dialog.content': '需要开启在WordPress rest api 的匿名评论功能！'
+
+                });
+              } else if (res.data.code == 'rest_invalid_param' && res.data.message.indexOf('author_email') > 0) {
+                self.setData({
+                  'dialog.hidden': false,
+                  'dialog.title': '提示',
+                  'dialog.content': 'email填写错误！'
+
+                });
+              } else {
+                console.log(res)
+                self.setData({
+                  'dialog.hidden': false,
+                  'dialog.title': '提示',
+                  'dialog.content': '评论失败,' + res.data.message
+
+                });
+              }
+            }
+          }).then(response => {
+            //self.fetchCommentData(self.data); 
+            self.setData({
+              page: 1,
+              commentsList: [],
+              isLastPage: false
+
+            })
+            self.onReachBottom();
+            //self.fetchCommentData();
+            setTimeout(function() {
+              wx.showToast({
+                title: postCommentMessage,
+                icon: 'none',
+                duration: 900,
+                success: function() {}
+              })
+            }, 900);
+          }).catch(response => {
+            console.log(response)
+            self.setData({
+              'dialog.hidden': false,
+              'dialog.title': '提示',
+              'dialog.content': '评论失败,' + response
+
+            });
+          })
+      } else {
+        this.$user.login('navigateTo')
+      }
     },
   },
 }

@@ -2,7 +2,7 @@
   <view class="tags" v-if="tagList.length">
     <view class="header">
       <view class="label">热门标签</view>
-      <view class="btn-more" @click="goto(item)">更多</view>
+      <view class="btn-more" @click="goto">更多</view>
     </view>
     <!-- 标签列表 -->
     <view class="content">

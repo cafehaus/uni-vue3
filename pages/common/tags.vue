@@ -8,11 +8,11 @@
     >
       <image class="img" mode="aspectFill" :src="tag.img" />
       <view class="info">
-        <view class="title">#{{ item.name }}</view>
+        <view class="title">#{{ tag.name }}</view>
         <view class="des">
-          <text>{{ item.description }}</text>
+          <text>{{ tag.description }}</text>
         </view>
-        <view class="num">{{ item.count }}篇文章</view>
+        <view class="num">{{ tag.count }}篇文章</view>
       </view>
     </view>
   </view>
@@ -36,7 +36,7 @@
 
     // 下拉刷新
     onPullDownRefresh: function () {
-      this.tagsList = []
+      this.tagList = []
       this.page.index = 1
       this.hasMore = true
       this.getTagList()
@@ -64,17 +64,17 @@
         })
 
         let list = res || []
-        list = list.map(m => {
+        this.tagList = list.map(m => {
           m.img = m.tag_thumbnail_image || this.$config.defaultImg
 
-          this.tagsList.push(m)
+          return m
         })
         this.hasMore = this.page.size === list.length
       },
 
       // 跳转标签文章列表
       goto(e) {
-        let url = '/pages/common/list?tagId=' + e.id
+        let url = '/pages/common/list?type=2&id=' + e.id
         uni.navigateTo({
           url
         })

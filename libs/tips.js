@@ -81,7 +81,7 @@ export default class Tips {
     confirmColor = '#333',
     cancelText = '取消',
     cancelColor = '#999',
-    confirm = () => {}
+    confirm = () => { }
   } = {}) {
     return new Promise(resolve => {
       uni.showModal({
@@ -105,37 +105,37 @@ export default class Tips {
   }
 
   // 确认窗口
-  static confirm(content, {
+  static confirm({
     title = '',
+    content = '',
+    showCancel = true,
     confirmText = '确定',
     confirmColor = '#333',
     cancelText = '取消',
     cancelColor = '#999',
-    confirm = () => {},
+    ok = () => {},
     cancel = () => {},
-    done = res => {},
   } = {}) {
     return new Promise((resolve, reject) => {
       uni.showModal({
         title,
         content,
-        showCancel: !!cancelText,
+        showCancel,
         cancelColor,
         cancelText,
         confirmColor,
         confirmText,
-        success({ confirm }) {
+        success: res => {
           // res.confirm 为 true: 点击了确定按钮；为 false: 点击了取消按钮；
-          if (confirm) {
-            confirm()
+          if (res.confirm) {
+            ok()
           } else {
             cancel()
           }
-          done(confirm)
-          resolve(confirm)
+          resolve(res)
         },
-        fail: res => {
-          reject(res)
+        fail: err => {
+          reject(err)
         },
       })
     })

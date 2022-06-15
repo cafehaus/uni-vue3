@@ -11,26 +11,30 @@
             confirm-type="send"
             cursor-spacing="10"
             maxlength="100"
-            :value="content"
+            v-model="content"
             :placeholder="placeholder"
-            :focus="focus"
-            @blur="onReplyBlur"
-            @focus="onRepleyFocus"
           />
           <button class="btn-submit" @click="submit">发送</button>
         </view>
 
-        <button
+        <!-- <button
           class="btn-share"
           hover-class="none"
           @click="showSharePopup"
+        >
+          <image src="@/static/detail_share.png" class="icon-img" />
+        </button> -->
+        <button
+          class="btn-share"
+          hover-class="none"
+          open-type="share"
         >
           <image src="@/static/detail_share.png" class="icon-img" />
         </button>
       </view>
 
       <!-- 弹出层 -->
-      <view
+      <!-- <view
         v-show="showPopup"
         class="pop"
       >
@@ -46,17 +50,22 @@
             <view>转发给好友</view>
           </button>
         </view>
-      </view>
+      </view> -->
     </template>
 
     <!-- 当在后台关闭评论功能时，显示出单独的分享按钮 -->
-    <button v-else class="circle-share" hover-class="none" @click="showSharePopup">
+    <!-- <button v-else class="circle-share" hover-class="none" @click="showSharePopup">
+      <image class="icon-img" src="@/static/detail_share.png"></image>
+    </button> -->
+    <button v-else class="circle-share" hover-class="none"  open-type="share">
       <image class="icon-img" src="@/static/detail_share.png"></image>
     </button>
   </view>
 </template>
 
 <script>
+import uni from '../libs/uni'
+
 export default {
   name: 'comment-bar',
   props: {
@@ -69,21 +78,21 @@ export default {
       default: true,
     },
   },
-  computed: {
-    isImage() {
-      return this.icon.includes('/')
-    },
-  },
+
   data() {
     return {
       showPopup: false,
       content: '',
-      focus: false,
     }
   },
   methods: {
     submit() {
+      if (!this.content) {
+        this.$tips.toast('请输入评论内容')
+        return
+      }
 
+      this.$emit('send', this.content)
     },
 
     showSharePopup() {
@@ -95,15 +104,9 @@ export default {
     },
 
     goHome() {
-
-    },
-
-    onReplyBlur() {
-
-    },
-
-    onRepleyFocus() {
-
+      uni.switchTab({
+        url: '/pages/home/home'
+      })
     },
   },
 }

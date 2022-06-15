@@ -1,11 +1,11 @@
 <template>
   <view class="nice-column">
-    <view class='common-subtitle'>
-      <view class='common-subtitle-left'>精选栏目</view>
-      <view class='common-subtitle-right'>滑动查看</view>
+    <view class="common-subtitle">
+      <view class="common-subtitle-left">精选栏目</view>
+      <view class="common-subtitle-right">滑动查看</view>
     </view>
 
-    <scroll-view :scroll-x="true">
+    <scroll-view scroll-x>
       <view class="top-Nav">
         <view
           v-for="(item, index) in navList"
@@ -14,7 +14,7 @@
           @click="goto(item)"
         >
           <view>
-            <image class="img" mode="aspectFill" :src="item.image" />
+            <image class="img" mode="aspectFill" :src="item.image || $config.defaultImg" />
           </view>
           <view>
             <text class="title">{{ item.title }}</text>
@@ -26,26 +26,26 @@
 </template>
 
 <script>
-  export default {
-    name: 'nice-column',
-    props: {
-      navList: {
-        type: Array,
-        default: () => []
-      }
+export default {
+  name: "nice-column",
+  props: {
+    navList: {
+      type: Array,
+      default: () => [],
     },
+  },
 
-    data() {
-      return {}
+  data() {
+    return {};
+  },
+
+  methods: {
+    // 跳转
+    goto(info) {
+      this.$util.goto(info);
     },
-
-    methods: {
-      // 跳转
-      goto(info) {
-        this.$util.goto(info)
-      }
-    }
-  }
+  },
+};
 </script>
 
 <style lang="stylus" scoped>

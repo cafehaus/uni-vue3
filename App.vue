@@ -1,13 +1,18 @@
 <script>
+    import { mapActions } from 'vuex'
 	export default {
 		onLaunch: function() {
-			console.log('App Launch')
+			this.getAppInfo()
+			this.getSystemInfo()
 		},
 		onShow: function() {
 			console.log('App Show')
 		},
 		onHide: function() {
 			console.log('App Hide')
+		},
+		methods: {
+			...mapActions('app', ['getAppInfo', 'getSystemInfo'])
 		}
 	}
 </script>

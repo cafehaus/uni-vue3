@@ -1,7 +1,6 @@
 <template>
   <view class="page my">
     <!-- 个人信息 -->
-    <!-- #ifdef MP -->
     <view class="user">
       <image class="user-img" :src="gravatar" mode="aspectFill" />
 
@@ -15,18 +14,15 @@
         </view>
       </view>
     </view>
-    <!-- #endif -->
 
     <!-- 列表 -->
     <view class="list">
-      <!-- #ifdef MP -->
       <view class="list-sub">
         <view class="list-item" @click="goto('1')">我的浏览</view>
         <view class="list-item" @click="goto('2')">我的评论</view>
         <view class="list-item" @click="goto('3')">我的点赞</view>
         <view class="list-item" @click="goto('5')">我的订阅</view>
       </view>
-      <!-- #endif -->
 
       <view class="list-sub">
         <!-- 关于我们 -->
@@ -38,14 +34,9 @@
           <button open-type="feedback" class='list-item-btn'>意见反馈</button>
         </view>
         <view class="list-item" @click="clearStorage">清除缓存</view>
-        <!-- #ifdef MP -->
         <view v-if="islogin" class="list-item" @click="logout">退出登录</view>
-        <!-- #endif -->
       </view>
     </view>
-
-    <!-- 确认弹窗 -->
-    <van-dialog id="van-dialog" />
   </view>
 </template>
 
@@ -70,7 +61,7 @@
     },
 
     computed: {
-      ...mapState(['islogin']),
+      ...mapState('user', ['islogin']),
       gravatar() { // 头像
         return this.userInfo.avatarUrl || '../../static/gravatar.png'
       }
@@ -115,21 +106,23 @@
       logout() {
         if (!this.$user.isLogin()) return
 
-        this.$dialog.confirm({
+        this.$tips.confirm({
           title: '提示',
-          message: '您确定要退出登录吗？'
-        })
-          .then(() => {
+          content: '您确定要退出登录吗？',
+          ok: () => {
             this.$user.logout()
             this.userInfo = {}
-          })
-          .catch(() => {
-          })
+          }
+        })
       },
 
       // 清除缓存
       clearStorage() {
-
+        uni.clearStorage({
+          success: () => {
+            this.$tips.success('清除成功')
+          }
+        })
       },
 
       // 跳转
@@ -137,9 +130,13 @@
         // 关于我们
         if (e === 'about') {
           uni.navigateTo({
-            url: `/pages/common/page-detail?id=2`
+            url: `/pages/me/about`
           })
         } else {
+          if(!this.$user.isLogin()) {
+            this.$user.login('navigateTo')
+            return
+          }
           uni.navigateTo({
             url: `/pages/me/readlog?type=${e}`
           })

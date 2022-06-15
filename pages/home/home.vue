@@ -1,13 +1,13 @@
 <template>
   <view class="page">
     <!-- 轮播 -->
-    <VSwiper :swiper-list="swiperList" />
+    <VSwiper style="width:100%" :swiper-list="swiperList" />
 
     <!-- 精选栏目 -->
-    <NiceColumn :nav-list="navList" />
+    <NiceColumn style="width:100%" :nav-list="navList" />
 
     <!-- 搜索 -->
-    <VSearch from="home" />
+    <VSearch style="width:100%" from="home" />
 
     <!-- 标签 -->
     <VTag :tag-list="tagList" />
@@ -137,11 +137,9 @@ export default {
       }
     },
 
-    // 去文章详情
-    goSwiperDetail(id) {
-      uni.navigateTo({
-        url: `/pages/common/detail?id=${id}`,
-      })
+    // 跳转
+    goto(info) {
+      this.$util.goto(info)
     },
   },
 }
@@ -165,4 +163,5 @@ export default {
     font-size 36rpx
     color $base-color
     text-align center
+
 </style>

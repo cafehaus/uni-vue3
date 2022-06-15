@@ -1,6 +1,9 @@
 <template>
   <view class="page">
-    <VSearch v-model="searchKey" @search="onSearch" />
+    <view class="search">
+      <input v-model="searchKey" placeholder="你感兴趣的内容..." class="input" />
+      <i class="iconfont icon-search" @click="onSearch" />
+    </view>
 
     <!-- 搜索历史 -->
     <view class="history" v-if="showHistory && history.length && !showList">
@@ -10,7 +13,12 @@
       </view>
 
       <view class='content'>
-        <view class="item" v-for="(item, index) in history" :key="index">
+        <view
+          class="item"
+          v-for="(item, index) in history"
+          :key="index"
+          @click="searchHistory(item)"
+        >
           {{ item }}
         </view>
       </view>
@@ -22,11 +30,9 @@
 
 <script>
   import ArticleList from '@/components/article-list'
-  import VSearch from '@/pages/home/components/v-search'
   export default {
     components: {
       ArticleList,
-      VSearch,
     },
     data() {
       return {
@@ -76,7 +82,7 @@
     methods: {
       initData() {
         if (this.searchKey) {
-          this.onSearch()
+          this.onSearch(this.searchKey)
         }
         this.getStorage()
       },
@@ -87,12 +93,19 @@
           this.$tips.toast('请输入关键字')
           return
         }
+
+        this.page.index = 1
+        this.getList()
+      },
+
+      searchHistory(item) {
+        this.searchKey = item
         this.page.index = 1
         this.getList()
       },
 
       async getList() {
-        this.setSearchStorage(this.searchKey)
+        this.setStorage(this.searchKey)
         const res = await this.$api.getArticleList({
           orderby: 'date',
           order: 'desc',
@@ -141,6 +154,18 @@
 
 <style lang="stylus" scoped>
 @import '../../styles/var'
+
+.search
+  background #f5f6f7
+  padding 30rpx 20rpx
+  display flex
+  justify-content space-between
+  align-items center
+  margin 16rpx 40rpx 40rpx
+  .input
+    flex 1
+  .icon-search
+    color #999  
 
 .history
   line-height 100rpx

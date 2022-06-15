@@ -14,6 +14,7 @@
         v-for="c in listData"
         :key="c.id"
         :item="c"
+        @click="goto(c)"
       />
     </view>
   </view>
@@ -51,7 +52,7 @@ export default {
         page: 1,
       })
 
-      if (res.code === '200') {
+      if (res.status === '200') {
         let list = res.data || []
         this.listData = list
       } else {
@@ -61,7 +62,7 @@ export default {
 
     // 跳转文章列表
     goto(e) {
-      let url = '/pages/common/detail?id=' + e.id
+      let url = '/pages/common/detail?id=' + e.postid
       uni.navigateTo({
         url,
       })
@@ -90,4 +91,6 @@ export default {
       left 50%
       transform translate(-50%, -50%)
 
+  .content
+    padding 0 32rpx
 </style>

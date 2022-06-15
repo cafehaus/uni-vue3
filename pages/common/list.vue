@@ -143,10 +143,12 @@
           order: 'desc',
           tags: this.curId
         })
-        let data = res.data || []
-        data = data(m => {
+        let data = res || []
+        data = data.map(m => {
           m.post_thumbnail_image = m.post_thumbnail_image || this.$config.defaultImg
           m.date = this.$util.fmtDate(res.date, 'yyyy-MM-dd')
+
+          return m
         })
         if (data.length) {
           this.articleList.push(...data)

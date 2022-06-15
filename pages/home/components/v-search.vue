@@ -21,7 +21,7 @@
 
     <!-- 搜索框 -->
     <view class="search">
-      <input :value="value" placeholder="你感兴趣的内容..." />
+      <input v-model="searchKey" placeholder="你感兴趣的内容..." class="input" />
       <i class="iconfont icon-search" @click="goto('/pages/common/search')" />
     </view>
   </view>
@@ -35,7 +35,7 @@
         type: String,
         default: ''
       },
-      value: {
+      defValue: {
         type: String,
         default: '',
       },
@@ -47,9 +47,26 @@
       }
     },
 
+    watch: {
+      defValue(v) {
+        console.log('v');
+        console.log(v);
+        if (v) {
+          this.searchKey = v
+        }
+      }
+    },
+
+    // mounted() {
+    //   console.log(11111)
+    //   console.log('value: '+ this.value)
+    //   this.searchKey = this.value || ''
+    // },
+
     methods: {
       // 跳转
       goto(url) {
+        console.log(this.defValue)
         if (this.from === 'home') {
           if (url === '/pages/common/search') {
             url = url + '?search=' + this.searchKey
@@ -58,7 +75,7 @@
             url
           })
         } else {
-          this.$emit('search')
+          this.$emit('search', this.searchKey)
         }
       }
     }
@@ -79,6 +96,10 @@
     justify-content space-between
     align-items center
     margin 16rpx 40rpx 40rpx
+    .input
+      flex 1
+    .icon-search
+      color #999  
 
   .nav
     display flex
@@ -86,7 +107,7 @@
     justify-content space-between
     padding 40rpx 40rpx 0
     .nav-item
-      width 100%
+      flex 1
       position relative
       &:first-child
         margin-right 8rpx

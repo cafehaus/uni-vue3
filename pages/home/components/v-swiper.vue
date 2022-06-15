@@ -54,44 +54,45 @@ export default {
 
 .swiper-box
   width 100%
-  .swiper
-    position relative
-    height 504rpx
-    background #fff
-    box-shadow 0px 22px 50px -24px rgba(0, 0, 0, 0.1)
-  .swiper .img
-    display block
-    width 100%
-    height 324rpx
-  .swiper .swiper-desc
-    display flex
-    justify-content space-between
-    align-items center
-    padding 24rpx 40rpx
-  .swiper-des-left .title
-    color #333
-    font-size 28rpx
-    line-height 1.6
-    overflow hidden
-    text-overflow ellipsis
-    display -webkit-box
-    -webkit-line-clamp 2
-    -webkit-box-orient vertical
-  .swiper-des-left
-    color #999
-    letter-spacing 2px
-    font-size 22rpx
-    margin 0 0 28rpx 0
-  .swiper-des-left
-    width 64%
-  .swiper-desc .btn-read
-    background $base-color
-    color #fff
-    width 180rpx
-    height 60rpx
-    line-height 60rpx
-    border-radius 40px
-    letter-spacing 2px
-    font-size 20rpx
-    text-align center
+.swiper
+  position relative
+  width 100%
+  height 504rpx
+  background #fff
+  box-shadow 0px 22px 50px -24px rgba(0, 0, 0, 0.1)
+.swiper .img
+  display block
+  width 100%
+  height 324rpx
+.swiper .swiper-desc
+  display flex
+  justify-content space-between
+  align-items center
+  padding 24rpx 40rpx
+.swiper-des-left .title
+  color #333
+  font-size 28rpx
+  line-height 1.6
+  overflow hidden
+  text-overflow ellipsis
+  display -webkit-box
+  -webkit-line-clamp 2
+  -webkit-box-orient vertical
+.swiper-des-left
+  color #999
+  letter-spacing 2px
+  font-size 22rpx
+  margin 0 0 28rpx 0
+.swiper-des-left
+  width 64%
+.swiper-desc .btn-read
+  background $base-color
+  color #fff
+  width 180rpx
+  height 60rpx
+  line-height 60rpx
+  border-radius 40px
+  letter-spacing 2px
+  font-size 20rpx
+  text-align center
 </style>

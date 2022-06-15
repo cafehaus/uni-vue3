@@ -64,10 +64,40 @@
 		        "navigationBarTitleText": "页面详情"
 		      }
 		    },
-        {
+            {
 		      "path": "pages/common/comment",
 		      "style": {
 		        "navigationBarTitleText": "最新评论"
+		      }
+		    },
+            {
+		      "path": "pages/common/tags",
+		      "style": {
+		        "navigationBarTitleText": "热门标签"
+		      }
+		    },
+            {
+		      "path": "pages/common/pay",
+		      "style": {
+		        "navigationBarTitleText": "鼓励"
+		      }
+		    },
+            {
+		      "path": "pages/me/about",
+		      "style": {
+		        "navigationBarTitleText": "最新评论"
+		      }
+		    },
+            {
+		      "path": "pages/common/web",
+		      "style": {
+		        "navigationBarTitleText": "网页"
+		      }
+		    },
+            {
+		      "path": "pages/common/search",
+		      "style": {
+		        "navigationBarTitleText": "搜索"
 		      }
 		    }
 	],
@@ -101,7 +131,7 @@
         "selectedIconPath": "static/tab-hot-on.png",
         "text": "热门"
       }
-	  // #ifdef MP
+	  // #ifdef MP-WEIXIN ||  MP-ALIPAY || MP-QQ || MP-TOUTIAO || MP-BAIDU || H5
       ,{
         "pagePath": "pages/me/me",
         "iconPath": "static/tab-me.png",

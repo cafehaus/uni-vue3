@@ -6,6 +6,9 @@ const wm = 'wp-json/minapper-plus/v1/'
 // 登录|post
 export const login = params => http.post(`${wm}weixin/userlogin`, params)
 
+// 获取应用信息|get
+export const getAppInfo = params => http.get(`${wm}options/config`, params)
+
 // 获取用户信息|get
 export const getUserInfo = params => http.get(`${wm}users/session`, params)
 
@@ -45,6 +48,9 @@ export const getWpPageDetail = id => http.get(`${wp}pages/${id}`)
 
 // 获取文章评论|get
 export const getArticleComment = params => http.get(`${wm}comment/getcomments`, params)
+
+// 提交评论|get
+export const submitComment = params => http.post(`${wm}comment/add`, params)
 
 // 获取标签相关文章|get
 export const getTagArticle = params => http.get(`${wp}posts`, params)
