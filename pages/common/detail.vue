@@ -4,7 +4,9 @@
     <section class="article-date">
       <text class="txt">{{ info.dateName }}</text>
       <i v-if="info.category_name" class="iconfont icon-cate" />
-      <text v-if="info.category_name" class="txt">{{ info.category_name }}</text>
+      <text v-if="info.category_name" class="txt">{{
+        info.category_name
+      }}</text>
       <i class="iconfont icon-comment" />
       <text class="txt">{{ commentNum }}</text>
       <i class="iconfont icon-preview" />
@@ -18,15 +20,22 @@
 
     <!-- 点赞 -->
     <section class="like">
-      <view class="btn" :class="{'btn-active': isLike}" @click="onLike">
+      <view class="btn" :class="{ 'btn-active': isLike }" @click="onLike">
         <i class="iconfont" :class="[isLike ? 'icon-zan-fill' : 'icon-zan']" />
         <text class="txt">{{ isLike ? '已点赞' : '点个赞' }}</text>
       </view>
-      <view class="num"><text>{{ likeNum }} 人已赞</text></view>
+      <view class="num"
+        ><text>{{ likeNum }} 人已赞</text></view
+      >
       <view class="avatar">
-        <view class="avatar-item" v-for="(item, i) in info.avatarurls" :key="i">
+        <view class="avatar-item" v-for="(item, i) in likeList" :key="i">
           <image class="img" :src="item.avatarurl" />
-          <image class="icon" :src="`/static/${item.userTypeImg.split('-')[1]}`" />
+          <image v-if="item.userType === 'weixin'" class="icon" src="/static/weixin.jpg" />
+          <image v-else-if="item.userType === 'qq'" class="icon" src="/static/qq.jpg" />
+          <image v-else-if="item.userType === 'toutiao'" class="icon" src="/static/toutiao.jpg" />
+          <image v-else-if="item.userType === 'baidu'" class="icon" src="/static/baidu.jpg" />
+          <image v-else-if="item.userType === 'alipay'" class="icon" src="/static/alipay.jpg" />
+          <image v-else class="icon" src="/static/web.jpg" />
         </view>
       </view>
     </section>
@@ -40,8 +49,8 @@
 
     <!-- 阅读原文和鼓励 -->
     <section class="origin">
-      <text class="txt">阅读原文</text>
-      <view class="praise">
+      <text class="txt" @click="gotoWeb">阅读原文</text>
+      <view class="praise" @click="onPraise">
         <text>鼓励</text>
         <i class="iconfont icon-lucky-money" />
       </view>
@@ -52,7 +61,7 @@
       <view v-if="info.preArticle && info.preArticle.id" class="pre">
         <view class="des">
           <text>上一篇</text>
-          <view class="title">{{info.preArticle.title}}</view>
+          <view class="title">{{ info.preArticle.title }}</view>
         </view>
         <image class="img" :src="info.preArticle.img" mode="aspectFill" />
       </view>
@@ -80,11 +89,7 @@
       <view>评论交流</view>
       <view v-if="commentNum" class="num">有{{ commentNum }}条评论</view>
     </view>
-    <CommentItem
-      v-for="c in commentList"
-      :key="c.id"
-      :item="c"
-    />
+    <CommentItem v-for="c in commentList" :key="c.id" :item="c" />
 
     <!-- 评论框 -->
     <CommentBar />
@@ -92,177 +97,287 @@
 </template>
 
 <script>
-  import mpHtml from '@/components/mp-html/mp-html'
-  import CommentItem from '@/components/comment-item'
-  import CommentBar from '@/components/comment-bar'
+import mpHtml from '@/components/mp-html/mp-html'
+import CommentItem from '@/components/comment-item'
+import CommentBar from '@/components/comment-bar'
 
-  export default {
-    components: {
-      mpHtml,
-      CommentItem,
-      CommentBar,
+export default {
+  components: {
+    mpHtml,
+    CommentItem,
+    CommentBar,
+  },
+  data() {
+    return {
+      articleId: '',
+      info: {},
+      title: '',
+      content: '',
+      page: {
+        index: 1,
+        size: 10,
+      },
+      commentList: [],
+      commentNum: 0,
+      likeNum: 0,
+      tagList: [],
+      tagArticle: [],
+      isLike: false,
+      likeList: [],
+    }
+  },
+  onLoad(e) {
+    this.articleId = e.id
+    this.initData()
+  },
+
+  methods: {
+    initData() {
+      this.getArticleDetail()
+      this.getArticleComment()
+      this.getIsLike()
     },
-    data() {
-      return {
-        articleId: '',
-        info: {},
-        title: '',
-        content: '',
-        page: {
-          index: 1,
-          size: 10
-        },
-        commentList: [],
-        commentNum: 0,
-        likeNum: 0,
-        tagList: [],
-        tagArticle: [],
-        isLike: false,
+
+    async onLike(e) {
+      if (this.$user.isLogin()) {
+        if (this.isLike) return
+
+        let params = {
+          openid: uni.getStorageSync('openid') || '',
+          postid: this.articleId,
+        }
+
+        const res = await this.$api.submitLike(params)
+        if (res.status == '200') {
+          this.likeNum = this.likeNum + 1
+          let userType = 'web'
+          // #ifdef MP-WEIXIN
+          userType = 'weixin'
+          // #endif
+          // #ifdef MP-ALIPAY
+          userType = 'alipay'
+          // #endif
+          // #ifdef MP-BAIDU
+          userType = 'baidu'
+          // #endif
+          // #ifdef MP-TOUTIAO
+          userType = 'toutiao'
+          // #endif
+          // #ifdef MP-QQ
+          userType = 'qq'
+          // #endif
+
+          this.likeList.unshift({
+            avatarurl: uni.getStorageSync('userInfo').avatarUrl,
+            userType,
+          })
+
+          this.isLike = true
+          this.$tips.success('谢谢点赞')
+        } else if (res.status === '501') {
+          this.$tips.success('谢谢，已赞过啦！')
+        }
+      } else {
+        this.$user.login('navigateTo')
       }
     },
-    onLoad(e) {
-      this.articleId = e.id
-      this.initData()
+
+    async getIsLike() {
+      if (this.$user.isLogin()) {
+        let params = {
+          openid: uni.getStorageSync('openid') || '',
+          postid: this.articleId,
+        }
+        const res = await this.$api.getIsLike(params)
+        if (res.status == '200') {
+          this.isLike = true
+        } else {
+          this.isLike = false
+        }
+      }
     },
 
-    methods: {
-      initData() {
-        this.getArticleDetail()
-        this.getArticleComment()
-      },
-
-      onLike() {
-
-      },
-
-      getIsLike() {
-        // if (self.data.openid) {
-        //   var data = {
-        //     openid: self.data.openid,
-        //     postid: self.data.postID
-        //   };
-        //   var url = Api.postIsLikeUrl();
-        //   var postIsLikeRequest = wxRequest.postRequest(url, data);
-        //   postIsLikeRequest
-        //     .then(response => {
-        //       if (response.data.status == '200') {
-        //         self.setData({
-        //           likeImag: "like-on.png"
-        //         });
-        //       }
-        //     })
-      },
-
-      // 获取文章详情
-      async getArticleDetail() {
-        let key = 'wxexcitation'
-        // #ifdef MP-WEIXIN
-        key = 'wxexcitation'
-        // #endif
-        // #ifdef MP-ALIPAY
-        key = 'alexcitation'
-        // #endif
-        // #ifdef MP-BAIDU
-        key = 'bdexcitation'
-        // #endif
-        // #ifdef MP-TOUTIAO
-        key = 'ttexcitation'
-        // #endif
-        // #ifdef MP-QQ
-        key = 'qqexcitation'
-        // #endif
-        const res = await this.$api.getArticleDetail({
-          id: this.articleId
-        }, { header: { [key]: '1' }})
-        let info = {
-          ...res,
-          preArticle: {
-            title: res.previous_post_title,
-            id: res.previous_post_id,
-            img: res.previous_post_image || this.$config.defaultImg,
-          },
-          nextArticle: {
-            title: res.next_post_title,
-            id: res.next_post_id,
-            img: res.next_post_image || this.$config.defaultImg,
-          },
-          dateName: this.$util.fmtDate(res.date, 'yyyy-MM-dd'),
-        }
-        this.info = info
-        this.content = info.content.rendered
-        this.title = info.title.rendered
-        this.commentNum = info.total_comments || 0
-        this.likeNum = info.like_count || 0
-        this.tagList = info.tag_name || []
-
-        // 根据标签获取相关文章
-        if (this.tagList.length) {
-          let tagIds =  res.tags.join(',')
-          this.getTagArticle(tagIds)
-        }
-
-        // 缓存浏览记录
-        this.setReadLog(info)
-      },
-
-      setReadLog(info) {
-        if (!this.title && !this.content) return
-
-        let logs = this.$storage('readLogs') || []
-        // 过滤重复值
-        if (logs.length > 0) {
-          logs = logs.filter(m =>  m.id !== this.articleId)
-        }
-        // 最多20条
-        if (logs.length > 19) {
-          logs.pop()
-        }
-        let obj = {
+    // 获取文章详情
+    async getArticleDetail() {
+      let key = 'wxexcitation'
+      // #ifdef MP-WEIXIN
+      key = 'wxexcitation'
+      // #endif
+      // #ifdef MP-ALIPAY
+      key = 'alexcitation'
+      // #endif
+      // #ifdef MP-BAIDU
+      key = 'bdexcitation'
+      // #endif
+      // #ifdef MP-TOUTIAO
+      key = 'ttexcitation'
+      // #endif
+      // #ifdef MP-QQ
+      key = 'qqexcitation'
+      // #endif
+      const res = await this.$api.getArticleDetail(
+        {
           id: this.articleId,
-          total_comments: this.commentNum,
-          pageviews: info.pageviews,
-          like_count: this.likeNum,
-          title: this.title,
-          post_medium_image: info.post_medium_image || $config.defaultImg
-        }
-        logs.unshift(obj)
-        this.$storage('readLogs', logs)
-      },
+        },
+        { header: { [key]: '1' } }
+      )
+      let info = {
+        ...res,
+        preArticle: {
+          title: res.previous_post_title,
+          id: res.previous_post_id,
+          img: res.previous_post_image || this.$config.defaultImg,
+        },
+        nextArticle: {
+          title: res.next_post_title,
+          id: res.next_post_id,
+          img: res.next_post_image || this.$config.defaultImg,
+        },
+        dateName: this.$util.fmtDate(res.date, 'yyyy-MM-dd'),
+      }
+      this.info = info
+      this.content = info.content.rendered
+      this.title = info.title.rendered
+      this.commentNum = info.total_comments || 0
+      this.likeNum = info.like_count || 0
+      this.tagList = info.tag_name || []
 
-      async getArticleComment() {
-        let params = {
-          postid: this.articleId,
-          limit: this.page.size || 10,
-          page: this.page.index || 1,
-          order: 'desc',
-        }
-        const res = await this.$api.getArticleComment(params)
-        if (res.status === '200') {
-          this.commentList = res.data || []
+      let likeList = info.avatarurls || []
+      this.likeList = likeList.map(m => {
+        m.userType = m.userTypeImg.split('-')[1]
+      })
+
+      // 根据标签获取相关文章
+      if (this.tagList.length) {
+        let tagIds = res.tags.join(',')
+        this.getTagArticle(tagIds)
+      }
+
+      // 缓存浏览记录
+      this.setReadLog(info)
+    },
+
+    setReadLog(info) {
+      if (!this.title && !this.content) return
+
+      let logs = this.$storage('readLogs') || []
+      // 过滤重复值
+      if (logs.length > 0) {
+        logs = logs.filter((m) => m.id !== this.articleId)
+      }
+      // 最多20条
+      if (logs.length > 19) {
+        logs.pop()
+      }
+      let obj = {
+        id: this.articleId,
+        total_comments: this.commentNum,
+        pageviews: info.pageviews,
+        like_count: this.likeNum,
+        title: this.title,
+        post_medium_image: info.post_medium_image || $config.defaultImg,
+      }
+      logs.unshift(obj)
+      this.$storage('readLogs', logs)
+    },
+
+    async getArticleComment() {
+      let params = {
+        postid: this.articleId,
+        limit: this.page.size || 10,
+        page: this.page.index || 1,
+        order: 'desc',
+      }
+      const res = await this.$api.getArticleComment(params)
+      if (res.status === '200') {
+        this.commentList = res.data || []
+      } else {
+        this.$tips.toast(res.message || '请求失败')
+      }
+    },
+
+    async getTagArticle(tags) {
+      let params = {
+        exclude: this.articleId,
+        per_page: 5,
+        page: 1,
+        tags,
+      }
+      const res = await this.$api.getTagArticle(params)
+      let list = res || []
+      this.tagArticle = list.map((m, i) => {
+        m.idx = i + 1
+        m.img = m.post_medium_image || this.$config.defaultImg
+        m.title = (m.title && m.title.rendered) || ''
+
+        return m
+      })
+    },
+
+    onPraise() {
+      let global = getApp().globalData
+      var minAppType = global.wx_enterprise_minapp
+      var system = self.data.system;
+
+      // #ifdef MP-WEIXIN
+      if (minAppType == "1" && system == 'Android') {
+        if (this.$user.isLogin()) {
+          let openid = uni.getStorageSync('openid') || ''
+          uni.navigateTo({
+            url: '../common/pay?flag=1&openid=' + openid + '&postid=' + this.articleId
+          })
         } else {
-          this.$tips.toast(res.message || '请求失败')
+          this.$user.login('navigateTo')
         }
-      },
-
-      async getTagArticle(tags) {
-        let params = {
-          exclude: this.articleId,
-          per_page: 5,
-          page: 1,
-          tags,
-        }
-        const res = await this.$api.getTagArticle(params)
-        let list = res || []
-        this.tagArticle = list.map((m,i) => {
-          m.idx = i + 1
-          m.img = m.post_medium_image || this.$config.defaultImg
-          m.title = (m.title && m.title.rendered) || ''
-
-          return m
+      } else {
+        let src = global.wx_praiseQrCode
+        uni.previewImage({
+          urls: [src],
         })
       }
-    }
-  }
+      // #endif
+
+      // #ifndef MP-WEIXIN
+      let src = global.wx_praiseQrCode
+      uni.previewImage({
+        urls: [src],
+      })
+      // #endif
+    },
+
+    // 去网页
+    gotoWeb() {
+      let minAppType =  getApp().globalData.wx_enterprise_minapp
+      if (minAppType === '1') {
+        let url = '/pages/common/web'
+        uni.navigateTo({
+          url: url + '?url=' + this.info.link
+        })
+      } else {
+        this.copyLink(this.info.link)
+      }
+    },
+
+    // 复制链接
+    copyLink(url) {
+      uni.setClipboardData({
+        data: url,
+        success: function(res) {
+          uni.getClipboardData({
+            success: function(res) {
+              this.$tips.toast('链接已复制')
+              // wx.showToast({
+              //   title: '链接已复制',
+              //   image: '../../images/src/link.png',
+              //   duration: 2000
+              // })
+            }
+          })
+        }
+      })
+    },
+  },
+}
 </script>
 
 <style lang="stylus" scoped>
@@ -287,10 +402,8 @@
       color #c4c4c4
     .txt
       margin-right 40rpx
-
   .article-content
     line-height 1.6
-
   // 点个赞
   .like
     margin 80rpx 0
@@ -366,7 +479,6 @@
           bottom 15rpx
           border-radius 50%
           border 1px solid #fff
-
   // 标签
   .tag
     display flex
@@ -380,7 +492,6 @@
       margin-bottom 20rpx
       .txt
         nowrap()
-
   // 阅读原文赞赏
   .origin
     display flex
@@ -399,7 +510,6 @@
         font-size 30rpx
         color $red
         margin-left 12rpx
-
   // 公共小标题
   .subtitle
     font-size 30rpx
@@ -422,7 +532,6 @@
       bottom -2rpx
     .num
       font-size 26rpx
-
   // 上下文
   .pre-next
     font-size 28rpx
@@ -436,8 +545,7 @@
       height 180rpx
       filter brightness(80%)
       background #f5f7f7
-    .pre,
-    .next
+    .pre, .next
       width 100%
       height 180rpx
       position relative
@@ -458,7 +566,6 @@
           multi-nowrap(2)
     .next
       text-align right
-
   // 猜你喜欢
   .tag-article
     margin 20rpx 0
@@ -478,5 +585,4 @@
         width 200rpx
         height 120rpx
         display block
-
 </style>

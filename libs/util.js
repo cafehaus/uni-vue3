@@ -45,6 +45,34 @@ export function isDate(v) {
   return Object.prototype.toString.call(v) === '[object Date]'
 }
 
+export function goto(v) {
+  let { type, appid, url, path } = v
+
+  if (type === 'apppage' && path) { // 小程序页面
+    // 兼容老版本的跳转路径
+    path = path.replace('/pages/detail/detail', '/pages/common/detail')
+
+    uni.navigateTo({
+      url: path
+    })
+  }
+  if (type === 'webpage' && url) { // web-view页面
+    url = '/pages/common/web?url=' + url
+    uni.navigateTo({
+      url
+    })
+  }
+  // #ifdef MP
+  if (type === 'miniapp' && appid) { // 其他小程序
+    uni.navigateToMiniProgram({
+      appId: appid,
+      path
+    })
+  }
+  // #endif
+}
+
 export default {
-  fmtDate
+  fmtDate,
+  goto
 }

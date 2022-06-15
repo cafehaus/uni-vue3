@@ -42,27 +42,7 @@
     methods: {
       // 跳转
       goto(info) {
-        let { type, appid, url, path } = info
-
-        if (type === 'apppage') { // 小程序页面
-          uni.navigateTo({
-            url: path
-          })
-        }
-        if (type === 'webpage') { // web-view页面
-          url = '../webpage/webpage?url=' + url
-          uni.navigateTo({
-            url
-          })
-        }
-        // #ifdef MP
-        if (type === 'miniapp') { // 其他小程序
-          uni.navigateToMiniProgram({
-            appId: appid,
-            path
-          })
-        }
-        // #endif
+        this.$util.goto(info)
       }
     }
   }

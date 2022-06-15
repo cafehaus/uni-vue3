@@ -7,7 +7,7 @@ export function isLogin() {
 }
 
 // 转到登录页
-export function login(redirect = '', type = 'redirectTo') {
+export function login(type = 'redirectTo', redirect = '') {
   let pages = getCurrentPages()
   let route = pages[pages.length - 1].route
   if (route !== 'pages/login/login') {

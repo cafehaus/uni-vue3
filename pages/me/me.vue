@@ -1,6 +1,7 @@
 <template>
   <view class="page my">
     <!-- 个人信息 -->
+    <!-- #ifdef MP -->
     <view class="user">
       <image class="user-img" :src="gravatar" mode="aspectFill" />
 
@@ -14,32 +15,32 @@
         </view>
       </view>
     </view>
+    <!-- #endif -->
 
     <!-- 列表 -->
     <view class="list">
+      <!-- #ifdef MP -->
       <view class="list-sub">
-        <view class="list-item">我的浏览</view>
-
-        <view class="list-item">我的评论</view>
-
-        <view class="list-item">我的点赞</view>
-
-        <view class="list-item">我的订阅</view>
+        <view class="list-item" @click="goto('1')">我的浏览</view>
+        <view class="list-item" @click="goto('2')">我的评论</view>
+        <view class="list-item" @click="goto('3')">我的点赞</view>
+        <view class="list-item" @click="goto('5')">我的订阅</view>
       </view>
+      <!-- #endif -->
 
       <view class="list-sub">
         <!-- 关于我们 -->
-        <view class="list-item" @click="goTo('about')">关于我们</view>
-
+        <view class="list-item" @click="goto('about')">关于我们</view>
         <view class="list-item">
           <button openType="contact" class='list-item-btn'>联系客服</button>
         </view>
         <view class="list-item">
           <button open-type="feedback" class='list-item-btn'>意见反馈</button>
         </view>
-
         <view class="list-item" @click="clearStorage">清除缓存</view>
+        <!-- #ifdef MP -->
         <view v-if="islogin" class="list-item" @click="logout">退出登录</view>
+        <!-- #endif -->
       </view>
     </view>
 
@@ -106,7 +107,7 @@
       // 登录
       login() {
         if(!this.$user.isLogin()) {
-          this.$user.login()
+          this.$user.login('navigateTo')
         }
       },
 
@@ -132,11 +133,15 @@
       },
 
       // 跳转
-      goTo(e) {
+      goto(e) {
         // 关于我们
         if (e === 'about') {
           uni.navigateTo({
             url: `/pages/common/page-detail?id=2`
+          })
+        } else {
+          uni.navigateTo({
+            url: `/pages/me/readlog?type=${e}`
           })
         }
       }

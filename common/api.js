@@ -69,3 +69,9 @@ export const getPraiseArticle = params => http.get(`${wp}post/mypraise?openid=${
 
 // 阅读记录-我的订阅|get
 export const getSubscribeArticle = params => http.get(`${wp}category/getsubscription?openid=${params.openid}`)
+
+// 鼓励,获取支付密钥|post
+export const postPraiseUrl = params => http.post(`${wm}payment`, params)
+
+// 更新鼓励数据|post
+export const updatePraiseUrl = params => http.post(`${wm}post/praise`)
