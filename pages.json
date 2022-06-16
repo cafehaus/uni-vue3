@@ -131,7 +131,7 @@
         "selectedIconPath": "static/tab-hot-on.png",
         "text": "热门"
       }
-	  // #ifdef MP-WEIXIN ||  MP-ALIPAY || MP-QQ || MP-TOUTIAO || MP-BAIDU || H5
+	  // #ifdef MP-WEIXIN ||  MP-ALIPAY || MP-QQ || MP-TOUTIAO || MP-BAIDU
       ,{
         "pagePath": "pages/me/me",
         "iconPath": "static/tab-me.png",

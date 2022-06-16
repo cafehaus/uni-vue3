@@ -4,12 +4,12 @@
       <!-- 页面内容 -->
       <view class="excerpt">
         <mp-html
-          content="{{ pageData.post_content }}"
-          bindlinktap="wxParseTagATap"
-          copy-link="{{false}}"
-          selectable="{{true}}"
-          lazy-load="{{true}}"
-          markdown="{{true}}"
+          :content="pageData.post_content"
+          @click="wxParseTagATap"
+          :copy-link="false"
+          :selectable="true"
+          :lazy-load="true"
+          :markdown="true"
         />
       </view>
 
@@ -20,17 +20,10 @@
             class="praise-button"
             formType="submit"
             size="mini"
-            bindtap="praise"
+            @click="onPraise"
           >
             赞赏鼓励
           </button>
-          <modal
-            title="{{dialog.title}}"
-            hidden="{{dialog.hidden}}"
-            no-cancel
-            bindconfirm="confirm"
-            >{{ dialog.content }}</modal
-          >
         </view>
 
         <!-- 头像 -->
@@ -40,44 +33,42 @@
           </view>
         </view>
         <view class="praiseText">
-          <block wx:key="id" wx:for="{{praiseList}}">
-            <image src="{{item}}" class="gravatarLikeImg"></image>
+          <block :key="index" v-for="(item, index) in praiseList">
+            <image :src="item" class="gravatarLikeImg"></image>
           </block>
         </view>
       </view>
     </view>
 
     <!-- 企业信息 -->
-    <view class="company" wx:if="{{pageData.raw_qyname}}">
+    <view class="company" v-if="pageData.raw_qyname">
       <!-- 地图 -->
-      <view class="map" bindtap="openMap">
+      <view class="map" @click="openMap">
         <map
           id="myMap"
           style="width: 100%; height: 420rpx"
-          latitude="{{pageData.raw_latitude}}"
-          longitude="{{pageData.raw_longitude}}"
-          markers="{{markers}}"
+          :latitude="pageData.raw_latitude"
+          :longitude="pageData.raw_longitude"
+          :markers="markers"
           show-location
         ></map>
       </view>
 
       <view class="company-info">
-        <text class="name" wx:if="{{pageData.raw_qyname}}">{{
-          pageData.raw_qyname
-        }}</text>
-        <view bindtap="openMap" wx:if="{{pageData.raw_address}}">
+        <text class="name" v-if="pageData.raw_qyname">{{ pageData.raw_qyname }}</text>
+        <view @click="openMap" v-if="pageData.raw_address">
           地址
           <text>{{ pageData.raw_address }}</text>
         </view>
-        <view bindtap="phoneCall" wx:if="{{pageData.raw_tel}}">
+        <view bindtap="phoneCall" v-if="pageData.raw_tel">
           电话
           <text>{{ pageData.raw_tel }}</text>
         </view>
-        <view wx:if="{{pageData.raw_email}}">
+        <view v-if="pageData.raw_email">
           邮箱
           <text>{{ pageData.raw_email }}</text>
         </view>
-        <view wx:if="{{pageData.raw_workday}}">
+        <view v-if="pageData.raw_workday">
           工作时间
           <text>{{ pageData.raw_workday }}</text>
         </view>
@@ -89,17 +80,12 @@
             class="btn-web"
             formType="submit"
             size="mini"
-            bindtap="gotowebpage"
+            @click="gotowebpage"
           >
             进入网站
           </button>
         </view>
       </view>
-    </view>
-
-    <!-- 版权信息 -->
-    <view class="copyright" style="display:{{floatDisplay}}">
-      <template is="tempCopyright" data="{{copyright}}" />
     </view>
 
     <!-- 联系客服 -->
@@ -108,7 +94,12 @@
 </template>
 
 <script>
+import { mapState } from 'vuex'
+import mpHtml from '@/components/mp-html/mp-html'
 export default {
+  components: {
+    mpHtml,
+  },
   data() {
     return {
       title: '页面内容',
@@ -131,6 +122,9 @@ export default {
       website: config.getDomain
     }
   },
+  computed: {
+    ...mapState('app', ['appInfo', 'systemInfo'])
+  },
   onLoad() {
     this.initData()
   },
@@ -146,8 +140,9 @@ export default {
 
       Auth.setUserInfoData(self)
       Auth.checkLogin(self);
-      this.fetchData();
-      wx.getSystemInfo({
+      this.fetchData()
+      this.getPraiseUser()
+      uni.getSystemInfo({
         success: function (t) {
           var system = t.system.indexOf('iOS') != -1 ? 'iOS' : 'Android';
           self.setData({ system: system });
@@ -156,8 +151,8 @@ export default {
 
       // 设置系统分享菜单
       wx.showShareMenu({
-        withShareTicket: true,
-        menus: ['shareAppMessage', 'shareTimeline']
+        withShareTicket: true,
+        menus: ['shareAppMessage', 'shareTimeline']
       })
     },
 
@@ -175,58 +170,34 @@ export default {
       }
     },
 
-    praise: function () {
-      var self = this;
-      var minAppType = app.globalData.wx_enterprise_minapp;
-      var system = self.data.system;
-      var postid = self.data.pageData.ID;
-      if (minAppType == "1" && system == 'Android') {
-        if (self.data.openid) {
-          wx.navigateTo({
-            url: '../pay/pay?flag=2&openid=' + self.data.openid + '&postid=' + postid
-          })
-        }
-        else {
-          Auth.checkSession(self, 'isLoginNow');
-        }
-      }
-      else {
-
-        var src = app.globalData.wx_praiseQrCode;
-        wx.previewImage({
-          urls: [src],
-        });
-
-      }
-
-    },
     onPullDownRefresh: function () {
       var self = this;
       self.setData({
         display: 'none',
         pageData: {},
-      
-
       });
 
-      this.fetchData();
+      this.fetchData()
+      this.getPraiseUser()
       //消除下刷新出现空白矩形的问题。
       wx.stopPullDownRefresh()
 
     },
 
     phoneCall: function () {
-      wx.makePhoneCall({
+      uni.makePhoneCall({
         phoneNumber: this.data.pageData.raw_tel
       })
     },
     openMap: function () {
-      var self = this;
+      var self = this
+
+      // #ifdef MP-WEIXIN
       wx.getLocation({
         type: 'gcj02', //返回可以用于wx.openLocation的经纬度
         success(res) {
-          const latitude = parseFloat(self.data.pageData.raw_latitude);
-          const longitude = parseFloat(self.data.pageData.raw_longitude);
+          const latitude = parseFloat(self.pageData.raw_latitude)
+          const longitude = parseFloat(self.pageData.raw_longitude)
           wx.openLocation({
             latitude,
             longitude,
@@ -234,39 +205,53 @@ export default {
           })
         }
       })
-
+      // #endif
     },
     gotowebpage: function () {
-      var self = this;
-      var minAppType =  app.globalData.wx_enterprise_minapp;
-      var url = '';
-      if (minAppType == "1") {
-        url = '../webpage/webpage?';
-        wx.navigateTo({
-          url: url
+      if (this.appInfo.isCompany) {
+        uni.navigateTo({
+          url: '/pages/common/web?url=' + this.website
         })
-      }
-      else {
-        self.copyLink(config.getDomain);
+      } else {
+        this.copyLink(this.website)
       }
 
     },
     copyLink: function (url) {
-      //this.ShowHideMenu();
-      wx.setClipboardData({
+      uni.setClipboardData({
         data: url,
         success: function (res) {
-          wx.getClipboardData({
+          uni.getClipboardData({
             success: function (res) {
-              wx.showToast({
-                title: '链接已复制',
-                image: '../../images/src/link.png',
-                duration: 2000
-              })
+              this.$tips.toast('接已复制')
             }
           })
         }
       })
+    },
+    onPraise() {
+      // #ifdef MP-WEIXIN
+      if (this.appInfo.isCompany && this.systemInfo.osName === 'Android') {
+        if (this.$user.isLogin()) {
+          let openid = uni.getStorageSync('openid') || ''
+          uni.navigateTo({
+            url: '../common/pay?flag=1&openid=' + openid + '&postid=' + this.pageData.ID
+          })
+        } else {
+          this.$user.login('navigateTo')
+        }
+      } else {
+        uni.previewImage({
+          urls: [this.appInfo.qrCode],
+        })
+      }
+      // #endif
+
+      // #ifndef MP-WEIXIN
+      uni.previewImage({
+        urls: [this.appInfo.qrCode],
+      })
+      // #endif
     },
     // a标签跳转和复制链接
     wxParseTagATap(e) {
@@ -274,7 +259,7 @@ export default {
       let href = e.currentTarget.dataset.src
       let domain = config.getDomain
       let redirectype = e.currentTarget.dataset.redirectype
-      let path = e.currentTarget.dataset.path 
+      let path = e.currentTarget.dataset.path
       // 判断a标签src里是不是插入的文档链接
       let isDoc = /\.(doc|docx|xls|xlsx|ppt|pptx|pdf)$/.test(href)
 
@@ -284,7 +269,7 @@ export default {
       }
 
       if (redirectype) {
-        if (redirectype == 'apppage') { //跳转到小程序内部页面         
+        if (redirectype == 'apppage') { //跳转到小程序内部页面
           wx.navigateTo({
             url: path
           })
@@ -327,9 +312,7 @@ export default {
             {
               console.log("appid 错误");
               return;
-
             }
-          
         }
         return
       }
@@ -396,13 +379,11 @@ export default {
 
     // 打开文档
     openLinkDoc(e) {
-      let self = this
       let url
       let fileType
 
       // 如果是a标签href中插入的文档
       let src = e.currentTarget.dataset.src
-      let docType
       let isDoc = /\.(doc|docx|xls|xlsx|ppt|pptx|pdf)$/.test(src)
 
       if (src && isDoc) {
@@ -413,11 +394,11 @@ export default {
         fileType = e.currentTarget.dataset.filetype
       }
 
-      wx.downloadFile({
+      uni.downloadFile({
         url: url,
         success: function (res) {
           const filePath = res.tempFilePath
-          wx.openDocument({
+          uni.openDocument({
             filePath: filePath,
             fieldType: fileType
           })
@@ -430,133 +411,56 @@ export default {
 
     // 短代码跳转
     wxParseToRedict(e) {
-      let redirectype = e.currentTarget.dataset.redirectype
+      let type = e.currentTarget.dataset.redirectype
       let path = e.currentTarget.dataset.path
       let url = e.currentTarget.dataset.url
-    
-
-      if (redirectype == 'apppage') { //跳转到小程序内部页面         
-        wx.navigateTo({
-          url: path
-        })
-      } else if (redirectype == 'webpage') //跳转到web-view内嵌的页面
-      {
-        url = '../webpage/webpage?url=' + url;
-        wx.navigateTo({
-          url: url
-        })
-      }
-      else if (redirectype == 'miniapp') //跳转其他小程序
-      {
-          // 根据平台取appid
-          let appid = '';
-          let _appid =e.currentTarget.dataset.appid;
-          if(util._isEmpty(_appid))
-          {
-            console.log("appid 为空");
-            return;
-          }
-          let appidList = _appid.split(',')
-          if(appidList.length<1)
-          {
-            console.log("appid 错误");
-            return;
-          }
-          let id = appidList.find(m => /^weixin-.*/.test(m)) || ''
-          if (!util._isEmpty(_appid)) appid = id.replace('weixin-', '')
-
-          if(!util._isEmpty(appid))
-          {
-            wx.navigateToMiniProgram({
-              appId: appid,
-              path: path
-            })
-
-          }
-          else
-          {
-            console.log("appid 错误");
-            return;
-
-          }
-      }
-    },
-    agreeGetUser: function (e) {
-      var userInfo = e.detail.userInfo;
-      var self = this;
-      if (userInfo) {
-        auth.getUsreInfo(e.detail);
-        self.setData({ userInfo: userInfo });
-      }
-      setTimeout(function () {
-        self.setData({ isLoginPopup: false })
-      }, 1200);
-    },
-    closeLoginPopup() {
-      this.setData({ isLoginPopup: false });
-    },
-    openLoginPopup() {
-      this.setData({ isLoginPopup: true });
-    },
-    fetchData: function () {
-      var self = this;
-      var getPageRequest = wxRequest.getRequest(Api.getAboutPage());
-      getPageRequest.then(response => {
-        wx.setNavigationBarTitle({
-          title: response.data.post_title
-        })
-        console.log(response.data);
-
-        self.setData({
-          pageData: response.data,
-          display: 'block'
-        })
-
-        // 地图覆盖物
-        let res = response.data
-        if (res.raw_latitude && res.raw_longitude) {
-          var marker = {}
-          var markers = []
-          marker.latitude = parseFloat(res.raw_latitude)
-          marker.longitude = parseFloat(res.raw_longitude)
-          marker.id = 1
-          marker.name = res.post_title
-          markers.push(marker)
-          self.setData({
-            markers: markers
-          })
-        }
-
-
-      }).then(res => {
-        var getAllPraiseRequest = wxRequest.getRequest(Api.getAllPraiseUrl());
-        getAllPraiseRequest.then(response => {
-
-          if (response.data.status == '200') {
-
-            var _avatarurls = response.data.avatarurls;
-            var avatarurls = [];
-            for (var i = 0; i < _avatarurls.length; i++) {
-              var avatarurl = "../../images/src/gravatar.png";
-              if (_avatarurls[i].avatarurl.indexOf('wx.qlogo.cn') != -1) {
-                avatarurl = _avatarurls[i].avatarurl;
-              }
-              avatarurls[i] = avatarurl;
-            }
-
-            self.setData({
-              praiseList: avatarurls
-            });
-
-          }
-          else {
-            console.log(response);
-          }
-
-
-        })
-
+      let appid =e.currentTarget.dataset.appid
+      this.$util.goto({
+        type,
+        path,
+        url,
+        appid
       })
+    },
+
+    async fetchData() {
+      const res = await this.$api.getAboutPage()
+      uni.setNavigationBarTitle({
+        title: res.post_title
+      })
+
+      this.pageData = res.data
+
+      // 地图覆盖物
+      let r = response.data
+      if (r.raw_latitude && r.raw_longitude) {
+        var marker = {}
+        var markers = []
+        marker.latitude = parseFloat(r.raw_latitude)
+        marker.longitude = parseFloat(r.raw_longitude)
+        marker.id = 1
+        marker.name = res.post_title
+        markers.push(marker)
+        this.markers = markers
+      }
+    },
+
+    async getPraiseUser() {
+      const res = await this.$api.getPraiseUser()
+      if (res.status == '200') {
+        let _avatarurls = res.avatarurls || []
+        let avatarurls = []
+        for (let i = 0; i < _avatarurls.length; i++) {
+          let avatarurl = '/static/avatar.png'
+          if (_avatarurls[i].avatarurl.indexOf('wx.qlogo.cn') != -1) {
+            avatarurl = _avatarurls[i].avatarurl
+          }
+          avatarurls[i] = avatarurl
+        }
+        this.praiseList = avatarurls
+      } else {
+        this.$tips.tost(res.message || '出错啦')
+      }
     }
   },
 }

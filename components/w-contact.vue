@@ -40,7 +40,7 @@ export default {
     padding 0
     margin 0
     &::after
-    border none
+      border none
   .iconfont
     color #FFF
     font-size 54rpx

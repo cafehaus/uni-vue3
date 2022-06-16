@@ -38,6 +38,9 @@ export const getCategory = params => http.get(`${wm}category?apptype=wx`, params
 // 获取分类信息|get
 export const getCategoryInfo = id => http.get(`${wp}categories/${id}`)
 
+// 订阅分类|post
+export const subscribeCate = params => http.post(`${wm}category/postsubscription`, params)
+
 // =================================================================== 热门
 // 获取热门文章|get
 export const getHotArticle = params => http.get(`${wm}post/${params.type}?apptype=wx`, params)
@@ -81,3 +84,9 @@ export const postPraiseUrl = params => http.post(`${wm}payment`, params)
 
 // 更新鼓励数据|post
 export const updatePraiseUrl = params => http.post(`${wm}post/praise`)
+
+// 获取关于我们页面数据|post
+export const getAboutPage = params => http.get(`${wm}pages/about`)
+
+// 获取赞赏用户|post
+export const getPraiseUser = params => http.get(`${wm}post/allpraise`)

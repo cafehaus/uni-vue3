@@ -24,12 +24,17 @@
         @click="goDetail(itm)"
       >
         <view class="cate-img">
-          <image :src="itm.category_thumbnail_image || $config.defaultImg" class="img" mode="aspectFill" />
+          <image :src="itm.category_thumbnail_image || defaultImg" class="img" mode="aspectFill" />
         </view>
 
         <!-- 分类名、描述 -->
         <view class="content-title">
-          <span>{{ itm.name }}</span>
+          <view class="name">
+            <text>{{itm.name}}</text>
+          </view>
+          <!-- #ifdef MP-WEIXIN ||  MP-ALIPAY || MP-QQ || MP-TOUTIAO || MP-BAIDU -->
+          <text class="btn-sub" @click="subscribeCate(itm)">{{itm.subflag === '1' ? '取消订阅' : '订阅'}}</text>
+          <!-- #endif -->
         </view>
         <view class="content-brief">
           <span>{{ itm.description }}</span>
@@ -44,6 +49,7 @@
   export default {
     data() {
       return {
+        defaultImg: $config.defaultImg,
         categoriesList: [],
         cateSubList: [],
         activeIndex: 0
@@ -96,7 +102,48 @@
           // url: `/pages/cate/cate-article?id=${item.id}`
           url: `/pages/common/list?id=${item.id}`
         })
-      }
+      },
+
+      async subscribeCate(e) {
+        if (!this.$user.isLogin()) {
+          this.$user.login('navigateTo')
+          return
+        }
+
+        let categoryid = e.id
+        let openid = uni.getStorageSync('openid') || ''
+        let params = {
+          categoryid,
+          openid
+        }
+
+        const res = await this.$api.subscribeCate(params)
+        if (res.status == '200') {
+          this.$tips.success('订阅成功')
+          this.reloadData(categoryid, '1')
+
+        } else if (res.status == '201') {
+          this.$tips.success('取消订阅成功')
+          this.reloadData(categoryid, '0')
+        } else {
+          this.$tips.toast('操作失败,请稍后重试')
+        }
+      },
+
+      reloadData(id, subflag) {
+        let newCategoriesList = []
+        let cateSubList = this.cateSubList
+        for (let i = 0; i < cateSubList.length; i++) {
+          if (cateSubList[i].id == id) {
+            cateSubList[i].subflag = subflag
+          }
+          newCategoriesList.push(cateSubList[i])
+        }
+
+        if (newCategoriesList.length) {
+          this.cateSubList = newCategoriesList
+        }
+      },
     }
   }
 </script>
@@ -104,7 +151,7 @@
 <style lang="stylus" scoped>
 @import '../../styles/var'
 
-  page 
+  page
     background #f5f7f7
   .cate
     width 100%
@@ -171,11 +218,21 @@
           display flex
           justify-content space-between
           align-items center
-          span
+          .name
             font-size 15px
             line-height 1
             font-weight 500
             color #333
+            flex 1
+            flex-shrink 0
+          .btn-sub
+            margin-left 20rpx
+            display inline-block
+            width 160rpx
+            height 48rpx
+            line-height @height
+            border 1rpx solid #eee
+            text-align center
         .content-brief
           width 70%
           padding 4rpx 0 30rpx 30rpx

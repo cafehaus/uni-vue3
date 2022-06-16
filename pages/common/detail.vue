@@ -91,7 +91,7 @@
     <CommentItem v-for="c in commentList" :key="c.id" :item="c" />
 
     <!-- 评论框 -->
-    <!-- #ifdef MP-WEIXIN ||  MP-ALIPAY || MP-QQ || MP-TOUTIAO || MP-BAIDU -->
+    <!-- #ifdef MP-WEIXIN || MP-QQ || MP-TOUTIAO || MP-BAIDU -->
     <CommentBar @send="submitComment" />
     <!-- #endif -->
   </view>
