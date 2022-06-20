@@ -1,57 +1,55 @@
 <template>
   <view>
-    <template v-if="showBar">
-      <view class="comment-box">
-        <image src="@/static/detail_home.png" class="icon-img" @click="goHome" />
+    <view v-if="showBar" class="comment-box">
+      <image src="@/static/detail_home.png" class="icon-img" @click="goHome" />
 
-        <view class="input-box">
-          <input
-            class="input"
-            type="text"
-            confirm-type="send"
-            cursor-spacing="10"
-            maxlength="100"
-            v-model="content"
-            :placeholder="placeholder"
-          />
-          <button class="btn-submit" @click="submit">发送</button>
-        </view>
-
-        <!-- <button
-          class="btn-share"
-          hover-class="none"
-          @click="showSharePopup"
-        >
-          <image src="@/static/detail_share.png" class="icon-img" />
-        </button> -->
-        <button
-          class="btn-share"
-          hover-class="none"
-          open-type="share"
-        >
-          <image src="@/static/detail_share.png" class="icon-img" />
-        </button>
+      <view class="input-box">
+        <input
+          class="input"
+          type="text"
+          confirm-type="send"
+          cursor-spacing="10"
+          maxlength="100"
+          v-model="content"
+          :placeholder="placeholder"
+        />
+        <button class="btn-submit" @click="submit">发送</button>
       </view>
 
-      <!-- 弹出层 -->
-      <!-- <view
-        v-show="showPopup"
-        class="pop"
+      <!-- <button
+        class="btn-share"
+        hover-class="none"
+        @click="showSharePopup"
       >
-        <view class="pop-title">立即分享</view>
-        <view class="pop-content">
-          <view class="share-item" @click="onCreatePoster">
-            <image class="img" src="@/static/share_poster.png" />
-            <view>生成海报</view>
-          </view>
+        <image src="@/static/detail_share.png" class="icon-img" />
+      </button> -->
+      <button
+        class="btn-share"
+        hover-class="none"
+        open-type="share"
+      >
+        <image src="@/static/detail_share.png" class="icon-img" />
+      </button>
+    </view>
 
-          <button class="share-item share-item-btn" open-type="share" hover-class="none">
-            <image class="img" src="@/static/share_wechat.png" />
-            <view>转发给好友</view>
-          </button>
+    <!-- 弹出层 -->
+    <!-- <view
+      v-show="showPopup"
+      class="pop"
+    >
+      <view class="pop-title">立即分享</view>
+      <view class="pop-content">
+        <view class="share-item" @click="onCreatePoster">
+          <image class="img" src="@/static/share_poster.png" />
+          <view>生成海报</view>
         </view>
-      </view> -->
-    </template>
+
+        <button class="share-item share-item-btn" open-type="share" hover-class="none">
+          <image class="img" src="@/static/share_wechat.png" />
+          <view>转发给好友</view>
+        </button>
+      </view>
+    </view> -->
 
     <!-- 当在后台关闭评论功能时，显示出单独的分享按钮 -->
     <!-- <button v-else class="circle-share" hover-class="none" @click="showSharePopup">
@@ -69,22 +67,38 @@ import uni from '../libs/uni'
 export default {
   name: 'comment-bar',
   props: {
-    placeholder: {
-      type: String,
-      default: '请输入评论',
-    },
-    showBar: { // 是否显示评论输入框
+    showBar: {
       type: Boolean,
       default: true,
+    },
+    article: { // 文章信息
+      type: Object,
+      default: () => ({}),
+    },
+    replayUser: { // 回复用户信息
+      type: Object,
+      default: () => ({}),
     },
   },
 
   data() {
     return {
+      placeholder: '请输入评论',
       showPopup: false,
       content: '',
     }
   },
+
+  computed: {
+    placeholder() {
+      if (this.replayUser.userid) {
+        return `回复 ${this.replayUser.name}：`
+      } else {
+        return '请输入评论'
+      }
+    }
+  },
+
   methods: {
     submit() {
       if (!this.content) {
@@ -92,7 +106,12 @@ export default {
         return
       }
 
-      this.$emit('send', this.content)
+      if (this.$user.isLogin()) {
+        // this.$emit('send', this.content)
+        this.submitComment()
+      } else {
+        this.$user.login('navigateTo')
+      }
     },
 
     showSharePopup() {
@@ -107,6 +126,51 @@ export default {
       uni.switchTab({
         url: '/pages/home/home'
       })
+    },
+
+    async submitComment() {
+      const parent = this.replayUser.id
+      const postID = this.article.id
+      const userid = this.replayUser.userid
+      let formId = this.replayUser.formId
+      if (formId === 'the formId is a mock one') {
+        formId = ''
+      }
+
+      let user = uni.getStorageSync('userInfo') || {}
+      let openid = uni.getStorageSync('openid') || ''
+      let name = user.nickName
+      let author_url = user.avatarUrl
+      let email = openid + "@weixin.com"
+
+      var data = {
+        post: postID,
+        author_name: name,
+        author_email: email,
+        content: this.content,
+        author_url: author_url,
+        parent: parent,
+        openid: openid,
+        userid: userid,
+        formId: formId
+      }
+
+      const res = await this.$api.submitComment(data)
+      if (res.statusCode == 200) {
+        if (res.data.status == '200') {
+          this.$emit('success')
+        } else if (res.data.status == '500') {
+          this.$tips.toast('评论失败，请稍后重试')
+        }
+      } else {
+        if (res.data.code == 'rest_comment_login_required') {
+          this.$tips.toast('需要开启在WordPress rest api 的匿名评论功能！')
+        } else if (res.data.code == 'rest_invalid_param' && res.data.message.indexOf('author_email') > 0) {
+          this.$tips.toast('email填写错误！')
+        } else {
+          this.$tips.toast('评论失败,' + res.data.message)
+        }
+      }
     },
   },
 }

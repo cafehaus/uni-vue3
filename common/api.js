@@ -25,6 +25,9 @@ export const getArticleList = params => http.get(`${wp}posts`, params)
 // 获取文章详情|get
 export const getArticleDetail = (params, config) => http.get(`${wm}posts/${params.id}`, params, config)
 
+// 获取文章是否可以评论|get
+export const getCanComment = (params, config) => http.get(`${wm}options/enableComment`, params, config)
+
 // 获取标签列表|get
 export const getTagList = params => http.get(`${wp}tags?per_page=7&orderby=count&order=desc&page=1`)
 

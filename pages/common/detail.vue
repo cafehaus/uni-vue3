@@ -17,6 +17,12 @@
 
     <mpHtml :content="content" />
 
+    <!-- <view class="read-more" wx:if="{{detailSummaryHeight != ''}}">
+      <view class="read-more-mask">
+        <view class="read-more-btn" @click="readMore">{{ wxAd.isShowExcitation ? '观看视频,' : '' }}阅读更多</view>
+      </view>
+    </view> -->
+
     <!-- 点赞 -->
     <section class="like">
       <!-- #ifdef MP-WEIXIN ||  MP-ALIPAY || MP-QQ || MP-TOUTIAO || MP-BAIDU -->
@@ -41,7 +47,7 @@
 
     <!-- 文章标签 -->
     <section v-if="info.tag_name && info.tag_name.length" class="tag">
-      <view class="tag-item" v-for="tag in info.tag_name" :key="tag.term_id">
+      <view class="tag-item" v-for="tag in info.tag_name" :key="tag.term_id" @click="goTagDetail(tag)">
         <view class="txt">#{{ tag.name }}</view>
       </view>
     </section>
@@ -57,7 +63,7 @@
 
     <!-- 上下文 -->
     <section class="pre-next">
-      <view v-if="info.preArticle && info.preArticle.id" class="pre">
+      <view v-if="info.preArticle && info.preArticle.id" class="pre" @click="goDetail(info.preArticle.id)">
         <view class="des">
           <text>上一篇</text>
           <view class="title">{{ info.preArticle.title }}</view>
@@ -65,7 +71,7 @@
         <image class="img" :src="info.preArticle.img" mode="aspectFill" />
       </view>
 
-      <view v-if="info.nextArticle && info.nextArticle.id" class="next">
+      <view v-if="info.nextArticle && info.nextArticle.id" class="next" @click="goDetail(info.nextArticle.id)">
         <view class="des">
           <text>下一篇</text>
           <view class="title">{{ info.nextArticle.title }}</view>
@@ -77,7 +83,7 @@
     <!-- 猜你喜欢 -->
     <section v-if="tagArticle.length" class="tag-article">
       <view class="subtitle">猜你喜欢</view>
-      <view class="item" v-for="item in tagArticle" :key="item.id">
+      <view class="item" v-for="item in tagArticle" :key="item.id" @click="goDetail(item.id)">
         <view class="title">{{ item.idx }}. {{ item.title }}</view>
         <image class="img" :src="item.img" mode="aspectFill"></image>
       </view>
@@ -88,11 +94,12 @@
       <view>评论交流</view>
       <view v-if="commentNum" class="num">有{{ commentNum }}条评论</view>
     </view>
-    <CommentItem v-for="c in commentList" :key="c.id" :item="c" />
+    <CommentItem v-for="c in commentList" :key="c.id" :item="c" @replay="handleReply" />
+    <w-empty v-if="empty" />
 
     <!-- 评论框 -->
     <!-- #ifdef MP-WEIXIN || MP-QQ || MP-TOUTIAO || MP-BAIDU -->
-    <CommentBar @send="submitComment" />
+    <CommentBar :show-bar="canComment" :article="info" :replay-user="replayUser" @success="commentSuccess" />
     <!-- #endif -->
   </view>
 </template>
@@ -120,12 +127,15 @@ export default {
         size: 10,
       },
       commentList: [],
+      empty: false,
       commentNum: 0,
       likeNum: 0,
       tagList: [],
       tagArticle: [],
       isLike: false,
       likeList: [],
+      replayUser: null,
+      canComment: true
     }
   },
   computed: {
@@ -140,6 +150,7 @@ export default {
     initData() {
       this.getArticleDetail()
       this.getArticleComment()
+      this.getCanComment()
       this.getIsLike()
     },
 
@@ -201,6 +212,17 @@ export default {
           this.isLike = false
         }
       }
+    },
+
+    async getCanComment() {
+      const res = await this.$api.getCanComment()
+      this.canComment = res.enableComment === '1'
+    },
+
+    commentSuccess() {
+      this.replayUser = null
+      this.page.index = 1
+      this.getArticleComment()
     },
 
     // 获取文章详情
@@ -300,7 +322,9 @@ export default {
       }
       const res = await this.$api.getArticleComment(params)
       if (res.status === '200') {
-        this.commentList = res.data || []
+        let list = res.data || []
+        this.commentList = list
+        this.empty = !list.length
       } else {
         this.$tips.toast(res.message || '请求失败')
       }
@@ -349,6 +373,20 @@ export default {
       // #endif
     },
 
+    // 跳转文章
+    goDetail(id) {
+      uni.navigateTo({
+        url: '/pages/common/detail' + '?id=' + id
+      })
+    },
+
+    // 跳转标签列表
+    goTagDetail(tag) {
+      uni.navigateTo({
+        url: '/pages/common/list' + '?type=2&id=' + tag.term_id
+      })
+    },
+
     // 去网页
     gotoWeb() {
       if (this.appInfo.isCompany) {
@@ -380,125 +418,8 @@ export default {
       })
     },
 
-    submitComment(content) {
-      var self = this
-      let e = this.commentUser
-
-      var parent = self.data.parentID;
-      var postID = e.detail.value.inputPostID;
-      var formId = e.detail.formId;
-      if (formId == "the formId is a mock one") {
-        formId = ''
-      }
-      var userid = self.data.userid;
-
-      if (this.$user.isLogin()) {
-        var name = self.data.userInfo.nickName;
-        var author_url = self.data.userInfo.avatarUrl;
-        var email = self.data.openid + "@weixin.com";
-        var openid = self.data.openid;
-
-        var data = {
-          post: postID,
-          author_name: name,
-          author_email: email,
-          content,
-          author_url: author_url,
-          parent: parent,
-          openid: openid,
-          userid: userid,
-          formId: formId
-        };
-
-        var postCommentRequest = this.$api.submitComment(data)
-        var postCommentMessage = "";
-        postCommentRequest
-          .then(res => {
-            console.log(res)
-            if (res.statusCode == 200) {
-              if (res.data.status == '200') {
-                self.setData({
-                  content: '',
-                  parentID: "0",
-                  userid: 0,
-                  placeholder: "写评论...",
-                  focus: false,
-                  commentsList: [],
-                  toUsertype: ""
-
-                });
-                postCommentMessage = res.data.message;
-                
-                var commentCounts = parseInt(self.data.total_comments) + 1;
-                self.setData({
-                  total_comments: commentCounts,
-                  commentCount: "有" + commentCounts + "条评论"
-
-                });
-              } else if (res.data.status == '500') {
-                self.setData({
-                  'dialog.hidden': false,
-                  'dialog.title': '提示',
-                  'dialog.content': '评论失败，请稍后重试。'
-
-                });
-              }
-            } else {
-
-              if (res.data.code == 'rest_comment_login_required') {
-                self.setData({
-                  'dialog.hidden': false,
-                  'dialog.title': '提示',
-                  'dialog.content': '需要开启在WordPress rest api 的匿名评论功能！'
-
-                });
-              } else if (res.data.code == 'rest_invalid_param' && res.data.message.indexOf('author_email') > 0) {
-                self.setData({
-                  'dialog.hidden': false,
-                  'dialog.title': '提示',
-                  'dialog.content': 'email填写错误！'
-
-                });
-              } else {
-                console.log(res)
-                self.setData({
-                  'dialog.hidden': false,
-                  'dialog.title': '提示',
-                  'dialog.content': '评论失败,' + res.data.message
-
-                });
-              }
-            }
-          }).then(response => {
-            //self.fetchCommentData(self.data); 
-            self.setData({
-              page: 1,
-              commentsList: [],
-              isLastPage: false
-
-            })
-            self.onReachBottom();
-            //self.fetchCommentData();
-            setTimeout(function() {
-              wx.showToast({
-                title: postCommentMessage,
-                icon: 'none',
-                duration: 900,
-                success: function() {}
-              })
-            }, 900);
-          }).catch(response => {
-            console.log(response)
-            self.setData({
-              'dialog.hidden': false,
-              'dialog.title': '提示',
-              'dialog.content': '评论失败,' + response
-
-            });
-          })
-      } else {
-        this.$user.login('navigateTo')
-      }
+    handleReply(e) {
+      this.replayUser  = e
     },
   },
 }
@@ -709,4 +630,38 @@ export default {
         width 200rpx
         height 120rpx
         display block
+
+  .read-more
+    width 100%
+    // position absolute
+    // bottom 0
+    .read-more-mask
+      height 200rpx
+      width 100%
+      box-sizing border-box
+      background-image linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 1) 96%)
+    .read-more-btn
+      width 280rpx
+      height 64rpx
+      font-size 30rpx
+      font-weight 500
+      line-height 1
+      text-align center
+      color #fd8f45
+      position absolute
+      bottom 0
+      left 50%
+      transform translateX(-50%)
+      &::after
+        content ''
+        display inline-block
+        border solid #fd8f45
+        border-width 0 0 2px 2px
+        padding 3px
+        position absolute
+        right 50%
+        bottom 6rpx
+        transform translateX(4px) rotate(-45deg)
+        opacity 0.6
+
 </style>
