@@ -13,7 +13,7 @@
           v-model="content"
           :placeholder="placeholder"
         />
-        <button class="btn-submit" @click="submit">发送</button>
+        <text class="btn-submit" @click="submit">发送</text>
       </view>
 
       <!-- <button
@@ -75,7 +75,7 @@ export default {
       type: Object,
       default: () => ({}),
     },
-    replayUser: { // 回复用户信息
+    replyUser: { // 回复用户信息
       type: Object,
       default: () => ({}),
     },
@@ -91,8 +91,8 @@ export default {
 
   computed: {
     placeholder() {
-      if (this.replayUser.userid) {
-        return `回复 ${this.replayUser.name}：`
+      if (this.replyUser && this.replyUser.userid) {
+        return `回复 ${this.replyUser.author_name}：`
       } else {
         return '请输入评论'
       }
@@ -101,6 +101,7 @@ export default {
 
   methods: {
     submit() {
+      console.log(this.replyUser)
       if (!this.content) {
         this.$tips.toast('请输入评论内容')
         return
@@ -129,10 +130,10 @@ export default {
     },
 
     async submitComment() {
-      const parent = this.replayUser.id
+      const parent = this.replyUser ? this.replyUser.id : ''
       const postID = this.article.id
-      const userid = this.replayUser.userid
-      let formId = this.replayUser.formId
+      const userid = this.replyUser ? this.replyUser.userid : ''
+      let formId = this.replyUser ? this.replyUser.formId : ''
       if (formId === 'the formId is a mock one') {
         formId = ''
       }
@@ -156,21 +157,28 @@ export default {
       }
 
       const res = await this.$api.submitComment(data)
-      if (res.statusCode == 200) {
-        if (res.data.status == '200') {
-          this.$emit('success')
-        } else if (res.data.status == '500') {
-          this.$tips.toast('评论失败，请稍后重试')
-        }
+      if (res.status === '200') {
+        this.$tips.toast(res.message || '评论成功')
+        this.content = ''
+        this.$emit('success')
       } else {
-        if (res.data.code == 'rest_comment_login_required') {
-          this.$tips.toast('需要开启在WordPress rest api 的匿名评论功能！')
-        } else if (res.data.code == 'rest_invalid_param' && res.data.message.indexOf('author_email') > 0) {
-          this.$tips.toast('email填写错误！')
-        } else {
-          this.$tips.toast('评论失败,' + res.data.message)
-        }
+        this.$tips.toast('评论失败，请稍后重试')
       }
+      // if (res.statusCode == 200) {
+      //   if (res.data.status == '200') {
+      //     this.$emit('success')
+      //   } else if (res.data.status == '500') {
+      //     this.$tips.toast('评论失败，请稍后重试')
+      //   }
+      // } else {
+      //   if (res.data.code == 'rest_comment_login_required') {
+      //     this.$tips.toast('需要开启在WordPress rest api 的匿名评论功能！')
+      //   } else if (res.data.code == 'rest_invalid_param' && res.data.message.indexOf('author_email') > 0) {
+      //     this.$tips.toast('email填写错误！')
+      //   } else {
+      //     this.$tips.toast('评论失败,' + res.data.message)
+      //   }
+      // }
     },
   },
 }
@@ -179,7 +187,7 @@ export default {
 <style lang="stylus" scoped>
 
 .comment-box
-  padding 20rpx
+  padding 20rpx 30rpx
   display flex
   justify-content space-between
   align-items center
@@ -214,20 +222,10 @@ export default {
       flex 1
       border-radius 40rpx
     .btn-submit
-      width 100rpx
-      height 80rpx
+      padding 0 30rpx
       line-height 80rpx
-      border-bottom-left-radius 0
-      border-top-left-radius 0
-      border-top-right-radius 40rpx
-      border-bottom-right-radius 40rpx
-      text-align center
-      font-size 15px
-      background-color #fff
+      font-size 30rpx
       color #959595
-      padding 0
-      &::after
-        border none
 
 // 分享弹出层
 .pop

@@ -1,6 +1,6 @@
 <template>
   <view>
-    <template v-for="item in list" :key="item.id">
+    <view v-for="item in list" :key="item.id">
       <view class="item">
         <text class="author">{{item.author_name}}</text>
         <text>回复</text>
@@ -9,16 +9,20 @@
       </view>
 
       <CommentChildren :list="item.child" :father="item" />
-    </template>
+    </view>
   </view>
 </template>
 
 <script>
+  // #ifdef MP
   // import CommentChildren from './comment-children'
+  // #endif
   export default {
     name: 'CommentChildren',
     components: {
+      // #ifdef MP
       // CommentChildren,
+      // #endif
     },
     props: {
       list: {

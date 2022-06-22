@@ -48,7 +48,7 @@ export default {
     }
   },
   computed: {
-    ...mapState('user', ['islogin', 'userInfo']),
+    ...mapState('user', ['isLogin', 'userInfo']),
   },
   onLoad() {
     this.initData()

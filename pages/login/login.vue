@@ -1,8 +1,7 @@
 <template>
   <div class="view login">
-    <button class="btn-login" @click="onLogin">
-      <p>微信授权登录</p>
-    </button>
+    <image class="logo" src="/static/logo.png" mode="aspectFill" />
+    <p class="btn-login" @click="onLogin">微信授权登录</p>
     <p class="btn-cancel" @click="goBack">暂不登录</p>
   </div>
 </template>
@@ -66,40 +65,65 @@
             desc: '登录后信息展示',
             success: async(res) => {
               let userInfo = res.userInfo || {}
-              uni.setStorageSync('userInfo', userInfo)
 
               userInfo.isLogin = true
               args.avatarUrl = userInfo.avatarUrl
               args.nickname = userInfo.nickName
               data.userInfo = userInfo
               // var url = Api.getOpenidUrl();
-              const postOpenidRequest = await this.$api.login(args)
+              const response = await this.$api.login(args)
               uni.hideLoading()
+              console.log(response)
+              if (response.status == '200') {
+                data.openid = response.openid
+                var userLevel = {}
+                if (response.userLevel) {
+                  userLevel = response.userLevel
+                } else {
+                  userLevel.level = '0'
+                  userLevel.levelName = '订阅者'
+                }
+
+                data.userLevel = userLevel
+                data.levelName = userLevel.levelName
+                data.errcode = ''
+                data.userId = response.userId
+
+                userInfo.userLevel = userLevel
+                userInfo.levelName = userLevel.levelName
+                userInfo.userId = response.userId
+                this.$storage('userInfo', userInfo)
+                this.onLoginSuccess(data)
+
+                resolve(data)
+              } else {
+                reject(response)
+              }
 
               //获取openid
-              postOpenidRequest.then(response => {
-                if (response.data.status == '200') {
-                  data.openid = response.data.openid
-                  var userLevel = {}
-                  if (response.data.userLevel) {
-                    userLevel = response.data.userLevel
-                  } else {
-                    userLevel.level = '0'
-                    userLevel.levelName = '订阅者'
-                  }
+              // postOpenidRequest.then(response => {
+              //   if (response.status == '200') {
+              //     data.openid = response.openid
+              //     var userLevel = {}
+              //     if (response.userLevel) {
+              //       userLevel = response.userLevel
+              //     } else {
+              //       userLevel.level = '0'
+              //       userLevel.levelName = '订阅者'
+              //     }
 
-                  data.userLevel = userLevel
-                  data.errcode = ''
-                  data.userId = response.data.userId
-                  resolve(data)
-                  this.onLoginSuccess()
-                } else {
-                  reject(response)
-                }
-              }).catch(error => {
-                console.log('error: ' + error)
-                reject(error)
-              })
+              //     data.userLevel = userLevel
+              //     data.errcode = ''
+              //     data.userId = response.userId
+              //     resolve(data)
+              //     this.onLoginSuccess()
+              //   } else {
+              //     reject(response)
+              //   }
+              // }).catch(error => {
+              //   console.log('error: ' + error)
+              //   reject(error)
+              // })
             },
             fail: err => {
               uni.hideLoading()
@@ -159,25 +183,25 @@
 
       // 登录成功后
       onLoginSuccess({
-        openid: userId
+        openid: openId
       }) {
         // const query = this.$Route.query
         // const redirect = query.redirect
 
         this.$tips.success('登录成功')
         this.$user.setLogin({
-          userId
+          openId
         })
 
         if (this.redirect) {
           uni.redirectTo({
             url: decodeURIComponent(this.redirect)
           })
-        } else if (this.$wx.hasPrevPage()) {
-          this.$wx.refreshtPrevPage()
+        } else if (this.$uni.hasPrevPage()) {
+          this.$uni.refreshtPrevPage()
           uni.navigateBack()
         } else {
-          this.$wx.relaunch(query.relaunch || '/pages/home/home')
+          this.$uni.relaunch(query.relaunch || '/pages/home/home')
         }
       },
 
@@ -194,28 +218,30 @@
 
   .login
     background #fff
+    text-align center
+    .logo
+      width 300rpx
+      height @width
+      margin-top 100rpx
     .btn-login
-      width 670rpx
-      height 98rpx
+      width 480rpx
+      height 88rpx
       // background linear-gradient(90deg,rgba(255,170,77,1) 0%,rgba(255,40,75,1) 100%)
       background $base-color
       // box-shadow 0px 10px 30px 0px rgba(240,110,50,0.3)
       border-radius 49rpx
-      margin 400rpx auto 0
-      display flex
-      justify-content center
-      align-items center
-      > p
-        color #fff
-        text-align center
+      margin 100rpx auto 0
+      line-height 88rpx
+      color #fff
+      text-align center
     .btn-cancel
-      width 670rpx
-      height 98rpx
+      width 480rpx
+      height 88rpx
       border 1px solid $base-color
       border-radius 49rpx
       margin 40rpx auto 0
       color $base-color
       text-align center
-      line-height 98rpx
+      line-height 88rpx
 
 </style>

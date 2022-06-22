@@ -1,18 +1,21 @@
 <template>
-  <view class="page my">
-    <!-- 个人信息 -->
+  <view class="page">
     <view class="user">
-      <image class="user-img" :src="gravatar" mode="aspectFill" />
+      <view class="user-info">
+        <view class="user-name">{{ userInfo.nickName || '游客' }}</view>
+        <view class="user-des">
+          <text class="user-member">{{ userInfo.levelName || '未知等级' }}</text>
+          <text v-if="userInfo.userId" class="user-id">ID:{{ userInfo.userId }}</text>
 
-      <view class='user-info'>
-        <view class='user-name' @click="login">
-          <text>{{ userInfo.nickName || '立即登录' }}</text>
-        </view>
-        <view class='user-member'>
-          <text>{{ userInfo.membername || '游客' }}</text>
-          <text class="user-member-integral">{{ userInfo.integral || '0' }} 积分</text>
-        </view>
+          <button v-if="!isLogin" class="btn-update" @click="login">立即登录</button>
+          <!-- #ifndef  MP-WEIXIN -->
+          <button v-else class="btn-update" open-type="getUserInfo" @getuserinfo="updateUserInfo">更新信息</button>
+          <!-- #endif -->
+       </view>
       </view>
+
+      <!-- 头像 -->
+      <image class="avatar" :src="avatar" mode="aspectFill" />
     </view>
 
     <!-- 列表 -->
@@ -34,7 +37,7 @@
           <button open-type="feedback" class='list-item-btn'>意见反馈</button>
         </view>
         <view class="list-item" @click="clearStorage">清除缓存</view>
-        <view v-if="islogin" class="list-item" @click="logout">退出登录</view>
+        <view v-if="isLogin" class="list-item" @click="logout">退出登录</view>
       </view>
     </view>
   </view>
@@ -56,43 +59,26 @@
 
     onShow() {
       if (this.$user.isLogin()) {
-        this.getUserInfo()
+        // this.getUserInfo()
       }
     },
 
     computed: {
-      ...mapState('user', ['islogin']),
-      gravatar() { // 头像
-        return this.userInfo.avatarUrl || '../../static/gravatar.png'
+      ...mapState('user', ['isLogin']),
+      avatar() { // 头像
+        return this.userInfo.avatarUrl || '/static/avatar.png'
       }
     },
 
     methods: {
       initData() {
-        // this.getUserInfo()
+        this.getUserInfo()
       },
 
       // 获取用户信息
       async getUserInfo() {
-        let userId = this.$storage('userId')
-        let sessionId = this.$storage('sessionId')
-        const res = await this.$api.getUserInfo({
-          sessionId,
-          userId
-        })
-
-        // 错误
-        if(res.code) {
-          this.$tips.toast(res.message)
-          return
-        }
-
-        let user = this.$storage('userInfo')
-        user.integral = res.memberUserInfo.integral
-        user.membername = res.memberUserInfo.membername
-
+        let user = this.$storage('userInfo') || {}
         this.userInfo = user
-        this.$storage('userInfo', user)
       },
 
       // 登录
@@ -114,6 +100,30 @@
             this.userInfo = {}
           }
         })
+      },
+
+      async updateUserInfo(e) {
+        let userInfo = e.detail.userInfo
+        let openId = wx.getStorageSync('openid') || ''
+        let args = {
+          openid: openId,
+          avatarUrl: userInfo.avatarUrl,
+          nickname: userInfo.nickName
+        }
+        const res = await this.$api.getUserInfo(args)
+        if (res.status === '200') {
+          let userLevel = res.userLevel || {}
+          userInfo.userLevel = userLevel
+          userInfo.levelName = userLevel.levelName || ''
+          userInfo.userId = res.usreId
+          userInfo.openId = openId
+
+          this.userInfo = userInfo
+          this.$storage('userInfo', userInfo)
+          this.$tips.success('更新成功')
+        } else {
+          this.$tips.toast(res.message || '更新失败，请稍后再试')
+        }
       },
 
       // 清除缓存
@@ -154,10 +164,11 @@
   .user
     display flex
     align-items center
+    justify-content space-between
     background-color #fff
     height 280rpx
     padding 0 40rpx
-    .user-img
+    .avatar
       width 128rpx
       height 128rpx
       border-radius 50%
@@ -166,29 +177,32 @@
       color #333
       margin-left 32rpx
       .user-name
-        max-height 42rpx
-        overflow hidden
-        > text
-          font-size 20px
-          font-weight 500
-          line-height 1
-          overflow hidden
-          text-overflow ellipsis
-          display -webkit-box
-          -webkit-line-clamp 1
-          -webkit-box-orient vertical
-      .user-member
+        max-width 400rpx
+        font-size 40rpx
+        font-weight 500
+        line-height 1
+        nowrap()
+
+      .user-des
         display flex
-        flex-direction row
         align-items center
         margin-top 20rpx
-        > text
-          display block
+        color #4c4c4c
+        font-size 24rpx
+        line-height 1
+        .user-member,
+        .user-id
+          margin-right 20rpx
+        .btn-update
+          line-height 42rpx
+          background #fff
+          padding 0 16rpx
+          font-size 22rpx
           color #4c4c4c
-          font-size 12px
-          line-height 1
-          &.user-member-integral
-            margin-left 24rpx
+          border-radius 24rpx
+          border 4rpx solid #f5f7f7
+          &::after
+            border none
 
   .list .list-sub
     margin 0 40rpx 40rpx

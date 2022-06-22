@@ -10,6 +10,8 @@ let api = 'https://plus.minapper.com/'
 //     env = 'dev'
 //     break
 // }
+// 历史接口请求要的平台来源参数
+export let appType = 'wx'
 
 // 通过条件编译设置平台名称
 export let platform = ''
@@ -24,18 +26,22 @@ platform = 'MP-WEIXIN'
 // #endif
 // #ifdef MP-ALIPAY
 platform = 'MP-ALIPAY'
+appType = 'alipay'
 // #endif
 // #ifdef MP-BAIDU
 platform = 'MP-BAIDU'
+appType = 'bd'
 // #endif
 // #ifdef MP-TOUTIAO
 platform = 'MP-TOUTIAO'
+appType = 'tt'
 // #endif
 // #ifdef MP-LARK
 platform = 'MP-LARK'
 // #endif
 // #ifdef MP-QQ
 platform = 'MP-QQ'
+appType = 'qq'
 // #endif
 // #ifdef MP-KUAISHOU
 platform = 'MP-KUAISHOU'
@@ -56,6 +62,7 @@ export const params = {
 export default {
   version: versionName,
   platform,
+  appType,
   isProd: process.env.NODE_ENV === 'production',
   env,
   api,

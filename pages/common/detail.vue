@@ -94,12 +94,12 @@
       <view>评论交流</view>
       <view v-if="commentNum" class="num">有{{ commentNum }}条评论</view>
     </view>
-    <CommentItem v-for="c in commentList" :key="c.id" :item="c" @replay="handleReply" />
+    <CommentItem v-for="c in commentList" :key="c.id" :item="c" @reply="handleReply" />
     <w-empty v-if="empty" />
 
     <!-- 评论框 -->
     <!-- #ifdef MP-WEIXIN || MP-QQ || MP-TOUTIAO || MP-BAIDU -->
-    <CommentBar :show-bar="canComment" :article="info" :replay-user="replayUser" @success="commentSuccess" />
+    <CommentBar :show-bar="canComment" :article="info" :reply-user="replyUser" @success="commentSuccess" />
     <!-- #endif -->
   </view>
 </template>
@@ -107,7 +107,7 @@
 <script>
 import { mapState } from 'vuex'
 import mpHtml from '@/components/mp-html/mp-html'
-import CommentItem from '@/components/comment-item'
+import CommentItem from '@/components/comment-item/comment-item'
 import CommentBar from '@/components/comment-bar'
 
 export default {
@@ -134,7 +134,7 @@ export default {
       tagArticle: [],
       isLike: false,
       likeList: [],
-      replayUser: null,
+      replyUser: null,
       canComment: true
     }
   },
@@ -220,7 +220,7 @@ export default {
     },
 
     commentSuccess() {
-      this.replayUser = null
+      this.replyUser = null
       this.page.index = 1
       this.getArticleComment()
     },
@@ -307,7 +307,7 @@ export default {
         pageviews: info.pageviews,
         like_count: this.likeNum,
         title: this.title,
-        post_medium_image: info.post_medium_image || $config.defaultImg,
+        img: info.post_medium_image || $config.defaultImg,
       }
       logs.unshift(obj)
       this.$storage('readLogs', logs)
@@ -419,7 +419,7 @@ export default {
     },
 
     handleReply(e) {
-      this.replayUser  = e
+      this.replyUser = e
     },
   },
 }
@@ -430,6 +430,7 @@ export default {
 
 .detail
   padding 0 40rpx
+  padding-bottom calc(120rpx + env(safe-area-inset-bottom))
   .article-title
     font-size 20px
     font-weight 600

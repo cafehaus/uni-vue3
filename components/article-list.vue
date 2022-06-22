@@ -6,8 +6,8 @@
       :key="index"
       @click="goDetail(item.id)"
     >
-      <view class="content-box">
-        <view class="title">
+      <view class="content-box" :class="{'content-box-simple': simple}">
+        <view class="title" v-if="item.title">
           <span class="title-txt">{{ item.title.rendered || item.title }}</span>
         </view>
         <view class="des">
@@ -19,9 +19,11 @@
         </view>
       </view>
       <view class="img-box">
-        <image :src="item.post_medium_image || item.img || $config.defaultImg" mode="aspectFill" class="cover" />
+        <image :src="item.post_medium_image || item.img || defaultImg" mode="aspectFill" class="cover" />
       </view>
     </view>
+
+    <w-empty v-if="empty" />
   </view>
 </template>
 
@@ -32,11 +34,21 @@
       articleList: {
         type: Array,
         default: []
+      },
+      simple: { // 简单模式：只有标题和图片
+        type: Boolean,
+        default: false
+      },
+      empty: {
+        type: Boolean,
+        default: false
       }
     },
 
     data() {
-      return {}
+      return {
+        defaultImg: this.$config.defaultImg,
+      }
     },
 
     onLoad() {
@@ -67,6 +79,8 @@
       flex-direction column
       justify-content space-between
       margin-right 32rpx
+      &.content-box-simple
+        justify-content center
       .title
         .title-txt
           text-overflow -o-ellipsis-lastline

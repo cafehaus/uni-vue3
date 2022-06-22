@@ -3,7 +3,7 @@ import store from '@/store'
 
 // 用户是否登录
 export function isLogin() {
-  return !!storage('openid')
+  return !!storage('openId')
 }
 
 // 转到登录页
@@ -18,14 +18,14 @@ export function login(type = 'redirectTo', redirect = '') {
 }
 
 // 设置登录态
-export function setLogin({ token, expires = 7 }) {
-  storage('openid', token)
+export function setLogin({ openId, expires = 7 }) {
+  storage('openId', openId)
   store.commit('user/upLoginState')
 }
 
 // 清除登录态
 export function clearLogin() {
-  storage('openid', '')
+  storage('openId', '')
   store.commit('user/upLoginState')
 }
 

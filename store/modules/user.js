@@ -6,13 +6,14 @@ import storage from '/libs/storage'
 export default {
   namespaced: true,
 	state: {
-    islogin: isLogin(),
-		userInfo: {}
+    isLogin: isLogin(),
+		userInfo: {},
+    openId: '',
 	},
 	getters: {},
 	mutations: {
     upLoginState(state) {
-      state.islogin = isLogin()
+      state.isLogin = isLogin()
       state.userInfo = storage('userInfo')
     },
 		setUserInfo(state, data = {}){ // 更新用户信息

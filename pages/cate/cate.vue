@@ -33,7 +33,7 @@
             <text>{{itm.name}}</text>
           </view>
           <!-- #ifdef MP-WEIXIN ||  MP-ALIPAY || MP-QQ || MP-TOUTIAO || MP-BAIDU -->
-          <text class="btn-sub" @click="subscribeCate(itm)">{{itm.subflag === '1' ? '取消订阅' : '订阅'}}</text>
+          <text class="btn-sub" @click.stop="subscribeCate(itm)">{{itm.subflag === '1' ? '取消' : '订阅'}}</text>
           <!-- #endif -->
         </view>
         <view class="content-brief">
@@ -49,7 +49,7 @@
   export default {
     data() {
       return {
-        defaultImg: $config.defaultImg,
+        defaultImg: this.$config.defaultImg,
         categoriesList: [],
         cateSubList: [],
         activeIndex: 0
@@ -123,7 +123,7 @@
           this.reloadData(categoryid, '1')
 
         } else if (res.status == '201') {
-          this.$tips.success('取消订阅成功')
+          this.$tips.toast('取消成功')
           this.reloadData(categoryid, '0')
         } else {
           this.$tips.toast('操作失败,请稍后重试')
@@ -228,11 +228,15 @@
           .btn-sub
             margin-left 20rpx
             display inline-block
-            width 160rpx
+            // width 10rpx
+            padding 0 24rpx
             height 48rpx
             line-height @height
             border 1rpx solid #eee
-            text-align center
+            border-radius 24rpx
+            font-size 24rpx
+            color #666
+
         .content-brief
           width 70%
           padding 4rpx 0 30rpx 30rpx

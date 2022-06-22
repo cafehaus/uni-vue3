@@ -39,7 +39,7 @@
 
     methods: {
       onReply(e) {
-        this.$emit('reply', e)
+        this.$emit('reply', { ...e })
       },
     }
   }

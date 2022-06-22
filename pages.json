@@ -85,7 +85,7 @@
             {
 		      "path": "pages/me/about",
 		      "style": {
-		        "navigationBarTitleText": "最新评论"
+		        "navigationBarTitleText": "关于我们"
 		      }
 		    },
             {
@@ -105,7 +105,10 @@
 		"navigationBarTextStyle": "black",
 		"navigationBarTitleText": "uni-app",
 		"navigationBarBackgroundColor": "#FFF",
-		"backgroundColor": "#FFF"
+		"backgroundColor": "#FFF",
+		"usingComponents": {
+			"CommentChildren":"./components/comment-item/comment-children"  
+		}  
 	},
   "tabBar": {
     "color": "#999",

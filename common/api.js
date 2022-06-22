@@ -10,7 +10,7 @@ export const login = params => http.post(`${wm}weixin/userlogin`, params)
 export const getAppInfo = params => http.get(`${wm}options/config`, params)
 
 // 获取用户信息|get
-export const getUserInfo = params => http.get(`${wm}users/session`, params)
+export const getUserInfo = params => http.post(`${wm}weixin/updateuserinfo`, params)
 
 // =================================================================== 首页
 // 获取轮播、精选|get
@@ -71,16 +71,16 @@ export const getIsLike = params => http.post(`${wm}post/islike`, params)
 export const getTagDetail = id => http.get(`${wp}tags/${id}`)
 
 // 阅读记录-我的评论|get
-export const getCommentArticle = params => http.get(`${wp}comment/get?openid=${params.openid}&apptype=${params.apptype}`)
+export const getCommentArticle = params => http.get(`${wm}comment/get?openid=${params.openid}&apptype=${params.apptype}`)
 
 // 阅读记录-我的点赞|get
-export const getLikeArticle = params => http.get(`${wp}post/mylike?openid=${params.openid}&apptype=${params.apptype}`)
+export const getLikeArticle = params => http.get(`${wm}post/mylike?openid=${params.openid}&apptype=${params.apptype}`)
 
 // 阅读记录-我的赞赏|get
-export const getPraiseArticle = params => http.get(`${wp}post/mypraise?openid=${params.openid}&apptype=${params.apptype}`)
+export const getPraiseArticle = params => http.get(`${wm}post/mypraise?openid=${params.openid}&apptype=${params.apptype}`)
 
 // 阅读记录-我的订阅|get
-export const getSubscribeArticle = params => http.get(`${wp}category/getsubscription?openid=${params.openid}`)
+export const getSubscribeArticle = params => http.get(`${wm}category/getsubscription?openid=${params.openid}`)
 
 // 鼓励,获取支付密钥|post
 export const postPraiseUrl = params => http.post(`${wm}payment`, params)

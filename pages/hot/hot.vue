@@ -5,8 +5,7 @@
       :active-tab="activeIndex"
       @change="change"
     >
-      <ArticleList :article-list="articleList" />
-      <w-empty v-if="empty" />
+      <ArticleList :empty="empty" :article-list="articleList" />
     </w-tabs>
   </view>
 </template>

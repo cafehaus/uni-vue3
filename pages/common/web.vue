@@ -1,5 +1,5 @@
 <template>
-  <web-view src="{{url}}"></web-view>
+  <web-view :src="url" />
 </template>
 
 <script>
@@ -10,21 +10,16 @@
         title: ''
       }
     },
+ 
     onLoad(options) {
-      var self = this;
-      if (options.url != null) {
-        var url = decodeURIComponent(options.url);
+      if (options.url) {
+        let url = decodeURIComponent(options.url)
         if (url.indexOf('*') != -1) {
           url = url.replace("*", "?");
         }
-        self.setData({
-          url
-        })
-      }
-      else {
-        self.setData({
-          url: 'https://' + config.getDomain
-        });
+        this.url = url
+      } else {
+        this.url = this.$config.api
       }
 
       // 设置系统分享菜单

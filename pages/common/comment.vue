@@ -21,7 +21,7 @@
 </template>
 
 <script>
-import CommentItem from '@/components/comment-item'
+import CommentItem from '@/components/comment-item/comment-item'
 export default {
   components: {
     CommentItem,

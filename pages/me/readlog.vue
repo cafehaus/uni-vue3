@@ -1,10 +1,6 @@
 <template>
   <view class="page">
-    <ArticleList
-      v-for="c in listData"
-      :key="c.id"
-      :item="c"
-    />
+    <ArticleList :simple="curType !== '1'" :empty="empty" :article-list="listData" />
   </view>
 </template>
 
@@ -18,6 +14,7 @@ export default {
     return {
       curType: '1', // 1 我的浏览  2 我的评论 3 我的点赞  4 我的赞赏 5 我的订阅
       listData: [],
+      empty: false,
     }
   },
   onLoad(e) {
@@ -46,20 +43,23 @@ export default {
       let listData = []
       let res = ''
       let params = {
-        openid: wx.getStorageSync('openid') || '',
-        apptype: 'wx',
+        openid: uni.getStorageSync('openid') || '',
+        // apptype: 'wx',
       }
 
       if (t === '1') {
-        listData = uni.getStorageSync('readLogs') || []
+        listData = this.$storage('readLogs') || []
+        console.log(listData)
       }
       if (t === '2') {
         res = await this.$api.getCommentArticle(params)
+        console.log(res)
         listData = (res.data || []).map(m => ({
           id: m.post_id,
           title: m.post_title,
           img: m.post_medium_image,
         }))
+        console.log(listData)
       }
       if (t === '3') {
         res = await this.$api.getLikeArticle(params)
@@ -86,6 +86,7 @@ export default {
         }))
       }
       this.listData = listData
+      this.empty = !listData.length
 
       // if (res.code === '200') {
       //   let list = res.data || []
