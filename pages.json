@@ -34,13 +34,6 @@
 		      }
 		    },
 		    {
-		      "path": "pages/me/userinfo",
-		      "style": {
-		        "navigationBarTitleText": "个人资料",
-		        "navigationStyle": "custom"
-		      }
-		    },
-		    {
 		      "path": "pages/me/readlog",
 		      "style": {
 		        "navigationBarTitleText": "我的浏览"
@@ -55,7 +48,23 @@
 		    {
 		      "path": "pages/common/detail",
 		      "style": {
-		        "navigationBarTitleText": "文章详情"
+		        "navigationBarTitleText": "文章详情",
+				"mp-baidu": {
+					"usingSwanComponents": {
+					    "comment-list": "dynamicLib://swan-interaction-lib/comment-list"
+					}
+				}
+		      }
+		    },
+		    {
+		      "path": "pages/common/comment-detail",
+		      "style": {
+		        "navigationBarTitleText": "评论详情",
+				"mp-baidu": {
+					"usingSwanComponents": {
+						"comment-detail": "dynamicLib://swan-interaction-lib/comment-detail"
+					}
+				}
 		      }
 		    },
 		    {

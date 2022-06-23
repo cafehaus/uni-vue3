@@ -90,12 +90,27 @@
     </section>
 
     <!-- 评论 -->
-    <view class="subtitle">
-      <view>评论交流</view>
-      <view v-if="commentNum" class="num">有{{ commentNum }}条评论</view>
-    </view>
-    <CommentItem v-for="c in commentList" :key="c.id" :item="c" @reply="handleReply" />
-    <w-empty v-if="empty" />
+    <template v-if="showBdComment">
+      <view class="subtitle">
+        <view>在百度APP里评论交流</view>
+      </view>
+      <comment-list
+        :comment-param="commentParam"
+        add-comment
+        is-page-scroll
+        need-toolbar
+        :toolbar-config="toolbarInfo"
+        @clickcomment="goCommentDetail"
+      />
+    </template>
+    <template v-else>
+      <view class="subtitle">
+        <view>在WordPress里评论交流</view>
+        <view v-if="commentNum" class="num">有{{ commentNum }}条评论</view>
+      </view>
+      <CommentItem v-for="c in commentList" :key="c.id" :item="c" @reply="handleReply" />
+      <w-empty v-if="empty" />
+    </template>
 
     <!-- 评论框 -->
     <!-- #ifdef MP-WEIXIN || MP-QQ || MP-TOUTIAO || MP-BAIDU -->
@@ -135,11 +150,23 @@ export default {
       isLike: false,
       likeList: [],
       replyUser: null,
-      canComment: true
+      canComment: true,
+      showBdComment: false,
+      commentParam: {},
+      toolbarInfo: {}
     }
   },
   computed: {
-    ...mapState('app', ['appInfo', 'systemInfo'])
+    ...mapState('app', ['appInfo', 'systemInfo']),
+    showBdComment() {
+      let bdInfo = this.appInfo.bdInfo || {}
+      let flag = bdInfo.enableInteraction === '1'
+      // #ifndef MP-BAIDU
+      flag = false
+      // #endif
+
+      return flag
+    }
   },
   onLoad(e) {
     this.articleId = e.id
@@ -154,7 +181,7 @@ export default {
       this.getIsLike()
     },
 
-    async onLike(e) {
+    async onLike() {
       if (this.$user.isLogin()) {
         if (this.isLike) return
 
@@ -243,12 +270,14 @@ export default {
       // #ifdef MP-QQ
       key = 'qqexcitation'
       // #endif
+      this.$tips.loading()
       const res = await this.$api.getArticleDetail(
         {
           id: this.articleId,
         },
         { header: { [key]: '1' } }
       )
+      this.$tips.loaded()
       let info = {
         ...res,
         preArticle: {
@@ -279,6 +308,26 @@ export default {
         return m
       })
 
+      this.commentParam = {
+        snid: this.articleId,
+        path: '/pages/comment/detail?id=' + this.articleId,
+        title: this.title,
+        openid: uni.getStorageSync('openid') || ''
+      }
+      getApp().commentParam = commentParam
+      this.toolbarInfo = {
+        placeholder: '评论...',
+        moduleList: ['comment', 'like', 'favor', 'share'],
+        share: {
+          title: this.title,
+          imageUrl: info.post_medium_image || this.$config.defaultImg,
+          path: '/pages/common/detail?id=' + this.articleId
+        }
+      }
+
+      // 设置页面标题
+      this.$uni.setTitle(this.title)
+
       // 根据标签获取相关文章
       if (this.tagList.length) {
         let tagIds = res.tags.join(',')
@@ -287,6 +336,14 @@ export default {
 
       // 缓存浏览记录
       this.setReadLog(info)
+    },
+
+    goCommentDetail(e) {
+      let srid = e.data.srid
+      let url = '/pages/common/comment-detail?srid=' + srid + '&id=' + this.articleId + "&title=" + this.title
+      uni.navigateTo({
+          url: url
+      })
     },
 
     setReadLog(info) {
@@ -307,7 +364,7 @@ export default {
         pageviews: info.pageviews,
         like_count: this.likeNum,
         title: this.title,
-        img: info.post_medium_image || $config.defaultImg,
+        img: info.post_medium_image || this.$config.defaultImg,
       }
       logs.unshift(obj)
       this.$storage('readLogs', logs)

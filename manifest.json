@@ -62,7 +62,15 @@
         "usingComponents" : true
     },
     "mp-baidu" : {
-        "usingComponents" : true
+        "usingComponents" : true,
+        "dynamicLib": {
+            "swan-sitemap-lib": {
+                "provider": "swan-sitemap"
+            },
+            "swan-interaction-lib": {
+                "provider": "swan-interaction"
+            }
+        }
     },
     "mp-toutiao" : {
         "usingComponents" : true
