@@ -1,5 +1,5 @@
 <template>
-  <view class="comment">
+  <view class="comment" @click="goto">
     <view class="user">
       <view class="avatar">
         <image class="img" :src="item.author_url" />
@@ -40,6 +40,9 @@
     methods: {
       onReply(e) {
         this.$emit('reply', { ...e })
+      },
+      goto() {
+        this.$emit('goto', this.item)
       },
     }
   }

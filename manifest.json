@@ -62,6 +62,7 @@
         "usingComponents" : true
     },
     "mp-baidu" : {
+        "appid": "15739846",
         "usingComponents" : true,
         "dynamicLib": {
             "swan-sitemap-lib": {

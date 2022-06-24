@@ -14,7 +14,7 @@
         v-for="c in listData"
         :key="c.id"
         :item="c"
-        @click="goto(c)"
+        @goto="goto"
       />
     </view>
   </view>

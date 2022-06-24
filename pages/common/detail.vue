@@ -1,5 +1,5 @@
 <template>
-  <view class="page detail">
+  <view>
     <view class="ad-box" v-if="wxAd.detailAdId && wxAd.detailAd == '1'">
       <ad :unit-id="wxAd.detailAdId"></ad>
     </view>
@@ -7,126 +7,133 @@
     <!-- 自定义广告 -->
     <CustomAd v-else from="detail" />
 
-    <h2 class="article-title">{{ title }}</h2>
-    <section class="article-date">
-      <text class="txt">{{ info.dateName }}</text>
-      <i v-if="info.category_name" class="iconfont icon-cate" />
-      <text v-if="info.category_name" class="txt">{{
-        info.category_name
-      }}</text>
-      <i class="iconfont icon-comment" />
-      <text class="txt">{{ commentNum }}</text>
-      <i class="iconfont icon-preview" />
-      <text class="txt">{{ info.pageviews }}</text>
-      <i class="iconfont icon-like" />
-      <text class="txt">{{ likeNum }}</text>
-    </section>
+    <view class="page detail">
+      <h2 class="article-title">{{ title }}</h2>
+      <section class="article-date">
+        <text class="txt">{{ info.dateName }}</text>
+        <i v-if="info.category_name" class="iconfont icon-cate" />
+        <text v-if="info.category_name" class="txt">{{
+          info.category_name
+        }}</text>
+        <i class="iconfont icon-comment" />
+        <text class="txt">{{ commentNum }}</text>
+        <i class="iconfont icon-preview" />
+        <text class="txt">{{ info.pageviews }}</text>
+        <i class="iconfont icon-like" />
+        <text class="txt">{{ likeNum }}</text>
+      </section>
 
-    <mpHtml :content="content" />
+      <mpHtml :content="content" />
 
-    <!-- <view class="read-more" wx:if="{{detailSummaryHeight != ''}}">
-      <view class="read-more-mask">
-        <view class="read-more-btn" @click="readMore">{{ wxAd.isShowExcitation ? '观看视频,' : '' }}阅读更多</view>
+      <!-- <view class="read-more" wx:if="{{detailSummaryHeight != ''}}">
+        <view class="read-more-mask">
+          <view class="read-more-btn" @click="readMore">{{ wxAd.isShowExcitation ? '观看视频,' : '' }}阅读更多</view>
+        </view>
+      </view> -->
+
+      <!-- 点赞 -->
+      <section class="like">
+        <!-- #ifdef MP-WEIXIN ||  MP-ALIPAY || MP-QQ || MP-TOUTIAO || MP-BAIDU -->
+        <view class="btn" :class="{ 'btn-active': isLike }" @click="onLike">
+          <i class="iconfont" :class="[isLike ? 'icon-zan-fill' : 'icon-zan']" />
+          <text class="txt">{{ isLike ? '已点赞' : '点个赞' }}</text>
+        </view>
+        <!-- #endif -->
+        <view class="num" v-if="likeNum"><text>{{ likeNum }} 人已赞</text></view>
+        <view class="avatar">
+          <view class="avatar-item" v-for="(item, i) in likeList" :key="i">
+            <image class="img" :src="item.avatarurl" />
+            <image v-if="item.userType === 'weixin'" class="icon" src="/static/weixin.jpg" />
+            <image v-else-if="item.userType === 'qq'" class="icon" src="/static/qq.jpg" />
+            <image v-else-if="item.userType === 'toutiao'" class="icon" src="/static/toutiao.jpg" />
+            <image v-else-if="item.userType === 'baidu'" class="icon" src="/static/baidu.jpg" />
+            <image v-else-if="item.userType === 'alipay'" class="icon" src="/static/alipay.jpg" />
+            <image v-else class="icon" src="/static/web.jpg" />
+          </view>
+        </view>
+      </section>
+
+      <!-- 文章标签 -->
+      <section v-if="info.tag_name && info.tag_name.length" class="tag">
+        <view class="tag-item" v-for="tag in info.tag_name" :key="tag.term_id" @click="goTagDetail(tag)">
+          <view class="txt">#{{ tag.name }}</view>
+        </view>
+      </section>
+
+      <!-- 阅读原文和鼓励 -->
+      <section class="origin">
+        <text class="txt" @click="gotoWeb">阅读原文</text>
+        <view class="praise" @click="onPraise">
+          <text>鼓励</text>
+          <i class="iconfont icon-lucky-money" />
+        </view>
+      </section>
+
+      <view class="ad-box-video" v-if="wxAd.videoAdId !='' && wxAd.detailAd == '1'">
+        <ad :unit-id="wxAd.videoAdId" ad-type="video" ad-theme="white"></ad>
       </view>
-    </view> -->
 
-    <!-- 点赞 -->
-    <section class="like">
-      <!-- #ifdef MP-WEIXIN ||  MP-ALIPAY || MP-QQ || MP-TOUTIAO || MP-BAIDU -->
-      <view class="btn" :class="{ 'btn-active': isLike }" @click="onLike">
-        <i class="iconfont" :class="[isLike ? 'icon-zan-fill' : 'icon-zan']" />
-        <text class="txt">{{ isLike ? '已点赞' : '点个赞' }}</text>
-      </view>
+      <!-- 上下文 -->
+      <section class="pre-next">
+        <view v-if="info.preArticle && info.preArticle.id" class="pre" @click="goDetail(info.preArticle.id)">
+          <view class="des">
+            <text>上一篇</text>
+            <view class="title">{{ info.preArticle.title }}</view>
+          </view>
+          <image class="img" :src="info.preArticle.img" mode="aspectFill" />
+        </view>
+
+        <view v-if="info.nextArticle && info.nextArticle.id" class="next" @click="goDetail(info.nextArticle.id)">
+          <view class="des">
+            <text>下一篇</text>
+            <view class="title">{{ info.nextArticle.title }}</view>
+          </view>
+          <image class="img" :src="info.nextArticle.img" mode="aspectFill" />
+        </view>
+      </section>
+
+      <!-- 猜你喜欢 -->
+      <section v-if="tagArticle.length" class="tag-article">
+        <view class="subtitle">猜你喜欢</view>
+        <view class="item" v-for="item in tagArticle" :key="item.id" @click="goDetail(item.id)">
+          <view class="title">{{ item.idx }}. {{ item.title }}</view>
+          <image class="img" :src="item.img" mode="aspectFill"></image>
+        </view>
+      </section>
+
+      <!-- 评论 -->
+      <template v-if="showBdComment">
+        <view class="subtitle">
+          <view>在百度APP里评论交流</view>
+        </view>
+        <comment-list
+          :comment-param="commentParam"
+          add-comment
+          is-page-scroll
+          need-toolbar
+          :toolbar-config="toolbarInfo"
+          @clickcomment="goCommentDetail"
+        />
+      </template>
+      <template v-else>
+        <view class="subtitle">
+          <view>
+            <!-- #ifdef MP-BAIDU -->
+            <text>在WordPress里</text>
+            <!-- #endif -->
+            <text>评论交流</text>
+          </view>
+          <view v-if="commentNum" class="num">有{{ commentNum }}条评论</view>
+        </view>
+        <CommentItem v-for="c in commentList" :key="c.id" :item="c" @reply="handleReply" />
+        <w-empty v-if="empty" />
+      </template>
+
+      <!-- 评论框 -->
+      <!-- #ifdef MP-WEIXIN || MP-QQ || MP-TOUTIAO || MP-BAIDU -->
+      <CommentBar :show-bar="canComment" :article="info" :reply-user="replyUser" @success="commentSuccess" />
       <!-- #endif -->
-      <view class="num" v-if="likeNum"><text>{{ likeNum }} 人已赞</text></view>
-      <view class="avatar">
-        <view class="avatar-item" v-for="(item, i) in likeList" :key="i">
-          <image class="img" :src="item.avatarurl" />
-          <image v-if="item.userType === 'weixin'" class="icon" src="/static/weixin.jpg" />
-          <image v-else-if="item.userType === 'qq'" class="icon" src="/static/qq.jpg" />
-          <image v-else-if="item.userType === 'toutiao'" class="icon" src="/static/toutiao.jpg" />
-          <image v-else-if="item.userType === 'baidu'" class="icon" src="/static/baidu.jpg" />
-          <image v-else-if="item.userType === 'alipay'" class="icon" src="/static/alipay.jpg" />
-          <image v-else class="icon" src="/static/web.jpg" />
-        </view>
-      </view>
-    </section>
-
-    <!-- 文章标签 -->
-    <section v-if="info.tag_name && info.tag_name.length" class="tag">
-      <view class="tag-item" v-for="tag in info.tag_name" :key="tag.term_id" @click="goTagDetail(tag)">
-        <view class="txt">#{{ tag.name }}</view>
-      </view>
-    </section>
-
-    <!-- 阅读原文和鼓励 -->
-    <section class="origin">
-      <text class="txt" @click="gotoWeb">阅读原文</text>
-      <view class="praise" @click="onPraise">
-        <text>鼓励</text>
-        <i class="iconfont icon-lucky-money" />
-      </view>
-    </section>
-
-    <view class="ad-box-video" v-if="wxAd.videoAdId !='' && wxAd.detailAd == '1'">
-      <ad :unit-id="wxAd.videoAdId" ad-type="video" ad-theme="white"></ad>
     </view>
-
-    <!-- 上下文 -->
-    <section class="pre-next">
-      <view v-if="info.preArticle && info.preArticle.id" class="pre" @click="goDetail(info.preArticle.id)">
-        <view class="des">
-          <text>上一篇</text>
-          <view class="title">{{ info.preArticle.title }}</view>
-        </view>
-        <image class="img" :src="info.preArticle.img" mode="aspectFill" />
-      </view>
-
-      <view v-if="info.nextArticle && info.nextArticle.id" class="next" @click="goDetail(info.nextArticle.id)">
-        <view class="des">
-          <text>下一篇</text>
-          <view class="title">{{ info.nextArticle.title }}</view>
-        </view>
-        <image class="img" :src="info.nextArticle.img" mode="aspectFill" />
-      </view>
-    </section>
-
-    <!-- 猜你喜欢 -->
-    <section v-if="tagArticle.length" class="tag-article">
-      <view class="subtitle">猜你喜欢</view>
-      <view class="item" v-for="item in tagArticle" :key="item.id" @click="goDetail(item.id)">
-        <view class="title">{{ item.idx }}. {{ item.title }}</view>
-        <image class="img" :src="item.img" mode="aspectFill"></image>
-      </view>
-    </section>
-
-    <!-- 评论 -->
-    <template v-if="showBdComment">
-      <view class="subtitle">
-        <view>在百度APP里评论交流</view>
-      </view>
-      <comment-list
-        :comment-param="commentParam"
-        add-comment
-        is-page-scroll
-        need-toolbar
-        :toolbar-config="toolbarInfo"
-        @clickcomment="goCommentDetail"
-      />
-    </template>
-    <template v-else>
-      <view class="subtitle">
-        <view>在WordPress里评论交流</view>
-        <view v-if="commentNum" class="num">有{{ commentNum }}条评论</view>
-      </view>
-      <CommentItem v-for="c in commentList" :key="c.id" :item="c" @reply="handleReply" />
-      <w-empty v-if="empty" />
-    </template>
-
-    <!-- 评论框 -->
-    <!-- #ifdef MP-WEIXIN || MP-QQ || MP-TOUTIAO || MP-BAIDU -->
-    <CommentBar :show-bar="canComment" :article="info" :reply-user="replyUser" @success="commentSuccess" />
-    <!-- #endif -->
   </view>
 </template>
 
@@ -752,16 +759,15 @@ export default {
         transform translateX(4px) rotate(-45deg)
         opacity 0.6
 
-  /* 小程序广告 */
-  .ad-box
-    width 100%
-    overflow hidden
-  .ad-box-video
-    padding 40rpx 40rpx 0
-    margin 0 auto
-    position relative
-    z-index 1
-  ad
-    z-index 1 !important
+/* 小程序广告 */
+.ad-box
+  width 100%
+  overflow hidden
+.ad-box-video
+  margin 40rpx auto 0
+  position relative
+  z-index 1
+ad
+  z-index 1 !important
 
 </style>

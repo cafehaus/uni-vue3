@@ -1,7 +1,7 @@
 <template>
-  <view class="article">
-    <template v-for="(item, index) in articleList">
-      <!-- #indef MP-WEIXIN -->
+  <view>
+    <view class="article" v-for="(item, index) in articleList" :key="index">
+      <!-- #ifdef MP-WEIXIN -->
       <view v-if="index > 0 && (index % item.wxlistAdEvery === 0) && item.wxlistAd == '1' && item.wxlistAdId && showAd">
         <view class="article-ad" v-if="(index / item.wxlistAdEvery) % 2 == 0">
           <ad unit-id="{{item.wxVideoAdId}}" ad-type="video" ad-theme="white" @error="onError"></ad>
@@ -13,7 +13,6 @@
       <!-- #endif -->
       <view
         class='article-item'
-        :key="index"
         @click="goDetail(item.id)"
       >
         <view class="content-box" :class="{'content-box-simple': simple}">
@@ -32,7 +31,7 @@
           <image :src="item.post_medium_image || item.img || defaultImg" mode="aspectFill" class="cover" />
         </view>
       </view>
-    </template>
+    </view>
 
     <w-empty v-if="empty" />
   </view>
