@@ -10,15 +10,21 @@
       </view>
     </view>
 
+    <!-- 自定义广告 -->
+    <CustomAd from="list" />
+
     <ArticleList :article-list="articleList" />
   </view>
 </template>
 
 <script>
   import ArticleList from '@/components/article-list'
+  import CustomAd from '@/components/custom-ad'
+
   export default {
     components: {
-      ArticleList
+      ArticleList,
+      CustomAd,
     },
     data() {
       return {

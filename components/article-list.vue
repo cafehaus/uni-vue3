@@ -1,27 +1,38 @@
 <template>
   <view class="article">
-    <view
-      class='article-item'
-      v-for="(item, index) in articleList"
-      :key="index"
-      @click="goDetail(item.id)"
-    >
-      <view class="content-box" :class="{'content-box-simple': simple}">
-        <view class="title" v-if="item.title">
-          <span class="title-txt">{{ item.title.rendered || item.title }}</span>
+    <template v-for="(item, index) in articleList">
+      <!-- #indef MP-WEIXIN -->
+      <view v-if="index > 0 && (index % item.wxlistAdEvery === 0) && item.wxlistAd == '1' && item.wxlistAdId && showAd">
+        <view class="article-ad" v-if="(index / item.wxlistAdEvery) % 2 == 0">
+          <ad unit-id="{{item.wxVideoAdId}}" ad-type="video" ad-theme="white" @error="onError"></ad>
         </view>
-        <view class="des">
-          <view class="des-inner">
-            <span class="des-item" v-if="item.pageviews">浏览 {{item.pageviews}}</span>
-            <span class="des-item" v-if="item.total_comments">评论 {{item.total_comments}}</span>
-            <span class="des-item" v-if="item.like_count">点赞 {{item.like_count}}</span>
+        <view class="article-ad" v-else>
+          <ad :unit-id="item.wxlistAdId" ad-theme="white" @error="onError"></ad>
+        </view>
+      </view>
+      <!-- #endif -->
+      <view
+        class='article-item'
+        :key="index"
+        @click="goDetail(item.id)"
+      >
+        <view class="content-box" :class="{'content-box-simple': simple}">
+          <view class="title" v-if="item.title">
+            <span class="title-txt">{{ item.title.rendered || item.title }}</span>
+          </view>
+          <view class="des">
+            <view class="des-inner">
+              <span class="des-item" v-if="item.pageviews">浏览 {{item.pageviews}}</span>
+              <span class="des-item" v-if="item.total_comments">评论 {{item.total_comments}}</span>
+              <span class="des-item" v-if="item.like_count">点赞 {{item.like_count}}</span>
+            </view>
           </view>
         </view>
+        <view class="img-box">
+          <image :src="item.post_medium_image || item.img || defaultImg" mode="aspectFill" class="cover" />
+        </view>
       </view>
-      <view class="img-box">
-        <image :src="item.post_medium_image || item.img || defaultImg" mode="aspectFill" class="cover" />
-      </view>
-    </view>
+    </template>
 
     <w-empty v-if="empty" />
   </view>
@@ -48,15 +59,16 @@
     data() {
       return {
         defaultImg: this.$config.defaultImg,
+        showAd: true,
       }
     },
 
-    onLoad() {
-      // this.initData()
-    },
-
     methods: {
-      // initData() {},
+      onError(e) {
+        if (e.detail.errCode) {
+          this.showAd = false
+        }
+      },
 
       // 去文章详情
       goDetail(id) {
@@ -70,6 +82,9 @@
 
 <style lang="stylus" scoped>
   @import '../styles/var'
+
+  .article-ad
+    margin-bottom 16rpx
 
   .article-item
     display flex

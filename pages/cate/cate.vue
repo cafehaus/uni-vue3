@@ -17,6 +17,9 @@
 
     <!-- 右边二级分类列表 -->
     <view class="cate-right">
+      <!-- 自定义广告 -->
+      <CustomAd from="cate" btn-text="详情" />
+
       <view
         class="list-item"
         v-for="(itm, idx) in cateSubList"
@@ -46,7 +49,11 @@
 </template>
 
 <script>
+  import CustomAd from '@/components/custom-ad'
   export default {
+    components: {
+      CustomAd,
+    },
     data() {
       return {
         defaultImg: this.$config.defaultImg,

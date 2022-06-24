@@ -1,5 +1,12 @@
 <template>
   <view class="page detail">
+    <view class="ad-box" v-if="wxAd.detailAdId && wxAd.detailAd == '1'">
+      <ad :unit-id="wxAd.detailAdId"></ad>
+    </view>
+
+    <!-- 自定义广告 -->
+    <CustomAd v-else from="detail" />
+
     <h2 class="article-title">{{ title }}</h2>
     <section class="article-date">
       <text class="txt">{{ info.dateName }}</text>
@@ -60,6 +67,10 @@
         <i class="iconfont icon-lucky-money" />
       </view>
     </section>
+
+    <view class="ad-box-video" v-if="wxAd.videoAdId !='' && wxAd.detailAd == '1'">
+      <ad :unit-id="wxAd.videoAdId" ad-type="video" ad-theme="white"></ad>
+    </view>
 
     <!-- 上下文 -->
     <section class="pre-next">
@@ -124,12 +135,14 @@ import { mapState } from 'vuex'
 import mpHtml from '@/components/mp-html/mp-html'
 import CommentItem from '@/components/comment-item/comment-item'
 import CommentBar from '@/components/comment-bar'
+import CustomAd from '@/components/custom-ad'
 
 export default {
   components: {
     mpHtml,
     CommentItem,
     CommentBar,
+    CustomAd,
   },
   data() {
     return {
@@ -153,7 +166,14 @@ export default {
       canComment: true,
       showBdComment: false,
       commentParam: {},
-      toolbarInfo: {}
+      toolbarInfo: {},
+
+      wxAd: {
+        isShowExcitation: false, // 是否启用激励视频
+        detailAd: '',
+        videoAdId: '',
+        excitationAdId: ''
+      }
     }
   },
   computed: {
@@ -308,6 +328,16 @@ export default {
         return m
       })
 
+      // 小程序广告
+      this.wxAd = {
+        isShowExcitation: res.wxExcitation === 1,
+        detailAd: res.wxdetailAd,
+        videoAdId: res.wxVideoAdId,
+        detailAdId: res.wxdetailAdId,
+        excitationAdId: res.wxExcitationAdId
+      }
+
+      // 百度互动组件
       this.commentParam = {
         snid: this.articleId,
         path: '/pages/comment/detail?id=' + this.articleId,
@@ -721,5 +751,17 @@ export default {
         bottom 6rpx
         transform translateX(4px) rotate(-45deg)
         opacity 0.6
+
+  /* 小程序广告 */
+  .ad-box
+    width 100%
+    overflow hidden
+  .ad-box-video
+    padding 40rpx 40rpx 0
+    margin 0 auto
+    position relative
+    z-index 1
+  ad
+    z-index 1 !important
 
 </style>

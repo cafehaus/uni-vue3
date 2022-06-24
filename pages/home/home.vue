@@ -12,6 +12,9 @@
     <!-- 标签 -->
     <VTag :tag-list="tagList" />
 
+    <!-- 自定义广告 -->
+    <CustomAd from="home" />
+
     <!-- 文章列表 -->
     <ArticleList :article-list="articleList" />
   </view>
@@ -20,13 +23,16 @@
 <script>
 import { mapState, mapMutations, mapActions } from 'vuex'
 import ArticleList from '@/components/article-list'
+import CustomAd from '@/components/custom-ad'
 import VSwiper from './components/v-swiper'
 import NiceColumn from './components/nice-column'
 import VSearch from './components/v-search'
 import VTag from './components/v-tag'
+
 export default {
   components: {
     ArticleList,
+    CustomAd,
     VSwiper,
     NiceColumn,
     VSearch,
@@ -80,7 +86,7 @@ export default {
     ...mapActions('user', ['getUserInfo']),
     initData() {
       this.getOptionsExpand()
-      this.getCustomAd()
+      // this.getCustomAd()
       this.getTagList()
       this.getArticleList()
     },
@@ -107,12 +113,12 @@ export default {
     },
 
     // 自定义广告
-    async getCustomAd() {
-      const res = await this.$api.getCustomAd()
-      let banner = res.home_list_top_ad || {}
+    // async getCustomAd() {
+    //   const res = await this.$api.getCustomAd()
+    //   let banner = res.home_list_top_ad || {}
 
-      this.banner = banner
-    },
+    //   this.banner = banner
+    // },
 
     // 获取文章列表
     async getArticleList() {

@@ -2,7 +2,7 @@
   <view class="custom-ad">
     <!-- banner图 -->
     <view
-      v-if="type === '1'"
+      v-if="styleType === '1'"
       :class="isBorder ? 'custom-ad custom-ad-border' : 'custom-ad'"
       @click="goto"
     >
@@ -11,7 +11,7 @@
 
     <!-- 左图右标题 -->
     <view
-      v-if="type === '2'"
+      v-if="styleType === '2'"
       :class="isBorder ? 'custom-ad-left custom-ad-border' : 'custom-ad-left'"
       @click="goto"
     >
@@ -24,7 +24,7 @@
 
     <!-- 上图下标题 -->
     <view
-      v-if="type === '3'"
+      v-if="styleType === '3'"
       :class="isBorder ? 'custom-ad-top custom-ad-border' : 'custom-ad-top'"
       @click="goto"
     >
@@ -41,39 +41,56 @@
 export default {
   name: 'custom-ad',
   props: {
-    info: {
-      type: Object,
-      default: () => ({})
-    },
-    isBorder: {
-      type: Boolean,
-      default: true
-    },
-    type: { // 1 banner图 2 左图右标题 3 上图下标题
+    from: { // 来源页面
       type: String,
-      default: '1'
+      default: ''
     },
     btnText: { 
       type: String,
       default: '查看详情'
     }
   },
+
+  date() {
+    return {
+      info: {},
+      keys: {
+        home: 'home_list_top_ad',
+        hot: 'hot_list_top_ad',
+        cate: 'cat_list_ad',
+        list: 'cat_posts_list_ad',
+        detail: 'post_detail_top_ad'
+      }
+    }
+  },
+  computed: {
+    styleType() { // 1 banner图 2 左图右标题 3 上图下标题
+      return this.info.adstyle || '1'
+    },
+
+    isBorder() {
+      let noNeed = ['hot', 'detail', 'cate']
+      return !noNeed.includes(this.from)
+    }
+  },
+
+  created() {
+    this.getCustomAd()
+  },
+
   methods: {
+    async getCustomAd() {
+      const res = await this.$api.getCustomAd()
+      let from = this.from || 'home'
+      let curKey = this.keys[from]
+      let info = res[curKey] || {}
+
+      this.info = info
+    },
+
     // 跳转
     goto() {
-      const { type, url, path } = this.info
-
-      if (type === 'apppage') { // 小程序页面
-        uni.navigateTo({
-          url: path
-        })
-      }
-      if (type === 'webpage') { // web-view页面
-        url = '/pages/common/web?url=' + url
-        uni.navigateTo({
-          url
-        })
-      }
+      this.$util.goto(this.info)
     }
   },
 }

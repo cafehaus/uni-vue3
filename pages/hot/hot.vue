@@ -5,6 +5,9 @@
       :active-tab="activeIndex"
       @change="change"
     >
+      <!-- 自定义广告 -->
+      <CustomAd from="list" />
+
       <ArticleList :empty="empty" :article-list="articleList" />
     </w-tabs>
   </view>
@@ -12,9 +15,12 @@
 
 <script>
   import ArticleList from '@/components/article-list'
+  import CustomAd from '@/components/custom-ad'
+
   export default {
     components: {
-      ArticleList
+      ArticleList,
+      CustomAd,
     },
     data() {
       return {
