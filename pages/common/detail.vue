@@ -25,11 +25,11 @@
 
       <mpHtml :content="content" />
 
-      <!-- <view class="read-more" wx:if="{{detailSummaryHeight != ''}}">
+      <view class="read-more" v-if="wxAd.isShowExcitation">
         <view class="read-more-mask">
           <view class="read-more-btn" @click="readMore">{{ wxAd.isShowExcitation ? '观看视频,' : '' }}阅读更多</view>
         </view>
-      </view> -->
+      </view>
 
       <!-- 点赞 -->
       <section class="like">
@@ -143,6 +143,7 @@ import mpHtml from '@/components/mp-html/mp-html'
 import CommentItem from '@/components/comment-item/comment-item'
 import CommentBar from '@/components/comment-bar'
 import CustomAd from '@/components/custom-ad'
+let rewardedVideoAd = null
 
 export default {
   components: {
@@ -198,6 +199,12 @@ export default {
   onLoad(e) {
     this.articleId = e.id
     this.initData()
+  },
+
+  onUnload() {
+    if (rewardedVideoAd && rewardedVideoAd.destroy) {
+      rewardedVideoAd.destroy()
+    }
   },
 
   methods: {
@@ -281,6 +288,9 @@ export default {
 
     // 获取文章详情
     async getArticleDetail() {
+      let logs = this.$storage('readLogs') || []
+      let isReaded = logs.find(m => m.id === this.articleId)
+
       let key = 'wxexcitation'
       // #ifdef MP-WEIXIN
       key = 'wxexcitation'
@@ -302,7 +312,7 @@ export default {
         {
           id: this.articleId,
         },
-        { header: { [key]: '1' } }
+        { header: { [key]: isReaded ? '1' : '0' } }
       )
       this.$tips.loaded()
       let info = {
@@ -336,8 +346,16 @@ export default {
       })
 
       // 小程序广告
+      let isShowExcitation = res.wxExcitation === 1
+      if (isShowExcitation) {
+        isShowExcitation = !isReaded
+      }
+      if (!isShowExcitation) {
+        // 缓存浏览记录
+        this.setReadLog(info)
+      }
       this.wxAd = {
-        isShowExcitation: res.wxExcitation === 1,
+        isShowExcitation,
         detailAd: res.wxdetailAd,
         videoAdId: res.wxVideoAdId,
         detailAdId: res.wxdetailAdId,
@@ -370,9 +388,6 @@ export default {
         let tagIds = res.tags.join(',')
         this.getTagArticle(tagIds)
       }
-
-      // 缓存浏览记录
-      this.setReadLog(info)
     },
 
     goCommentDetail(e) {
@@ -514,6 +529,53 @@ export default {
 
     handleReply(e) {
       this.replyUser = e
+    },
+
+    readMore() {
+      // let platform = this.data.platform
+      // if (platform === 'devtools' && this.wxAd.isShowExcitation) {
+      //   this.wxAd.isShowExcitation = false
+      //   this.$tips.toast('开发工具内无法获取激励视频广告，请在手机上预览！')
+      //   return
+      // }
+
+      if (this.wxAd.isShowExcitation) {
+        this.loadInterstitialAd()
+        rewardedVideoAd.show().catch(() => {
+          rewardedVideoAd
+            .load()
+            .then(() => rewardedVideoAd.show())
+            .catch(err => {
+              this.wxAd.isShowExcitation = false
+              this.$tips.toast('激励视频广告获取失败！')
+            })
+        })
+      } else {
+        this.wxAd.isShowExcitation = false
+      }
+    },
+
+    // 加载激励视频广告
+    loadInterstitialAd() {
+      var self = this
+      if (uni.createRewardedVideoAd) {
+        rewardedVideoAd = uni.createRewardedVideoAd({
+          adUnitId: this.wxAd.excitationAdId
+        })
+        rewardedVideoAd.onLoad(() => {})
+        rewardedVideoAd.onError((err) => {
+          self.wxAd.isShowExcitation = false
+        })
+        rewardedVideoAd.onClose((res) => {
+          if (res && res.isEnded) {
+            self.wxAd.isShowExcitation = false
+            self.setReadLog(self.info)
+            self.getArticleDetail('1')
+          } else {
+            this.$tips.toast('你中途关闭了视频')
+          }
+        })
+      }
     },
   },
 }
