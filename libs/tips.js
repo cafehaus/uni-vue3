@@ -14,7 +14,9 @@ export default class Tips {
       uni.showToast({
         title,
         icon,
+        // #ifdef MP-WEIXIN || MP-QQ || MP-BAIDU
         mask: true,
+        // #endif
         duration,
       })
     }, 300)
@@ -36,7 +38,9 @@ export default class Tips {
       uni.showToast({
         title,
         icon: 'success',
+        // #ifdef MP-WEIXIN || MP-QQ || MP-BAIDU
         mask: true,
+        // #endif
         duration,
       })
     }, 300)
@@ -60,7 +64,7 @@ export default class Tips {
 
     uni.showLoading({
       title,
-      // #ifndef MP-ALIPAY
+      // #ifdef MP-WEIXIN || MP-QQ || MP-BAIDU
       mask: true,
       // #endif
     })

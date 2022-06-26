@@ -1,5 +1,5 @@
 <template>
-  <view>
+  <view class="page-detail">
     <!-- 广告 -->
     <template v-if="showTopAd">
       <view class="ad-box" v-if="adSuccess && adInfo.detailAdId && adInfo.detailAd === '1'">
@@ -84,7 +84,7 @@
       <!-- #endif -->
       <!-- #ifdef MP-TOUTIAO -->
       <view class="ad-box-video" v-if="adSuccess && adInfo.ttDetailAdId && adInfo.ttDetailAd === '1'">
-        <ad :unit-id="adInfo.ttDetailAdId" :type="adInfo.ttDetailAdType" :scale="adInf.ttDetailAdScale" @error="onErrorAd"></ad>
+        <ad :unit-id="adInfo.ttDetailAdId" :type="adInfo.ttDetailAdType" :scale="adInfo.ttDetailAdScale" @error="onErrorAd"></ad>
       </view>
       <!-- #endif -->
       <!-- #ifdef MP-BAIDU  -->
@@ -721,9 +721,33 @@ export default {
 
 <style lang="stylus" scoped>
 @import '../../styles/var'
+
+.page-detail
+  padding-bottom calc(120rpx + env(safe-area-inset-bottom))
+  .subtitle // 公共小标题
+    font-size 30rpx
+    font-weight 500
+    color #4c4c4c
+    display flex
+    justify-content space-between
+    border-bottom 1rpx solid #e6e6e6
+    position relative
+    margin 40rpx 0
+    padding-bottom 20rpx
+    &::before
+      content ''
+      display block
+      width 54rpx
+      height 4rpx
+      background #959595
+      position absolute
+      left 0
+      bottom -2rpx
+    .num
+      font-size 26rpx
+
 .detail
   padding 0 40rpx
-  padding-bottom calc(120rpx + env(safe-area-inset-bottom))
   .article-title
     font-size 20px
     font-weight 600
@@ -849,28 +873,7 @@ export default {
         font-size 30rpx
         color $red
         margin-left 12rpx
-  // 公共小标题
-  .subtitle
-    font-size 30rpx
-    font-weight 500
-    color #4c4c4c
-    display flex
-    justify-content space-between
-    border-bottom 1rpx solid #e6e6e6
-    position relative
-    margin 40rpx 0
-    padding-bottom 20rpx
-    &::before
-      content ''
-      display block
-      width 54rpx
-      height 4rpx
-      background #959595
-      position absolute
-      left 0
-      bottom -2rpx
-    .num
-      font-size 26rpx
+
   // 上下文
   .pre-next
     font-size 28rpx

@@ -1,11 +1,14 @@
 <template>
   <div class="view login">
     <image class="logo" src="/static/logo.png" mode="aspectFit" />
-    <!-- #ifdef MP-WEIXIN -->
+    <!-- #ifdef MP-WEIXIN || MP-TOUTIAO -->
     <p class="btn-login" @click="onLogin">授权登录</p>
     <!-- #endif -->
-    <!-- #ifdef MP-BAIDU || MP-QQ || MP-TOUTIAO || MP-ALIPAY -->
+    <!-- #ifdef MP-BAIDU || MP-QQ  -->
     <button class="btn-login" open-type="getUserInfo" @getuserinfo="onLogin">授权登录</button>
+    <!-- #endif -->
+    <!-- #ifdef MP-ALIPAY -->
+    <button class="btn-login" open-type="getAuthorize" @GetAuthorize="onLogin" scope="userInfo">授权登录</button>
     <!-- #endif -->
     <p class="btn-cancel" @click="goBack">暂不登录</p>
   </div>
@@ -62,33 +65,20 @@
       },
 
       async onLogin(e) {
-        // #ifdef MP-WEIXIN
+        // #ifdef MP-WEIXIN || MP-TOUTIAO
         if (this.code) {
-          this._wxLogin().then(res => {
-            if (res.errcode == '') {
-              uni.setStorageSync('userInfo', res.userInfo)
-              uni.setStorageSync('openid', res.openid)
-              uni.setStorageSync('userLevel', res.userLevel)
-              uni.setStorageSync('userId', res.userId)
-            } else {
-              console.log('用户拒绝了授权')
-            }
-          })
+          this._wxLogin()
         } else {
           this.$tips.toast('登录失败', 'error')
         }
         // #endif
 
-        // #ifdef MP-BAIDU || MP-QQ || MP-TOUTIAO || MP-ALIPAY
+        // #ifdef MP-BAIDU || MP-QQ
         if (this.code) {
           let args = {}
           let data = {}
           args.js_code = this.code
-          uni.showLoading({
-            title: '正在登录...',
-            mask: true
-          })
-
+ 
           let detail = e.detail || {}
           let userInfo = detail.userInfo || {}
 
@@ -112,8 +102,10 @@
           if (this.$config.isTT) {
             apiName = 'loginTT'
           }
+
+          this.$tips.loading('正在登录...')
           const response = await this.$api[apiName](args)
-          uni.hideLoading()
+          this.$tips.loaded()
 
           if (response.status == '200') {
             data.openid = response.openid
@@ -138,91 +130,38 @@
           }
         }
         // #endif
-      },
 
-      checkAgreeGetUser() {
-        // #ifdef MP-WEIXIN || MP-QQ || MP-TOUTIAO || MP-ALIPAY
-        if (this.code) {
-          this._wxLogin().then(res => {
-            if (res.errcode == '') {
-              uni.setStorageSync('userInfo', res.userInfo)
-              uni.setStorageSync('openid', res.openid)
-              uni.setStorageSync('userLevel', res.userLevel)
-              uni.setStorageSync('userId', res.userId)
-            } else {
-              console.log('用户拒绝了授权')
-            }
-          })
-        } else {
-          this.$tips.toast('登录失败', 'error')
-        }
-        // #endif
-
-        // #ifdef MP-BAIDU
-        this.bdLogin()
+        // #ifdef MP-ALIPAY
+        my.getOpenUserInfo({
+          success: user => {
+            let res = JSON.parse(user.response)
+            let userInfo = res.response
+            this.alLogin(userInfo)
+          }
+        })
         // #endif
       },
 
-      bdLogin() {
-        if(swan.canIUse('getLoginCode')){
-          swan.getLoginCode({
-            success: resCode => {
-              if(resCode.errCode=='10004') {
-                this.$tips.toast('用户没有登录百度app', 'error')
-                return
-              }
-              this.code = resCode.code
-              if (this.code) {
-                this._wxLogin().then(res => {
-                  if (res.errcode == '') {
-                    uni.setStorageSync('userInfo', res.userInfo)
-                    uni.setStorageSync('openid', res.openid)
-                    uni.setStorageSync('userLevel', res.userLevel)
-                    uni.setStorageSync('userId', res.userId)
-                  } else {
-                    console.log('用户拒绝了授权')
-                  }
-                })
-              } else {
-                this.$tips.toast('登录失败', 'error')
-              }
-            }
-          })
-        } else {
-          //在低版本基础库中'swan.getLoginCode'不可用
-          console.log('"swan.getLoginCode"不可用,请升级基础库版本')
-        }
-      },
-
-      _wxLogin() {
-        return new Promise((resolve, reject) => {
-          let args = {}
-          let data = {}
-          args.js_code = this.code
-          uni.showLoading({
-            title: '正在登录...',
-            mask: true
-          })
-          let func = this.$config.isWX ? 'getUserProfile' : 'getUserInfo'
-          uni[func]({
-            lang: 'zh_CN',
-            desc: '登录后信息展示',
-            success: async(res) => {
-              let userInfo = res.userInfo || {}
-
-              userInfo.isLogin = true
-              args.avatarUrl = userInfo.avatarUrl
-              args.nickname = userInfo.nickName
+      alLogin(userInfo){   
+        my.getAuthCode({
+          scopes: 'auth_base', // 主动授权（弹框）：auth_user，静默授权（不弹框）：auth_base
+          success: async (resAuth) => {
+            if (resAuth.authCode) {
+              let data = {}
               data.userInfo = userInfo
-
-              const response = await this.$api.login(args)
-              uni.hideLoading()
-
-              if (response.status == '200') {
-                data.openid = response.openid
+              let args = {}
+              args.authCode = resAuth.authCode
+              args.nickName = userInfo.nickName || '支付宝企业用户'
+              args.avatarUrl = userInfo.avatar       
+ 
+              this.$tips.loading('正在登录...')
+              const res = await this.$api.loginAL(args)  
+              this.$tips.loaded()
+              if (res.status === '200') {                            
+                data.openid = res.alipayUserid
                 var userLevel = {}
-                if (response.userLevel) {
-                  userLevel = response.userLevel
+                if (res.userLevel) {
+                  userLevel = res.userLevel
                 } else {
                   userLevel.level = '0'
                   userLevel.levelName = '订阅者'
@@ -231,62 +170,77 @@
                 data.userLevel = userLevel
                 data.levelName = userLevel.levelName
                 data.errcode = ''
-                data.userId = response.userId
+                data.userId = res.userId
 
                 userInfo.userLevel = userLevel
                 userInfo.levelName = userLevel.levelName
-                userInfo.userId = response.userId
+                userInfo.userId = res.userId
                 this.$storage('userInfo', userInfo)
                 this.onLoginSuccess(data)
-
-                resolve(data)
               } else {
-                reject(response)
+                this.$tips.toast('登录失败', 'error')
               }
-            },
-            fail: err => {
-              uni.hideLoading()
-              if (err.errMsg == 'getUserProfile:fail auth deny') {
-                args.errcode = 'getUserProfile:fail auth deny'
-                args.userInfo = {
-                  isLogin: false
-                }
-                args.userSession = ''
-                resolve(args)
-              }
-            }
-          })
-        })
-      },
-
-      async getUserInfo() {
-        uni.getUserInfo({
-          success: async (res) => {
-            this.$storage('userInfo', res.userInfo)
-
-            // 微信登录
-            if (this.code) {
-              // 获取登录信息
-              this.$tips.loading()
-              const resLogin = await this.$api.login({
-                js_code: this.code,
-                iv: res.iv,
-                encryptedData: res.encryptedData,
-                userInfo: res.userInfo
-              })
-              this.$tips.loaded()
-
-              // 登录失败
-              if (resLogin.code === 'error') {
-                this.$tips.toast(resLogin.message)
-                return
-              }
-
-              this.onLoginSuccess(resLogin.raw_session)
             }
           }
         })
+      },
 
+      _wxLogin() {
+        let args = {}
+        let data = {}
+        args.js_code = this.code
+
+        let func = this.$config.isWX ? 'getUserProfile' : 'getUserInfo'
+        uni[func]({
+          lang: 'zh_CN',
+          desc: '登录后信息展示',
+          success: async(res) => {
+            let userInfo = res.userInfo || {}
+
+            userInfo.isLogin = true
+            args.avatarUrl = userInfo.avatarUrl
+            args.nickname = userInfo.nickName
+            data.userInfo = userInfo
+
+            this.$tips.loading('正在登录...')
+            let apiName = this.$config.isWX ? 'login' : 'loginTT'
+            const response = await this.$api[apiName](args)
+            this.$tips.loaded()
+
+            if (response.status == '200') {
+              data.openid = response.openid
+              var userLevel = {}
+              if (response.userLevel) {
+                userLevel = response.userLevel
+              } else {
+                userLevel.level = '0'
+                userLevel.levelName = '订阅者'
+              }
+
+              data.userLevel = userLevel
+              data.levelName = userLevel.levelName
+              data.errcode = ''
+              data.userId = response.userId
+
+              userInfo.userLevel = userLevel
+              userInfo.levelName = userLevel.levelName
+              userInfo.userId = response.userId
+              this.$storage('userInfo', userInfo)
+              this.onLoginSuccess(data)
+            }
+          },
+          fail: err => {
+            uni.hideLoading()
+            if (err.errMsg == 'getUserProfile:fail auth deny') {
+              args.errcode = 'getUserProfile:fail auth deny'
+              args.userInfo = {
+                isLogin: false
+              }
+              args.userSession = ''
+              resolve(args)
+            }
+          }
+        })
       },
 
       // 登录成功后
