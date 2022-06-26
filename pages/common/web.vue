@@ -23,10 +23,12 @@
       }
 
       // 设置系统分享菜单
+      // #ifdef MP-WEIXIN
       wx.showShareMenu({
         withShareTicket: true,
         menus: ['shareAppMessage', 'shareTimeline']
       })
+      // #endif
       this.initData()
     },
 

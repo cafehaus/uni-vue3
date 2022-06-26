@@ -6,6 +6,18 @@ const wm = 'wp-json/minapper-plus/v1/'
 // 登录|post
 export const login = params => http.post(`${wm}weixin/userlogin`, params)
 
+// 百度登录|post
+export const loginBD = params => http.post(`${wm}baidu/getopenid`, params)
+
+// 阿里登录|post
+export const loginAL = params => http.post(`${wm}alipay/getUserid`, params)
+
+// QQ登录|post
+export const loginQQ = params => http.post(`${wm}qq/getopenid`, params)
+
+// 头条登录|post
+export const loginTT = params => http.post(`${wm}toutiao/getopenid`, params)
+
 // 获取应用信息|get
 export const getAppInfo = params => http.get(`${wm}options/config`, params)
 
@@ -18,6 +30,9 @@ export const getOptionsExpand = params => http.get(`${wm}options/expand`, params
 
 // 获取自定义广告|get
 export const getCustomAd = params => http.get(`${wm}options/adconfig`, params)
+
+// 获取插屏广告|get
+export const getInterstitialAd = params => http.get(`${wm}options/enableOption`, params)
 
 // 获取文章列表|get
 export const getArticleList = params => http.get(`${wp}posts`, params)

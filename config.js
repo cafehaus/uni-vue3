@@ -13,28 +13,43 @@ let api = 'https://plus.minapper.com/'
 // 历史接口请求要的平台来源参数
 export let appType = 'wx'
 
+// 判断来源平台
+export let isWX = false
+export let isQQ = false
+export let isBD = false
+export let isTT = false
+export let isAL = false
+export let isH5 = false
+export let isAPP = false
+
 // 通过条件编译设置平台名称
 export let platform = ''
 // #ifdef APP-PLUS
 platform = 'APP-PLUS'
+isAPP = true
 // #endif
 // #ifdef H5
 platform = 'H5'
+isH5 = true
 // #endif
 // #ifdef MP-WEIXIN
 platform = 'MP-WEIXIN'
+isWX = true
 // #endif
 // #ifdef MP-ALIPAY
 platform = 'MP-ALIPAY'
 appType = 'alipay'
+isAL = true
 // #endif
 // #ifdef MP-BAIDU
 platform = 'MP-BAIDU'
 appType = 'bd'
+isBD = true
 // #endif
 // #ifdef MP-TOUTIAO
 platform = 'MP-TOUTIAO'
 appType = 'tt'
+isTT = true
 // #endif
 // #ifdef MP-LARK
 platform = 'MP-LARK'
@@ -42,6 +57,7 @@ platform = 'MP-LARK'
 // #ifdef MP-QQ
 platform = 'MP-QQ'
 appType = 'qq'
+isQQ = true
 // #endif
 // #ifdef MP-KUAISHOU
 platform = 'MP-KUAISHOU'
@@ -63,6 +79,11 @@ export default {
   version: versionName,
   platform,
   appType,
+  isWX,
+  isQQ,
+  isBD,
+  isTT,
+  isAL,
   isProd: process.env.NODE_ENV === 'production',
   env,
   api,

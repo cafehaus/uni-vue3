@@ -21,7 +21,9 @@
 </template>
 
 <script>
+import { mapActions } from 'vuex'
 import CommentItem from '@/components/comment-item/comment-item'
+
 export default {
   components: {
     CommentItem,
@@ -33,6 +35,7 @@ export default {
   },
   onLoad() {
     this.initData()
+    this.getCpAd('comment')
   },
 
   // 下拉刷新
@@ -42,6 +45,8 @@ export default {
   },
 
   methods: {
+    ...mapActions('app', ['getCpAd']),
+
     initData() {
       this.getList()
     },

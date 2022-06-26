@@ -8,7 +8,7 @@
           <text v-if="userInfo.userId" class="user-id">ID:{{ userInfo.userId }}</text>
 
           <button v-if="!isLogin" class="btn-update" @click="login">立即登录</button>
-          <!-- #ifndef  MP-WEIXIN -->
+          <!-- #ifdef  MP-BAIDU || MP-QQ || MP-TOUTIAO || MP-ALIPAY -->
           <button v-else class="btn-update" open-type="getUserInfo" @getuserinfo="updateUserInfo">更新信息</button>
           <!-- #endif -->
        </view>
@@ -54,12 +54,12 @@
       }
     },
     onLoad() {
-      this.initData()
+      // this.initData()
     },
 
     onShow() {
-      if (this.$user.isLogin()) {
-        // this.getUserInfo()
+      if (this.isLogin) {
+        this.getUserInfo()
       }
     },
 
@@ -104,13 +104,15 @@
 
       async updateUserInfo(e) {
         let userInfo = e.detail.userInfo
-        let openId = wx.getStorageSync('openid') || ''
+        let openId = this.$storage('openId') || ''
         let args = {
           openid: openId,
           avatarUrl: userInfo.avatarUrl,
           nickname: userInfo.nickName
         }
+        this.$tips.loading('更新中...')
         const res = await this.$api.getUserInfo(args)
+        this.$tips.loaded()
         if (res.status === '200') {
           let userLevel = res.userLevel || {}
           userInfo.userLevel = userLevel
@@ -128,9 +130,23 @@
 
       // 清除缓存
       clearStorage() {
-        uni.clearStorage({
+        this.$tips.loading('努力清除中...')
+        // uni.clearStorage({
+        //   success: () => {
+        //     setTimeout(() => {
+        //       this.$tips.loaded()
+        //       this.$tips.success('清除成功')
+        //     }, 2000)
+        //   }
+        // })
+
+        uni.removeStorage({
+          key: 'readLogs', // 浏览记录
           success: () => {
-            this.$tips.success('清除成功')
+            setTimeout(() => {
+              this.$tips.loaded()
+              this.$tips.success('清除成功')
+            }, 2000)
           }
         })
       },

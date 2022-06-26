@@ -1,5 +1,5 @@
 // uni-app 网络请求封装
-import config from '/config'
+import $config from '/config'
 import storage from './storage'
 import Tips from './tips'
 import { clearLogin, login } from './user'
@@ -7,10 +7,10 @@ import { clearLogin, login } from './user'
 export default {
   // 配置
   config: {
-    baseUrl: config.api,
+    baseUrl: $config.api,
     header: {
-      Source: config.platform,
-      Version: config.version,
+      Source: $config.platform,
+      Version: $config.version,
     },
     data: {},
     method: 'GET',
@@ -36,7 +36,7 @@ export default {
       config.header = {
         ...config.header,
         Token: storage('token') || '',
-        clentkey: config.appType,
+        clentkey: $config.appType,
       }
     },
 
@@ -145,7 +145,7 @@ export default {
   },
 
   get(url, data, options = {}) {
-    if (data) data.apptype = config.appType
+    if (data) data.apptype = $config.appType
 
     options.url = url
     options.data = data
@@ -154,7 +154,7 @@ export default {
   },
 
   post(url, data, options = {}) {
-    if (data) data.apptype = config.appType
+    if (data) data.apptype = $config.appType
 
     options.url = url
     options.data = data

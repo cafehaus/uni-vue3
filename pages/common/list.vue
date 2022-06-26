@@ -20,6 +20,7 @@
 <script>
   import ArticleList from '@/components/article-list'
   import CustomAd from '@/components/custom-ad'
+  import { mapActions } from 'vuex'
 
   export default {
     components: {
@@ -45,6 +46,9 @@
       this.curId = e.id || ''
       this.type = e.type || '1'
       this.initData()
+
+      // 插屏广告
+      this.getCpAd('list')
     },
 
     // 下拉刷新
@@ -73,6 +77,8 @@
     },
 
     methods: {
+      ...mapActions('app', ['getCpAd']),
+
       initData() {
         // 分类
         if (this.type === '1') {

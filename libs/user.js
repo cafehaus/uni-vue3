@@ -26,6 +26,7 @@ export function setLogin({ openId, expires = 7 }) {
 // 清除登录态
 export function clearLogin() {
   storage('openId', '')
+  storage('userInfo', '')
   store.commit('user/upLoginState')
 }
 

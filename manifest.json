@@ -62,18 +62,19 @@
         "usingComponents" : true
     },
     "mp-baidu" : {
-        "appid": "15739846",
+        "appid" : "15739846",
         "usingComponents" : true,
-        "dynamicLib": {
-            "swan-sitemap-lib": {
-                "provider": "swan-sitemap"
+        "dynamicLib" : {
+            "swan-sitemap-lib" : {
+                "provider" : "swan-sitemap"
             },
-            "swan-interaction-lib": {
-                "provider": "swan-interaction"
+            "swan-interaction-lib" : {
+                "provider" : "swan-interaction"
             }
         }
     },
     "mp-toutiao" : {
+        "appid": "tt534b25f6cc61d760",
         "usingComponents" : true
     },
     "uniStatistics" : {

@@ -43,7 +43,7 @@ export default {
       let listData = []
       let res = ''
       let params = {
-        openid: uni.getStorageSync('openid') || '',
+        openid: this.$storage('openId') || '',
         // apptype: 'wx',
       }
 

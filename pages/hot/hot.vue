@@ -6,7 +6,7 @@
       @change="change"
     >
       <!-- 自定义广告 -->
-      <CustomAd from="list" />
+      <CustomAd from="hot" />
 
       <ArticleList :empty="empty" :article-list="articleList" />
     </w-tabs>
@@ -16,6 +16,7 @@
 <script>
   import ArticleList from '@/components/article-list'
   import CustomAd from '@/components/custom-ad'
+  import { mapActions } from 'vuex'
 
   export default {
     components: {
@@ -38,9 +39,12 @@
     },
     onLoad() {
       this.initData()
+      this.getCpAd('hot')
     },
 
     methods: {
+      ...mapActions('app', ['getCpAd']),
+
       initData() {
        this.getHotArticle()
       },

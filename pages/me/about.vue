@@ -35,6 +35,7 @@
     <!-- 企业信息 -->
     <view class="company" v-if="pageData.raw_qyname">
       <!-- 地图 -->
+      <!-- #ifdef MP-WEIXIN -->
       <view class="map" @click="openMap">
         <map
           id="myMap"
@@ -45,6 +46,7 @@
           show-location
         ></map>
       </view>
+      <!-- #endif -->
 
       <view class="company-info">
         <text class="name" v-if="pageData.raw_qyname">{{ pageData.raw_qyname }}</text>
@@ -193,12 +195,12 @@ export default {
 
     openMap() {
       // #ifdef MP-WEIXIN
-      wx.getLocation({
+      uni.getLocation({
         type: 'gcj02', //返回可以用于wx.openLocation的经纬度
         success: (res) => {
           const latitude = parseFloat(this.pageData.raw_latitude)
           const longitude = parseFloat(this.pageData.raw_longitude)
-          wx.openLocation({
+          uni.openLocation({
             latitude,
             longitude,
             scale: 28
@@ -235,7 +237,7 @@ export default {
       // #ifdef MP-WEIXIN
       if (this.appInfo.isCompany && this.systemInfo.osName === 'Android') {
         if (this.$user.isLogin()) {
-          let openid = uni.getStorageSync('openid') || ''
+          let openid = this.$storage('openId') || ''
           uni.navigateTo({
             url: '/pages/common/pay?flag=1&openid=' + openid + '&postid=' + this.pageData.ID
           })

@@ -138,8 +138,8 @@ export default {
         formId = ''
       }
 
-      let user = uni.getStorageSync('userInfo') || {}
-      let openid = uni.getStorageSync('openid') || ''
+      let user = this.$storage('userInfo') || {}
+      let openid = this.$storage('openId') || ''
       let name = user.nickName
       let author_url = user.avatarUrl
       let email = openid + "@weixin.com"

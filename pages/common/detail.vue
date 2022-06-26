@@ -1,10 +1,13 @@
 <template>
   <view>
-    <view class="ad-box" v-if="wxAd.detailAdId && wxAd.detailAd == '1'">
-      <ad :unit-id="wxAd.detailAdId"></ad>
-    </view>
+    <!-- 广告 -->
+    <template v-if="showTopAd">
+      <view class="ad-box" v-if="adSuccess && adInfo.detailAdId && adInfo.detailAd === '1'">
+        <ad :unit-id="adInfo.detailAdId" @error="onErrorAd"></ad>
+      </view>
 
-    <!-- 自定义广告 -->
+      <CustomAd v-else from="detail" />
+    </template>
     <CustomAd v-else from="detail" />
 
     <view class="page detail">
@@ -25,9 +28,9 @@
 
       <mpHtml :content="content" />
 
-      <view class="read-more" v-if="wxAd.isShowExcitation">
+      <view class="read-more" v-if="adInfo.isShowExcitation">
         <view class="read-more-mask">
-          <view class="read-more-btn" @click="readMore">{{ wxAd.isShowExcitation ? '观看视频,' : '' }}阅读更多</view>
+          <view class="read-more-btn" @click="readMore">{{ adInfo.isShowExcitation ? '观看视频,' : '' }}阅读更多</view>
         </view>
       </view>
 
@@ -69,9 +72,27 @@
         </view>
       </section>
 
-      <view class="ad-box-video" v-if="wxAd.videoAdId !='' && wxAd.detailAd == '1'">
-        <ad :unit-id="wxAd.videoAdId" ad-type="video" ad-theme="white"></ad>
+      <!-- #ifdef MP-WEIXIN -->
+      <view class="ad-box-video" v-if="adSuccess && adInfo.videoAdId && adInfo.detailAd === '1'">
+        <ad :unit-id="adInfo.videoAdId" ad-type="video" ad-theme="white" @error="onErrorAd"></ad>
       </view>
+      <!-- #endif -->
+      <!-- #ifdef MP-QQ -->
+      <view class="ad-box-video" v-if="adSuccess && adInfo.detailAdId && adInfo.detailAd === '1'">
+        <ad :unit-id="adInfo.detailAdId" type="card" @error="onErrorAd"></ad>
+      </view>
+      <!-- #endif -->
+      <!-- #ifdef MP-TOUTIAO -->
+      <view class="ad-box-video" v-if="adSuccess && adInfo.ttDetailAdId && adInfo.ttDetailAd === '1'">
+        <ad :unit-id="adInfo.ttDetailAdId" :type="adInfo.ttDetailAdType" :scale="adInf.ttDetailAdScale" @error="onErrorAd"></ad>
+      </view>
+      <!-- #endif -->
+      <!-- #ifdef MP-BAIDU  -->
+      <view class="ad-box-video" v-if="adSuccess && adInfo.bdDetailAdAppid && adInfo.bdDetailAdApid && adInfo.bdDetailAd === '1'">
+        <ad :appid="adInfo.bdDetailAdAppid" :apid="adInfo.bdDetailAdApid" :type="adInfo.bdDetailAdType"
+       @error="onErrorAd"></ad>
+      </view>
+      <!-- #endif -->
 
       <!-- 上下文 -->
       <section class="pre-next">
@@ -101,10 +122,26 @@
         </view>
       </section>
 
-      <!-- 评论 -->
+      <!-- #ifndef MP-BAIDU -->
+      <view class="subtitle">
+        <view>评论交流</view>
+        <view v-if="commentNum" class="num">有{{ commentNum }}条评论</view>
+      </view>
+      <CommentItem v-for="c in commentList" :key="c.id" :item="c" @reply="handleReply" />
+      <w-empty v-if="empty" />
+      <!-- #endif -->
+
+      <!-- #ifdef MP-WEIXIN || MP-QQ || MP-TOUTIAO -->
+      <CommentBar :show-bar="canComment" :article="info" :reply-user="replyUser" @success="commentSuccess" />
+      <!-- #endif -->
+    </view>
+
+      <!-- #ifdef MP-BAIDU -->
       <template v-if="showBdComment">
-        <view class="subtitle">
-          <view>在百度APP里评论交流</view>
+        <view style="padding: 0 40rpx">
+          <view class="subtitle">
+            <view>在百度APP里评论交流</view>
+          </view>
         </view>
         <comment-list
           :comment-param="commentParam"
@@ -116,29 +153,22 @@
         />
       </template>
       <template v-else>
-        <view class="subtitle">
-          <view>
-            <!-- #ifdef MP-BAIDU -->
-            <text>在WordPress里</text>
-            <!-- #endif -->
-            <text>评论交流</text>
+        <view style="padding: 0 40rpx">
+          <view class="subtitle">
+            <view>在WordPress里评论交流</view>
+            <view v-if="commentNum" class="num">有{{ commentNum }}条评论</view>
           </view>
-          <view v-if="commentNum" class="num">有{{ commentNum }}条评论</view>
+          <CommentItem v-for="c in commentList" :key="c.id" :item="c" @reply="handleReply" />
+          <w-empty v-if="empty" />
         </view>
-        <CommentItem v-for="c in commentList" :key="c.id" :item="c" @reply="handleReply" />
-        <w-empty v-if="empty" />
+        <CommentBar :show-bar="canComment" :article="info" :reply-user="replyUser" @success="commentSuccess" />
       </template>
-
-      <!-- 评论框 -->
-      <!-- #ifdef MP-WEIXIN || MP-QQ || MP-TOUTIAO || MP-BAIDU -->
-      <CommentBar :show-bar="canComment" :article="info" :reply-user="replyUser" @success="commentSuccess" />
       <!-- #endif -->
-    </view>
   </view>
 </template>
 
 <script>
-import { mapState } from 'vuex'
+import { mapState, mapActions } from 'vuex'
 import mpHtml from '@/components/mp-html/mp-html'
 import CommentItem from '@/components/comment-item/comment-item'
 import CommentBar from '@/components/comment-bar'
@@ -164,6 +194,7 @@ export default {
       },
       commentList: [],
       empty: false,
+      hasMore: true,
       commentNum: 0,
       likeNum: 0,
       tagList: [],
@@ -176,12 +207,13 @@ export default {
       commentParam: {},
       toolbarInfo: {},
 
-      wxAd: {
+      adInfo: {
         isShowExcitation: false, // 是否启用激励视频
         detailAd: '',
         videoAdId: '',
         excitationAdId: ''
-      }
+      },
+      adSuccess: true,
     }
   },
   computed: {
@@ -194,22 +226,47 @@ export default {
       // #endif
 
       return flag
+    },
+    showTopAd() {
+      return this.$config.isWX
     }
   },
-  onLoad(e) {
+  onLoad: function(e)  {
     this.articleId = e.id
     this.initData()
+
+    // 插屏广告
+    this.getCpAd('detail')
   },
 
-  onUnload() {
+  onUnload: function() {
     if (rewardedVideoAd && rewardedVideoAd.destroy) {
       rewardedVideoAd.destroy()
     }
   },
 
+  onReachBottom: function() {
+    if (this.hasMore) {
+      this.getArticleComment()
+    }
+  },
+
+  onShareAppMessage: function() {
+    return {
+      title: this.title,
+      path: "pages/common/detail?id=" + this.articleId,
+      imageUrl: this.info.post_thumbnail_image,
+    }
+  },
+
   methods: {
+    ...mapActions('app', ['getCpAd']),
+
     initData() {
-      this.getArticleDetail()
+      let logs = this.$storage('readLogs') || []
+      let isReaded = logs.find(m => m.id === this.articleId) ? '1' : '0'
+      this.getArticleDetail(isReaded)
+
       this.getArticleComment()
       this.getCanComment()
       this.getIsLike()
@@ -220,7 +277,7 @@ export default {
         if (this.isLike) return
 
         let params = {
-          openid: uni.getStorageSync('openid') || '',
+          openid: this.$storage('openId') || '',
           postid: this.articleId,
         }
 
@@ -263,7 +320,7 @@ export default {
     async getIsLike() {
       if (this.$user.isLogin()) {
         let params = {
-          openid: uni.getStorageSync('openid') || '',
+          openid: this.$storage('openId') || '',
           postid: this.articleId,
         }
         const res = await this.$api.getIsLike(params)
@@ -287,32 +344,26 @@ export default {
     },
 
     // 获取文章详情
-    async getArticleDetail() {
-      let logs = this.$storage('readLogs') || []
-      let isReaded = logs.find(m => m.id === this.articleId)
-
+    async getArticleDetail(e) {
       let key = 'wxexcitation'
-      // #ifdef MP-WEIXIN
-      key = 'wxexcitation'
-      // #endif
-      // #ifdef MP-ALIPAY
-      key = 'alexcitation'
-      // #endif
-      // #ifdef MP-BAIDU
-      key = 'bdexcitation'
-      // #endif
-      // #ifdef MP-TOUTIAO
-      key = 'ttexcitation'
-      // #endif
-      // #ifdef MP-QQ
-      key = 'qqexcitation'
-      // #endif
+      if (this.$config.isWX) {
+        key = 'wxexcitation'
+      } else if (this.$config.isQQ) {
+        key = 'qqexcitation'
+      } else if (this.$config.isBD) {
+        key = 'bdexcitation'
+      } else if (this.$config.isTT) {
+        key = 'ttexcitation'
+      } else if (this.$config.isAL) {
+        key = 'alexcitation'
+      }
+
       this.$tips.loading()
       const res = await this.$api.getArticleDetail(
         {
           id: this.articleId,
         },
-        { header: { [key]: isReaded ? '1' : '0' } }
+        { header: { [key]: e || '0' } }
       )
       this.$tips.loaded()
       let info = {
@@ -345,31 +396,54 @@ export default {
         return m
       })
 
-      // 小程序广告
-      let isShowExcitation = res.wxExcitation === 1
-      if (isShowExcitation) {
-        isShowExcitation = !isReaded
+      if (this.$config.isWX) {
+        this.adInfo = {
+          isShowExcitation: res.wxExcitation === 1,
+          detailAd: res.wxdetailAd,
+          videoAdId: res.wxVideoAdId,
+          detailAdId: res.wxdetailAdId,
+          excitationAdId: res.wxExcitationAdId,
+        }
       }
-      if (!isShowExcitation) {
-        // 缓存浏览记录
-        this.setReadLog(info)
+      if (this.$config.isBD) {
+        this.adInfo = {
+          isShowExcitation: res.bdExcitation === 1,
+          bdDetailAdApid: res.bdDetailAdApid,
+          bdDetailAdAppid: res.bdDetailAdAppid,
+          bdDetailAdType: res.bdDetailAdType,
+          bdDetailAd: res.bdDetailAd,
+          excitationAdId: res.bdExcitationAdId
+        }
       }
-      this.wxAd = {
-        isShowExcitation,
-        detailAd: res.wxdetailAd,
-        videoAdId: res.wxVideoAdId,
-        detailAdId: res.wxdetailAdId,
-        excitationAdId: res.wxExcitationAdId
+      if (this.$config.isTT) {
+        this.adInfo = {
+          ttDetailAdId: res.ttDetailAdId,
+          ttDetailAdScale: res.ttDetailAdScale,
+          ttDetailAdType: res.ttDetailAdType,
+          ttDetailAd: res.ttDetailAd,
+          dyExcitationAdId:res.dyExcitationAdId,
+          isShowExcitation:res.dyExcitation === 1
+        }
       }
+      if (this.$config.isQQ) {
+        this.adInfo = {
+          isShowExcitation: res.qqExcitation === 1,
+          detailAd: res.qqDetailAd,
+          detailAdId: res.qqdetailAdId,
+          excitationAdId: res.qqExcitationAdId
+        }
+      }
+      // 缓存浏览记录
+      this.setReadLog(info)
 
       // 百度互动组件
       this.commentParam = {
         snid: this.articleId,
         path: '/pages/comment/detail?id=' + this.articleId,
         title: this.title,
-        openid: uni.getStorageSync('openid') || ''
+        openid: this.$storage('openId') || ''
       }
-      getApp().commentParam = commentParam
+      getApp().commentParam = this.commentParam
       this.toolbarInfo = {
         placeholder: '评论...',
         moduleList: ['comment', 'like', 'favor', 'share'],
@@ -432,8 +506,9 @@ export default {
       const res = await this.$api.getArticleComment(params)
       if (res.status === '200') {
         let list = res.data || []
-        this.commentList = list
+        this.commentList = [...this.commentList, ...list]
         this.empty = !list.length
+        this.hasMore = list.length === this.page.size
       } else {
         this.$tips.toast(res.message || '请求失败')
       }
@@ -461,7 +536,7 @@ export default {
       // #ifdef MP-WEIXIN
       if (this.appInfo.isCompany && this.systemInfo.osName === 'Android') {
         if (this.$user.isLogin()) {
-          let openid = uni.getStorageSync('openid') || ''
+          let openid = this.$storage('openId') || ''
           uni.navigateTo({
             url: '../common/pay?flag=1&openid=' + openid + '&postid=' + this.articleId
           })
@@ -532,43 +607,99 @@ export default {
     },
 
     readMore() {
-      // let platform = this.data.platform
-      // if (platform === 'devtools' && this.wxAd.isShowExcitation) {
-      //   this.wxAd.isShowExcitation = false
-      //   this.$tips.toast('开发工具内无法获取激励视频广告，请在手机上预览！')
-      //   return
-      // }
+      let platform = this.systemInfo.platform
+      if (platform === 'devtools' && this.adInfo.isShowExcitation) {
+        this.adInfo.isShowExcitation = false
+        this.$tips.toast('开发工具内无法获取激励视频广告，请在手机上预览！')
+        return
+      }
 
-      if (this.wxAd.isShowExcitation) {
+      if (this.adInfo.isShowExcitation) {
         this.loadInterstitialAd()
         rewardedVideoAd.show().catch(() => {
           rewardedVideoAd
             .load()
             .then(() => rewardedVideoAd.show())
             .catch(err => {
-              this.wxAd.isShowExcitation = false
+              this.adInfo.isShowExcitation = false
               this.$tips.toast('激励视频广告获取失败！')
             })
         })
       } else {
-        this.wxAd.isShowExcitation = false
+        this.adInfo.isShowExcitation = false
       }
     },
 
     // 加载激励视频广告
     loadInterstitialAd() {
       var self = this
-      if (uni.createRewardedVideoAd) {
-        rewardedVideoAd = uni.createRewardedVideoAd({
-          adUnitId: this.wxAd.excitationAdId
+
+      if (this.$config.isWX && wx.createRewardedVideoAd) {
+        rewardedVideoAd = createRewardedVideoAd({
+          adUnitId: this.adInfo.excitationAdId
         })
         rewardedVideoAd.onLoad(() => {})
         rewardedVideoAd.onError((err) => {
-          self.wxAd.isShowExcitation = false
+          self.adInfo.isShowExcitation = false
         })
         rewardedVideoAd.onClose((res) => {
           if (res && res.isEnded) {
-            self.wxAd.isShowExcitation = false
+            self.adInfo.isShowExcitation = false
+            self.setReadLog(self.info)
+            self.getArticleDetail('1')
+          } else {
+            this.$tips.toast('你中途关闭了视频')
+          }
+        })
+      }
+      if (this.$config.isBD && swan.createRewardedVideoAd) {
+        rewardedVideoAd = swan.createRewardedVideoAd({
+          adUnitId: this.adInfo.excitationAdId,
+          appSid: this.adInfo.bdDetailAdAppid,
+        })
+        rewardedVideoAd.onLoad(() => {})
+        rewardedVideoAd.onError((err) => {
+          self.adInfo.isShowExcitation = false
+        })
+        rewardedVideoAd.onClose((res) => {
+          if (res && res.isEnded) {
+            self.adInfo.isShowExcitation = false
+            self.setReadLog(self.info)
+            self.getArticleDetail('1')
+          } else {
+            this.$tips.toast('你中途关闭了视频')
+          }
+        })
+      }
+      if (this.$config.isTT && tt.createRewardedVideoAd) {
+        rewardedVideoAd = tt.createRewardedVideoAd({
+          adUnitId: this.adInfo.dyExcitationAdId,
+        })
+        rewardedVideoAd.onLoad(() => {})
+        rewardedVideoAd.onError((err) => {
+          self.adInfo.isShowExcitation = false
+        })
+        rewardedVideoAd.onClose((res) => {
+          if (res && res.isEnded) {
+            self.adInfo.isShowExcitation = false
+            self.setReadLog(self.info)
+            self.getArticleDetail('1')
+          } else {
+            this.$tips.toast('你中途关闭了视频')
+          }
+        })
+      }
+      if (this.$config.isQQ && qq.createRewardedVideoAd) {
+        rewardedVideoAd = qq.createRewardedVideoAd({
+          adUnitId: this.adInfo.excitationAdId,
+        })
+        rewardedVideoAd.onLoad(() => {})
+        rewardedVideoAd.onError((err) => {
+          self.adInfo.isShowExcitation = false
+        })
+        rewardedVideoAd.onClose((res) => {
+          if (res && res.isEnded) {
+            self.adInfo.isShowExcitation = false
             self.setReadLog(self.info)
             self.getArticleDetail('1')
           } else {
@@ -577,13 +708,19 @@ export default {
         })
       }
     },
+
+    // 广告加载失败
+    onErrorAd(e) {  
+      if (e.detail.errCode) {
+        this.adSuccess = false
+      }
+    },
   },
 }
 </script>
 
 <style lang="stylus" scoped>
 @import '../../styles/var'
-
 .detail
   padding 0 40rpx
   padding-bottom calc(120rpx + env(safe-area-inset-bottom))

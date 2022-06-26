@@ -1,7 +1,12 @@
 <template>
   <div class="view login">
-    <image class="logo" src="/static/logo.png" mode="aspectFill" />
-    <p class="btn-login" @click="onLogin">微信授权登录</p>
+    <image class="logo" src="/static/logo.png" mode="aspectFit" />
+    <!-- #ifdef MP-WEIXIN -->
+    <p class="btn-login" @click="onLogin">授权登录</p>
+    <!-- #endif -->
+    <!-- #ifdef MP-BAIDU || MP-QQ || MP-TOUTIAO || MP-ALIPAY -->
+    <button class="btn-login" open-type="getUserInfo" @getuserinfo="onLogin">授权登录</button>
+    <!-- #endif -->
     <p class="btn-cancel" @click="goBack">暂不登录</p>
   </div>
 </template>
@@ -26,13 +31,40 @@
         this.getWxCode()
       },
 
-      onLogin() {
-        this.checkAgreeGetUser()
+      // 获取微信登录code
+      getWxCode() {
+        // #ifdef MP-WEIXIN || MP-QQ || MP-TOUTIAO || MP-ALIPAY
+        uni.login({
+          success: (r) => {
+            if (r.code) {
+              this.code = r.code
+            }
+          }
+        })
+        // #endif
+
+        // #ifdef MP-BAIDU
+        if(swan.canIUse('getLoginCode')){
+          swan.getLoginCode({
+            success: resCode => {
+              if(resCode.errCode=='10004') {
+                this.$tips.toast('用户没有登录百度app', 'error')
+                return
+              }
+              this.code = resCode.code
+            }
+          })
+        } else {
+          //在低版本基础库中'swan.getLoginCode'不可用
+          console.log('"swan.getLoginCode"不可用,请升级基础库版本')
+        }
+        // #endif
       },
 
-      checkAgreeGetUser() {
+      async onLogin(e) {
+        // #ifdef MP-WEIXIN
         if (this.code) {
-          this.agreeGetUser().then(res => {
+          this._wxLogin().then(res => {
             if (res.errcode == '') {
               uni.setStorageSync('userInfo', res.userInfo)
               uni.setStorageSync('openid', res.openid)
@@ -43,24 +75,136 @@
             }
           })
         } else {
-          uni.showToast({
-            title: '登录失败',
-            mask: false,
-            duration: 1000
+          this.$tips.toast('登录失败', 'error')
+        }
+        // #endif
+
+        // #ifdef MP-BAIDU || MP-QQ || MP-TOUTIAO || MP-ALIPAY
+        if (this.code) {
+          let args = {}
+          let data = {}
+          args.js_code = this.code
+          uni.showLoading({
+            title: '正在登录...',
+            mask: true
           })
+
+          let detail = e.detail || {}
+          let userInfo = detail.userInfo || {}
+
+          userInfo.isLogin = true
+          args.avatarUrl = userInfo.avatarUrl
+          args.nickname = userInfo.nickName
+          data.userInfo = userInfo
+
+          // #ifdef MP-BAIDU
+          args.iv = detail.iv
+          args.encryptedData = detail.encryptedData
+          // #endif
+
+          let apiName = 'login'
+          if (this.$config.isQQ) {
+            apiName = 'loginQQ'
+          }
+          if (this.$config.isBD) {
+            apiName = 'loginBD'
+          }
+          if (this.$config.isTT) {
+            apiName = 'loginTT'
+          }
+          const response = await this.$api[apiName](args)
+          uni.hideLoading()
+
+          if (response.status == '200') {
+            data.openid = response.openid
+            let userLevel = {}
+            if (response.userLevel) {
+              userLevel = response.userLevel
+            } else {
+              userLevel.level = '0'
+              userLevel.levelName = '订阅者'
+            }
+
+            data.userLevel = userLevel
+            data.levelName = userLevel.levelName
+            data.errcode = ''
+            data.userId = response.userId
+
+            userInfo.userLevel = userLevel
+            userInfo.levelName = userLevel.levelName
+            userInfo.userId = response.userId
+            this.$storage('userInfo', userInfo)
+            this.onLoginSuccess(data)
+          }
+        }
+        // #endif
+      },
+
+      checkAgreeGetUser() {
+        // #ifdef MP-WEIXIN || MP-QQ || MP-TOUTIAO || MP-ALIPAY
+        if (this.code) {
+          this._wxLogin().then(res => {
+            if (res.errcode == '') {
+              uni.setStorageSync('userInfo', res.userInfo)
+              uni.setStorageSync('openid', res.openid)
+              uni.setStorageSync('userLevel', res.userLevel)
+              uni.setStorageSync('userId', res.userId)
+            } else {
+              console.log('用户拒绝了授权')
+            }
+          })
+        } else {
+          this.$tips.toast('登录失败', 'error')
+        }
+        // #endif
+
+        // #ifdef MP-BAIDU
+        this.bdLogin()
+        // #endif
+      },
+
+      bdLogin() {
+        if(swan.canIUse('getLoginCode')){
+          swan.getLoginCode({
+            success: resCode => {
+              if(resCode.errCode=='10004') {
+                this.$tips.toast('用户没有登录百度app', 'error')
+                return
+              }
+              this.code = resCode.code
+              if (this.code) {
+                this._wxLogin().then(res => {
+                  if (res.errcode == '') {
+                    uni.setStorageSync('userInfo', res.userInfo)
+                    uni.setStorageSync('openid', res.openid)
+                    uni.setStorageSync('userLevel', res.userLevel)
+                    uni.setStorageSync('userId', res.userId)
+                  } else {
+                    console.log('用户拒绝了授权')
+                  }
+                })
+              } else {
+                this.$tips.toast('登录失败', 'error')
+              }
+            }
+          })
+        } else {
+          //在低版本基础库中'swan.getLoginCode'不可用
+          console.log('"swan.getLoginCode"不可用,请升级基础库版本')
         }
       },
 
-      agreeGetUser() {
+      _wxLogin() {
         return new Promise((resolve, reject) => {
           let args = {}
           let data = {}
           args.js_code = this.code
           uni.showLoading({
-            title: "正在登录...",
+            title: '正在登录...',
             mask: true
           })
-          uni.getUserProfile({
+          let func = this.$config.isWX ? 'getUserProfile' : 'getUserInfo'
+          uni[func]({
             lang: 'zh_CN',
             desc: '登录后信息展示',
             success: async(res) => {
@@ -70,10 +214,10 @@
               args.avatarUrl = userInfo.avatarUrl
               args.nickname = userInfo.nickName
               data.userInfo = userInfo
-              // var url = Api.getOpenidUrl();
+
               const response = await this.$api.login(args)
               uni.hideLoading()
-              console.log(response)
+
               if (response.status == '200') {
                 data.openid = response.openid
                 var userLevel = {}
@@ -99,31 +243,6 @@
               } else {
                 reject(response)
               }
-
-              //获取openid
-              // postOpenidRequest.then(response => {
-              //   if (response.status == '200') {
-              //     data.openid = response.openid
-              //     var userLevel = {}
-              //     if (response.userLevel) {
-              //       userLevel = response.userLevel
-              //     } else {
-              //       userLevel.level = '0'
-              //       userLevel.levelName = '订阅者'
-              //     }
-
-              //     data.userLevel = userLevel
-              //     data.errcode = ''
-              //     data.userId = response.userId
-              //     resolve(data)
-              //     this.onLoginSuccess()
-              //   } else {
-              //     reject(response)
-              //   }
-              // }).catch(error => {
-              //   console.log('error: ' + error)
-              //   reject(error)
-              // })
             },
             fail: err => {
               uni.hideLoading()
@@ -137,17 +256,6 @@
               }
             }
           })
-        })
-      },
-
-      // 获取微信登录code
-      getWxCode() {
-        uni.login({
-          success: (r) => {
-            if (r.code) {
-              this.code = r.code
-            }
-          }
         })
       },
 
@@ -220,28 +328,30 @@
     background #fff
     text-align center
     .logo
-      width 300rpx
-      height @width
-      margin-top 100rpx
+      width 200rpx
+      // height 218rpx
+      margin-top 60rpx
     .btn-login
       width 480rpx
       height 88rpx
-      // background linear-gradient(90deg,rgba(255,170,77,1) 0%,rgba(255,40,75,1) 100%)
       background $base-color
-      // box-shadow 0px 10px 30px 0px rgba(240,110,50,0.3)
-      border-radius 49rpx
-      margin 100rpx auto 0
+      margin 200rpx auto 0
       line-height 88rpx
       color #fff
       text-align center
+      display flex
+      justify-content center
+      align-items center
+      &::after
+        border none
     .btn-cancel
       width 480rpx
-      height 88rpx
+      height 80rpx
       border 1px solid $base-color
-      border-radius 49rpx
+      // border-radius 49rpx
       margin 40rpx auto 0
       color $base-color
       text-align center
-      line-height 88rpx
+      line-height 80rpx
 
 </style>

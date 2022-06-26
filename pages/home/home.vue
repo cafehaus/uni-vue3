@@ -1,13 +1,13 @@
 <template>
   <view class="page">
     <!-- 轮播 -->
-    <VSwiper style="width:100%" :swiper-list="swiperList" />
+    <VSwiper :swiper-list="swiperList" />
 
     <!-- 精选栏目 -->
-    <NiceColumn style="width:100%" :nav-list="navList" />
+    <NiceColumn :nav-list="navList" />
 
     <!-- 搜索 -->
-    <VSearch style="width:100%" from="home" />
+    <VSearch from="home" />
 
     <!-- 标签 -->
     <VTag :tag-list="tagList" />
@@ -58,6 +58,9 @@ export default {
   },
   onLoad() {
     this.initData()
+
+    // 插屏广告
+    this.getCpAd('home')
   },
   onPullDownRefresh() {
     this.articleList = []
@@ -84,6 +87,8 @@ export default {
   methods: {
     ...mapMutations('user', ['setUserInfo']),
     ...mapActions('user', ['getUserInfo']),
+    ...mapActions('app', ['getCpAd']),
+
     initData() {
       this.getOptionsExpand()
       // this.getCustomAd()
@@ -94,8 +99,10 @@ export default {
     // 轮播/精选
     async getOptionsExpand() {
       const res = await this.$api.getOptionsExpand()
-      let swiperList = res.wx_swipe_nav || []
-      let navList = res.wx_selected_nav || []
+      let swiperKey = this.$config.appType + '_swipe_nav'
+      let navKey = this.$config.appType + '_selected_nav'
+      let swiperList = res[swiperKey] || []
+      let navList = res[navKey] || []
 
       this.swiperList = swiperList
       this.navList = navList
@@ -154,10 +161,6 @@ export default {
 <style lang="stylus" scoped>
 @import '../../styles/var'
 .page
-  display flex
-  flex-direction column
-  align-items center
-  justify-content center
   .logo
     height 200rpx
     width 200rpx

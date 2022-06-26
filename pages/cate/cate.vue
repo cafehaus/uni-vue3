@@ -19,37 +19,39 @@
     <view class="cate-right">
       <!-- 自定义广告 -->
       <CustomAd from="cate" btn-text="详情" />
-
-      <view
-        class="list-item"
-        v-for="(itm, idx) in cateSubList"
-        :key="idx"
-        @click="goDetail(itm)"
-      >
-        <view class="cate-img">
-          <image :src="itm.category_thumbnail_image || defaultImg" class="img" mode="aspectFill" />
-        </view>
-
-        <!-- 分类名、描述 -->
-        <view class="content-title">
-          <view class="name">
-            <text>{{itm.name}}</text>
+      <view class="list">
+        <view
+          class="list-item"
+          v-for="(itm, idx) in cateSubList"
+          :key="idx"
+          @click="goDetail(itm)"
+        >
+          <view class="cate-img">
+            <image :src="itm.category_thumbnail_image || defaultImg" class="img" mode="aspectFill" />
           </view>
-          <!-- #ifdef MP-WEIXIN ||  MP-ALIPAY || MP-QQ || MP-TOUTIAO || MP-BAIDU -->
-          <text class="btn-sub" @click.stop="subscribeCate(itm)">{{itm.subflag === '1' ? '取消' : '订阅'}}</text>
-          <!-- #endif -->
-        </view>
-        <view class="content-brief">
-          <span>{{ itm.description }}</span>
-        </view>
 
+          <!-- 分类名、描述 -->
+          <view class="content-title">
+            <view class="name">
+              <text>{{itm.name}}</text>
+            </view>
+            <!-- #ifdef MP-WEIXIN ||  MP-ALIPAY || MP-QQ || MP-TOUTIAO || MP-BAIDU -->
+            <text class="btn-sub" @click.stop="subscribeCate(itm)">{{itm.subflag === '1' ? '取消' : '订阅'}}</text>
+            <!-- #endif -->
+          </view>
+          <view class="content-brief">
+            <span>{{ itm.description }}</span>
+          </view>
+        </view>
       </view>
     </view>
   </view>
 </template>
 
 <script>
+  import { mapActions } from 'vuex'
   import CustomAd from '@/components/custom-ad'
+
   export default {
     components: {
       CustomAd,
@@ -64,9 +66,12 @@
     },
     onLoad() {
       this.initData()
+      this.getCpAd('cate')
     },
 
     methods: {
+      ...mapActions('app', ['getCpAd']),
+
       initData() {
         this.getCategory()
       },
@@ -118,7 +123,7 @@
         }
 
         let categoryid = e.id
-        let openid = uni.getStorageSync('openid') || ''
+        let openid = this.$storage('openId') || ''
         let params = {
           categoryid,
           openid
@@ -201,14 +206,16 @@
     .cate-right
       flex 1
       height 100%
-      padding 40rpx 40rpx 0
+      // padding 0 40rpx
       overflow auto
       background #f5f7f7
       margin-left 200rpx
+      .list
+        padding 0 40rpx
       .list-item
         position relative
         overflow hidden
-        margin-bottom 40rpx
+        margin-top 40rpx
         background #fff
         border-radius 10rpx
         box-shadow 2px 2px 10px #eee
@@ -235,11 +242,10 @@
           .btn-sub
             margin-left 20rpx
             display inline-block
-            // width 10rpx
             padding 0 24rpx
             height 48rpx
             line-height @height
-            border 1rpx solid #eee
+            border 1rpx solid #ddd
             border-radius 24rpx
             font-size 24rpx
             color #666

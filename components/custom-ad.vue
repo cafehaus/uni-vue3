@@ -51,7 +51,7 @@ export default {
     }
   },
 
-  date() {
+  data() {
     return {
       info: {},
       keys: {
@@ -97,7 +97,7 @@ export default {
 </script>
 
 <style lang="stylus" scoped>
-
+@import '../styles/var'
 .custom-ad // banner图
   .img
     display block
@@ -140,6 +140,8 @@ export default {
       border-radius 6rpx
       padding 16rpx
       margin-top 16rpx
+      nowrap()
+
 
 .custom-ad-top // 上图下标题
   display flex
@@ -152,7 +154,7 @@ export default {
     position relative
   .title-box
     width 100%
-    padding 40rpx
+    padding 20rpx 40rpx 40rpx
     box-sizing border-box
     display flex
     justify-content space-between
