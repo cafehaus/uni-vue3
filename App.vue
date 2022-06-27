@@ -19,6 +19,6 @@
 
 <style>
 	/*每个页面公共css */
+	@import "./styles/iconfont.css";
+	@import "./styles/main.styl";
 </style>
-<style src="./styles/iconfont.css" />
-<style lang="stylus" src="./styles/main.styl" />

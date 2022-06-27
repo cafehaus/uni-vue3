@@ -58,7 +58,12 @@
         },
         "usingComponents" : true
     },
+    "mp-qq" : {
+        "appid" : "1109599694",
+        "usingComponents" : true
+    },
     "mp-alipay" : {
+        "appid" : "2019040463796094",
         "usingComponents" : true
     },
     "mp-baidu" : {
@@ -74,7 +79,7 @@
         }
     },
     "mp-toutiao" : {
-        "appid": "tt534b25f6cc61d760",
+        "appid" : "tt534b25f6cc61d760",
         "usingComponents" : true
     },
     "uniStatistics" : {
