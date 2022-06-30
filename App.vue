@@ -20,5 +20,7 @@
 <style>
 	/*每个页面公共css */
 	@import "./styles/iconfont.css";
+</style>
+<style lang="stylus">
 	@import "./styles/main.styl";
 </style>

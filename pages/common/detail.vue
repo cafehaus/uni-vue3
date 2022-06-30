@@ -930,8 +930,7 @@ export default {
 
   .read-more
     width 100%
-    // position absolute
-    // bottom 0
+    position relative
     .read-more-mask
       height 200rpx
       width 100%
