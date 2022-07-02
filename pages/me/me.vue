@@ -39,6 +39,7 @@
         <view class="list-item">
           <button open-type="feedback" class='list-item-btn'>意见反馈</button>
         </view>
+        <!-- #endif -->
         <view class="list-item" @click="clearStorage">清除缓存</view>
         <view v-if="isLogin" class="list-item" @click="logout">退出登录</view>
       </view>
