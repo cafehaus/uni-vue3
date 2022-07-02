@@ -1,6 +1,6 @@
-import Tips from '/libs/tips'
-import config from '/config'
-import * as api from '/common/api'
+import Tips from '@/libs/tips'
+import config from '@/config'
+import * as api from '@/common/api'
 
 export default {
   namespaced: true,

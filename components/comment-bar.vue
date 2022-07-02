@@ -83,7 +83,7 @@ export default {
 
   data() {
     return {
-      placeholder: '请输入评论',
+      // placeholder: '请输入评论',
       showPopup: false,
       content: '',
     }

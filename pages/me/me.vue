@@ -30,9 +30,12 @@
       <view class="list-sub">
         <!-- 关于我们 -->
         <view class="list-item" @click="goto('about')">关于我们</view>
+        <!-- #ifdef MP-WEIXIN || MP-BAIDU -->
         <view class="list-item">
           <button openType="contact" class='list-item-btn'>联系客服</button>
         </view>
+        <!-- #endif -->
+        <!-- #ifdef MP-WEIXIN || MP-QQ -->
         <view class="list-item">
           <button open-type="feedback" class='list-item-btn'>意见反馈</button>
         </view>

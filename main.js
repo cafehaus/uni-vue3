@@ -1,5 +1,4 @@
 import App from './App'
-import { createSSRApp } from 'vue'
 import store from './store'
 
 // 全局挂载
@@ -11,6 +10,8 @@ import util from './libs/util'
 import * as user from './libs/user'
 import * as api from './common/api'
 
+// #ifdef VUE3
+import { createSSRApp } from 'vue'
 export function createApp() {
   const app = createSSRApp(App)
   app.config.globalProperties.$config = config
@@ -26,3 +27,24 @@ export function createApp() {
     app
   }
 }
+// #endif
+
+// #ifndef VUE3
+import Vue from 'vue'
+Vue.config.productionTip = false
+// Vue.prototype.$store = store
+Vue.prototype.$config = config
+Vue.prototype.$uni = uni
+Vue.prototype.$storage = storage
+Vue.prototype.$tips = tips
+Vue.prototype.$user = user
+Vue.prototype.$api = api
+Vue.prototype.$util = util
+
+App.mpType = 'app'
+const app = new Vue({
+  store,
+  ...App
+})
+app.$mount()
+// #endif

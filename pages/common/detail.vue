@@ -203,7 +203,7 @@ export default {
       likeList: [],
       replyUser: null,
       canComment: true,
-      showBdComment: false,
+      // showBdComment: false,
       commentParam: {},
       toolbarInfo: {},
 
@@ -470,6 +470,8 @@ export default {
     },
 
     goCommentDetail(e) {
+      console.log('goCommentDetail(e)')
+      console.log(e)
       let srid = e.data.srid
       let url = '/pages/common/comment-detail?srid=' + srid + '&id=' + this.articleId + "&title=" + this.title
       uni.navigateTo({

@@ -51,9 +51,11 @@
 
       // 获取热门文章
       async getHotArticle() {
+        this.$tips.loading()
         const res = await this.$api.getHotArticle({
           type: this.tabsList[this.activeIndex].type
         })
+        this.$tips.loaded()
 
         let list = res || []
         this.articleList = list.map(m => {
@@ -68,7 +70,6 @@
 
       change(index) {
         this.activeIndex = index
-        console.log(index)
         this.getHotArticle()
       }
     }

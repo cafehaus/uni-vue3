@@ -1,5 +1,5 @@
 // uni-app api 封装
-import config from '/config'
+import config from '@/config'
 import Tips from '../tips'
 import http from '../http'
 import { clearLogin, login } from '../user'
