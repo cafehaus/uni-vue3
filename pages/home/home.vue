@@ -136,8 +136,10 @@ export default {
         order: 'desc',
       })
 
-      if (res.length) {
+      if (res && res.length && Array.isArray(res)) {
         this.articleList.push(...res)
+      } else {
+        this.$tips.toast('出错了，请稍后再试')
       }
 
       if (this.isPullDown) {

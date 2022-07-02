@@ -145,12 +145,12 @@
         </view>
         <comment-list
           :comment-param="commentParam"
-          add-comment
-          is-page-scroll
-          need-toolbar
+          :add-comment="true"
+          :is-page-scroll="true"
+          :need-toolbar="true"
           :toolbar-config="toolbarInfo"
-          @clickcomment="goCommentDetail"
-        />
+          bindclickcomment="goCommentDetail"
+        ></comment-list>
       </template>
       <template v-else>
         <view style="padding: 0 40rpx">
@@ -366,6 +366,11 @@ export default {
         { header: { [key]: e || '0' } }
       )
       this.$tips.loaded()
+      if (!res || !res.content) {
+        this.$tips.toast('出错了，请稍后再试')
+        return
+      }
+
       let info = {
         ...res,
         preArticle: {
