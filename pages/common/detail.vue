@@ -451,7 +451,7 @@ export default {
         }
       }
       // 缓存浏览记录
-      this.setReadLog(info)
+      if (!this.adInfo.isShowExcitation) this.setReadLog(info)
 
       // 百度互动组件
       this.commentParam = {
@@ -654,7 +654,7 @@ export default {
       var self = this
 
       if (this.$config.isWX && wx.createRewardedVideoAd) {
-        rewardedVideoAd = createRewardedVideoAd({
+        rewardedVideoAd = wx.createRewardedVideoAd({
           adUnitId: this.adInfo.excitationAdId
         })
         rewardedVideoAd.onLoad(() => {})
