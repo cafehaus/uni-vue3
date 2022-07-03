@@ -1,3 +1,14 @@
+import { versionName } from '../manifest'
+let env = 'pro'
+switch (process.env.NODE_ENV) {
+  case 'development':
+    env = 'dev'
+    break
+  case 'production':
+    env = 'pro'
+    break
+}
+
 // 历史接口请求要的平台来源参数
 export let appType = 'wx'
 
@@ -66,5 +77,9 @@ export default {
   isQQ,
   isBD,
   isTT,
-  isAL
+  isAL,
+  version: versionName,
+  isProd: process.env.NODE_ENV === 'production',
+  env,
+  defaultImg: '/static/default.jpg',
 }
