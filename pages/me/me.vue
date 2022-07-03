@@ -42,6 +42,8 @@
         <!-- #endif -->
         <view class="list-item" @click="clearStorage">清除缓存</view>
         <view v-if="isLogin" class="list-item" @click="logout">退出登录</view>
+
+        <view v-if="isLogin && userInfo.levelName === '管理者'" class="list-item" @click="updateLiveInfo">更新直播数据</view>
       </view>
     </view>
   </view>
@@ -153,6 +155,22 @@
             }, 2000)
           }
         })
+      },
+
+      // 更新直播数据
+      async updateLiveInfo() {
+        this.$tips.loading('更新中...')
+        const res = await this.$api.updateLiveInfo({
+          userid: this.userInfo.userId,
+          openid: this.userInfo.openid
+        })
+        this.$tips.loaded()
+
+        if (res.success === 0) {
+          this.$tips.toast(res.message || '更新成功')
+        } else {
+          this.$tips.toast(res.message || '出错了')
+        }
       },
 
       // 跳转

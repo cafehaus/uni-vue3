@@ -108,6 +108,17 @@
 		      "style": {
 		        "navigationBarTitleText": "搜索"
 		      }
+		    },
+            {
+		      "path": "pages/common/live",
+		      "style": {
+		        "navigationBarTitleText": "直播",
+				"mp-weixin": {
+					"usingComponents": {
+						"subscribe": "plugin-private://wx2b03c6e691cd7370/components/subscribe/subscribe"
+					}
+				}
+		      }
 		    }
 	],
 	"globalStyle": {

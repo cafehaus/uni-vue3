@@ -46,13 +46,14 @@ export function isDate(v) {
 }
 
 export function goto(v) {
-  let { type, appid, url, path } = v
+  let { type, appid, url, path, jumptype } = v
 
   if (type === 'apppage' && path) { // 小程序页面
     // 兼容老版本的跳转路径
     path = path.replace('/pages/detail/detail', '/pages/common/detail')
     path = path.replace('/pages/postags/postags', '/pages/common/tags')
     path = path.replace('/pages/list/list?categoryID=', '/pages/common/list?id=')
+    path = path.replace('/pages/live/live', '/pages/common/live')
 
     uni.navigateTo({
       url: path
@@ -66,10 +67,17 @@ export function goto(v) {
   }
   // #ifdef MP
   if (type === 'miniapp' && appid) { // 其他小程序
-    uni.navigateToMiniProgram({
-      appId: appid,
-      path
-    })
+    if (jumptype === 'embedded') {
+      uni.openEmbeddedMiniProgram({
+        appId: appid,
+        path
+      })
+    } else {
+      uni.navigateToMiniProgram({
+        appId: appid,
+        path
+      })
+    }
   }
   // #endif
 }

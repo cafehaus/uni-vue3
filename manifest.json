@@ -48,7 +48,13 @@
         "setting" : {
             "urlCheck" : false
         },
-        "usingComponents" : true
+        "usingComponents" : true,
+        "plugins" : {
+            "live-player-plugin" : {
+                "version" : "1.3.4",
+                "provider" : "wx2b03c6e691cd7370"
+            }
+        }
     },
     "mp-qq" : {
         "appid" : "1109599694",

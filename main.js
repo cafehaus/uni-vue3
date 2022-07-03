@@ -32,7 +32,7 @@ export function createApp() {
 // #ifndef VUE3
 import Vue from 'vue'
 Vue.config.productionTip = false
-// Vue.prototype.$store = store
+Vue.prototype.$store = store
 Vue.prototype.$config = config
 Vue.prototype.$uni = uni
 Vue.prototype.$storage = storage
