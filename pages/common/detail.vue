@@ -237,6 +237,26 @@ export default {
 
     // 插屏广告
     this.getCpAd('detail')
+
+    this.$util.setShareMenu()
+  },
+
+  onShareTimeline: function () {
+    return {
+      title: this.title,
+      query: {
+        id: this.articleId
+      },
+      imageUrl: this.info.post_thumbnail_image
+    }
+  },
+
+  onShareAppMessage: function () {
+    return {
+      title: this.title,
+      path: 'pages/common/detail?id=' + this.articleId,
+      imageUrl: this.info.post_thumbnail_image
+    }
   },
 
   onUnload: function() {
@@ -248,14 +268,6 @@ export default {
   onReachBottom: function() {
     if (this.hasMore) {
       this.getArticleComment()
-    }
-  },
-
-  onShareAppMessage: function() {
-    return {
-      title: this.title,
-      path: "pages/common/detail?id=" + this.articleId,
-      imageUrl: this.info.post_thumbnail_image,
     }
   },
 

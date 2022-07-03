@@ -82,7 +82,19 @@ export function goto(v) {
   // #endif
 }
 
+export function setShareMenu() {
+  // #ifdef MP
+  uni.showShareMenu({
+    withShareTicket: true,
+    // #ifdef MP-WEIXIN
+    menus: ['shareAppMessage', 'shareTimeline']
+    // #endif
+  })
+  // #endif
+}
+
 export default {
+  setShareMenu,
   fmtDate,
   goto
 }

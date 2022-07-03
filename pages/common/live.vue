@@ -49,6 +49,7 @@
 </template>
 
 <script>
+import { mapActions } from 'vuex'
 export default {
   data() {
     return {
@@ -58,9 +59,12 @@ export default {
   },
   onLoad() {
     this.initData()
+    this.getCpAd('live')
   },
 
   methods: {
+    ...mapActions('app', ['getCpAd']),
+
     initData() {
       this.getLiveInfo()
     },

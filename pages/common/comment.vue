@@ -21,7 +21,7 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex'
+import { mapState, mapActions } from 'vuex'
 import CommentItem from '@/components/comment-item/comment-item'
 
 export default {
@@ -33,9 +33,28 @@ export default {
       listData: [],
     }
   },
+  computed: {
+    ...mapState('app', ['appInfo'])
+  },
+
   onLoad() {
     this.initData()
     this.getCpAd('comment')
+
+    this.$util.setShareMenu()
+  },
+
+  onShareTimeline: function () {
+    return {
+      title: this.appInfo.appName + '的最新评论'
+    }
+  },
+
+  onShareAppMessage: function () {
+    return {
+      title: '分享“' + this.appInfo.appName + '”的最新评论',
+      path: 'pages/common/comment'
+    }
   },
 
   // 下拉刷新

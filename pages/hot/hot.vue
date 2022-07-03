@@ -16,7 +16,7 @@
 <script>
   import ArticleList from '@/components/article-list'
   import CustomAd from '@/components/custom-ad'
-  import { mapActions } from 'vuex'
+  import { mapState, mapActions } from 'vuex'
 
   export default {
     components: {
@@ -37,9 +37,29 @@
         empty: false,
       }
     },
+
+    computed: {
+      ...mapState('app', ['appInfo']),
+    },
+
     onLoad() {
       this.initData()
       this.getCpAd('hot')
+
+      this.$util.setShareMenu()
+    },
+
+    onShareTimeline: function () {
+      return {
+        title: '分享“' + this.appInfo.appName + '”的热门文章'
+      }
+    },
+
+    onShareAppMessage: function () {
+      return {
+        title: '分享“' + this.appInfo.appName + '”的热门文章',
+        path: 'pages/hot/hot'
+      }
     },
 
     methods: {

@@ -55,13 +55,30 @@ export default {
   },
   computed: {
     ...mapState('user', ['isLogin', 'userInfo']),
+    ...mapState('app', ['appInfo']),
   },
   onLoad() {
     this.initData()
 
     // 插屏广告
     this.getCpAd('home')
+
+    this.$util.setShareMenu()
   },
+
+  onShareTimeline: function () {
+    return {
+      title: this.appInfo.appName
+    }
+  },
+
+  onShareAppMessage: function () {
+    return {
+      title: '分享“' + this.appInfo.appName + '”小程序',
+      path: 'pages/home/home'
+    }
+  },
+
   onPullDownRefresh() {
     this.articleList = []
     this.page.index = 1
@@ -73,11 +90,7 @@ export default {
 
   onReachBottom() {
     if (this.isLastPage) {
-      uni.showToast({
-        icon: 'none',
-        title: '已经是最后一页了',
-        duration: 1000,
-      })
+      this.$tips.toast('已经是最后一页了')
       return
     }
 

@@ -118,28 +118,21 @@ export default {
   onLoad() {
     this.initData()
 
-    // #ifdef MP-WEIXIN
-    wx.showShareMenu({
-      withShareTicket: true,
-      menus: ['shareAppMessage', 'shareTimeline']
-    })
-    // #endif
+    this.$util.setShareMenu()
   },
 
-  // #ifdef MP-WEIXIN
   onShareTimeline: function () {
     return {
-      title: '关于“' + appInfo.appName 
+      title: '关于“' + this.appInfo.appName 
     }
   },
 
   onShareAppMessage: function () {
     return {
-      title: '关于“' + appInfo.appName,
+      title: '关于“' + this.appInfo.appName ,
       path: 'pages/common/about'
     }
   },
-  // #endif
 
   methods: {
     initData() {
