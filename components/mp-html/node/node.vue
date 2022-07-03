@@ -1062,7 +1062,6 @@ myAudio,
 ._block,
 ._div,
 ._p {
-	display: block;
   line-height: 1.8;
   text-align: justify;
   word-break: break-all;
