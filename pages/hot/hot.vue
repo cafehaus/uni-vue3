@@ -6,7 +6,7 @@
       @change="change"
     >
       <!-- 自定义广告 -->
-      <CustomAd from="hot" />
+      <CustomAd style="margin-top: 16rpx;" from="hot" />
 
       <ArticleList :empty="empty" :article-list="articleList" />
     </w-tabs>
@@ -25,12 +25,12 @@
     },
     data() {
       return {
-        tabsList: [
-          { index: 0, name: '评论数', type: 'hotpostthisyear' },
-          { index: 1, name: '浏览数', type: 'pageviewsthisyear' },
-          { index: 2, name: '点赞数', type: 'likethisyear' },
-          { index: 3, name: '鼓励数', type: 'praisethisyear' }
-        ],
+        // tabsList: [
+        //   { name: '评论数', type: 'hotpostthisyear' },
+        //   { name: '浏览数', type: 'pageviewsthisyear' },
+        //   { name: '点赞数', type: 'likethisyear' },
+        //   { name: '鼓励数', type: 'praisethisyear' },
+        // ],
 
         activeIndex: 0,
         articleList: [],
@@ -40,6 +40,23 @@
 
     computed: {
       ...mapState('app', ['appInfo']),
+
+      tabsList() {
+        let list = [
+          { name: '评论数', type: 'hotpostthisyear' },
+          { name: '浏览数', type: 'pageviewsthisyear' },
+        ]
+
+        if (!this.$config.isBD) {
+          list.push({ name: '点赞数', type: 'likethisyear' })
+        }
+
+        if (!this.$config.isBD && !this.$config.isQQ && !this.$config.isTT && !this.$config.isAL) {
+          list.push({ name: '鼓励数', type: 'praisethisyear' })
+        }
+
+        return list
+      }
     },
 
     onLoad() {

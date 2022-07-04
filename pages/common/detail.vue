@@ -64,6 +64,7 @@
       </section>
 
       <!-- 阅读原文和鼓励 -->
+      <!-- #ifdef MP-WEIXIN || MP-QQ || H5 || APP-PLUS  -->
       <section class="origin">
         <text class="txt" @click="gotoWeb">阅读原文</text>
         <view class="praise" @click="onPraise">
@@ -71,6 +72,7 @@
           <i class="iconfont icon-lucky-money" />
         </view>
       </section>
+      <!-- #endif -->
 
       <!-- #ifdef MP-WEIXIN -->
       <view class="ad-box-video" v-if="adSuccess && adInfo.videoAdId && adInfo.detailAd === '1'">
@@ -131,8 +133,8 @@
       <w-empty v-if="empty" />
       <!-- #endif -->
 
-      <!-- #ifdef MP-WEIXIN || MP-QQ || MP-TOUTIAO -->
-      <CommentBar :show-bar="canComment" :article="info" :reply-user="replyUser" @success="commentSuccess" />
+      <!-- #ifdef MP-WEIXIN || MP-QQ || MP-TOUTIAO || H5 -->
+      <CommentBar ref="commentBar" :show-bar="canComment" :article="info" :reply-user="replyUser" @cancel="replyUser = null" @success="commentSuccess" />
       <!-- #endif -->
     </view>
 
@@ -161,7 +163,7 @@
           <CommentItem v-for="c in commentList" :key="c.id" :item="c" @reply="handleReply" />
           <w-empty v-if="empty" />
         </view>
-        <CommentBar :show-bar="canComment" :article="info" :reply-user="replyUser" @success="commentSuccess" />
+        <CommentBar ref="commentBar" :show-bar="canComment" :article="info" :reply-user="replyUser" @cancel="replyUser = null" @success="commentSuccess" />
       </template>
       <!-- #endif -->
   </view>
@@ -352,6 +354,8 @@ export default {
     commentSuccess() {
       this.replyUser = null
       this.page.index = 1
+      this.empty = false
+      this.commentList = []
       this.getArticleComment()
     },
 
@@ -374,6 +378,7 @@ export default {
       const res = await this.$api.getArticleDetail(
         {
           id: this.articleId,
+          time: new Date().valueOf()
         },
         { header: { [key]: e || '0' } }
       )
@@ -449,6 +454,10 @@ export default {
           detailAdId: res.qqdetailAdId,
           excitationAdId: res.qqExcitationAdId
         }
+      }
+      // 已经看过
+      if (e === '1') {
+        this.adInfo.isShowExcitation = false
       }
       // 缓存浏览记录
       if (!this.adInfo.isShowExcitation) this.setReadLog(info)
@@ -623,12 +632,14 @@ export default {
 
     handleReply(e) {
       this.replyUser = e
+      this.$refs.commentBar.onComment()
     },
 
     readMore() {
       let platform = this.systemInfo.platform
       if (platform === 'devtools' && this.adInfo.isShowExcitation) {
         this.adInfo.isShowExcitation = false
+        this.getArticleDetail('1')
         this.$tips.toast('开发工具内无法获取激励视频广告，请在手机上预览！')
         return
       }
