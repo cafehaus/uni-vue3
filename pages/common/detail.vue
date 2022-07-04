@@ -133,7 +133,7 @@
       <w-empty v-if="empty" />
       <!-- #endif -->
 
-      <!-- #ifdef MP-WEIXIN || MP-QQ || MP-TOUTIAO || H5 -->
+      <!-- #ifdef MP-WEIXIN || MP-QQ || MP-TOUTIAO -->
       <CommentBar ref="commentBar" :show-bar="canComment" :article="info" :reply-user="replyUser" @cancel="replyUser = null" @success="commentSuccess" />
       <!-- #endif -->
     </view>

@@ -199,6 +199,7 @@
 
   page
     background #f5f7f7
+    padding-bottom 40rpx
   .user
     display flex
     align-items center

@@ -8,7 +8,7 @@
 
       <!-- 赞赏 -->
       <view class="praisePost">
-        <!-- #ifndef MP-BAIDU  -->
+        <!-- #ifdef MP-WEIXIN || MP-QQ || H5 || APP-PLUS  -->
         <view style="text-align: center">
           <button
             class="praise-button"
