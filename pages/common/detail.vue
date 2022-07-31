@@ -64,6 +64,7 @@
       </section>
 
       <!-- 阅读原文和鼓励 -->
+      <!-- #ifdef MP-WEIXIN || MP-QQ || H5 || APP-PLUS  -->
       <section class="origin">
         <text class="txt" @click="gotoWeb">阅读原文</text>
         <view class="praise" @click="onPraise">
@@ -71,6 +72,7 @@
           <i class="iconfont icon-lucky-money" />
         </view>
       </section>
+      <!-- #endif -->
 
       <!-- #ifdef MP-WEIXIN -->
       <view class="ad-box-video" v-if="adSuccess && adInfo.videoAdId && adInfo.detailAd === '1'">
@@ -132,7 +134,7 @@
       <!-- #endif -->
 
       <!-- #ifdef MP-WEIXIN || MP-QQ || MP-TOUTIAO -->
-      <CommentBar :show-bar="canComment" :article="info" :reply-user="replyUser" @success="commentSuccess" />
+      <CommentBar ref="commentBar" :show-bar="canComment" :article="info" :reply-user="replyUser" @cancel="replyUser = null" @success="commentSuccess" />
       <!-- #endif -->
     </view>
 
@@ -161,7 +163,7 @@
           <CommentItem v-for="c in commentList" :key="c.id" :item="c" @reply="handleReply" />
           <w-empty v-if="empty" />
         </view>
-        <CommentBar :show-bar="canComment" :article="info" :reply-user="replyUser" @success="commentSuccess" />
+        <CommentBar ref="commentBar" :show-bar="canComment" :article="info" :reply-user="replyUser" @cancel="replyUser = null" @success="commentSuccess" />
       </template>
       <!-- #endif -->
   </view>
@@ -203,7 +205,7 @@ export default {
       likeList: [],
       replyUser: null,
       canComment: true,
-      showBdComment: false,
+      // showBdComment: false,
       commentParam: {},
       toolbarInfo: {},
 
@@ -237,6 +239,26 @@ export default {
 
     // 插屏广告
     this.getCpAd('detail')
+
+    this.$util.setShareMenu()
+  },
+
+  onShareTimeline: function () {
+    return {
+      title: this.title,
+      query: {
+        id: this.articleId
+      },
+      imageUrl: this.info.post_thumbnail_image
+    }
+  },
+
+  onShareAppMessage: function () {
+    return {
+      title: this.title,
+      path: 'pages/common/detail?id=' + this.articleId,
+      imageUrl: this.info.post_thumbnail_image
+    }
   },
 
   onUnload: function() {
@@ -248,14 +270,6 @@ export default {
   onReachBottom: function() {
     if (this.hasMore) {
       this.getArticleComment()
-    }
-  },
-
-  onShareAppMessage: function() {
-    return {
-      title: this.title,
-      path: "pages/common/detail?id=" + this.articleId,
-      imageUrl: this.info.post_thumbnail_image,
     }
   },
 
@@ -340,6 +354,8 @@ export default {
     commentSuccess() {
       this.replyUser = null
       this.page.index = 1
+      this.empty = false
+      this.commentList = []
       this.getArticleComment()
     },
 
@@ -362,6 +378,7 @@ export default {
       const res = await this.$api.getArticleDetail(
         {
           id: this.articleId,
+          time: new Date().valueOf()
         },
         { header: { [key]: e || '0' } }
       )
@@ -438,8 +455,12 @@ export default {
           excitationAdId: res.qqExcitationAdId
         }
       }
+      // 已经看过
+      if (e === '1') {
+        this.adInfo.isShowExcitation = false
+      }
       // 缓存浏览记录
-      this.setReadLog(info)
+      if (!this.adInfo.isShowExcitation) this.setReadLog(info)
 
       // 百度互动组件
       this.commentParam = {
@@ -470,6 +491,8 @@ export default {
     },
 
     goCommentDetail(e) {
+      console.log('goCommentDetail(e)')
+      console.log(e)
       let srid = e.data.srid
       let url = '/pages/common/comment-detail?srid=' + srid + '&id=' + this.articleId + "&title=" + this.title
       uni.navigateTo({
@@ -609,12 +632,14 @@ export default {
 
     handleReply(e) {
       this.replyUser = e
+      this.$refs.commentBar.onComment()
     },
 
     readMore() {
       let platform = this.systemInfo.platform
       if (platform === 'devtools' && this.adInfo.isShowExcitation) {
         this.adInfo.isShowExcitation = false
+        this.getArticleDetail('1')
         this.$tips.toast('开发工具内无法获取激励视频广告，请在手机上预览！')
         return
       }
@@ -640,7 +665,7 @@ export default {
       var self = this
 
       if (this.$config.isWX && wx.createRewardedVideoAd) {
-        rewardedVideoAd = createRewardedVideoAd({
+        rewardedVideoAd = wx.createRewardedVideoAd({
           adUnitId: this.adInfo.excitationAdId
         })
         rewardedVideoAd.onLoad(() => {})

@@ -19,6 +19,7 @@
 </template>
 
 <script>
+  import { mapState } from 'vuex'
   export default {
     data() {
       return {
@@ -30,8 +31,26 @@
         tagList: [],
       }
     },
+    computed: {
+      ...mapState('app', ['appInfo'])
+    },
+
     onLoad() {
       this.initData()
+      this.$util.setShareMenu()
+    },
+
+    onShareTimeline: function () {
+      return {
+        title: '分享“' + this.appInfo.appName + '”的标签列表'
+      }
+    },
+
+    onShareAppMessage: function () {
+      return {
+        title: '分享“' + this.appInfo.appName + '”的标签列表',
+        path: '/pages/common/tags'
+      }
     },
 
     // 下拉刷新

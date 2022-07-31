@@ -55,13 +55,30 @@ export default {
   },
   computed: {
     ...mapState('user', ['isLogin', 'userInfo']),
+    ...mapState('app', ['appInfo']),
   },
   onLoad() {
     this.initData()
 
     // 插屏广告
     this.getCpAd('home')
+
+    this.$util.setShareMenu()
   },
+
+  onShareTimeline: function () {
+    return {
+      title: this.appInfo.appName
+    }
+  },
+
+  onShareAppMessage: function () {
+    return {
+      title: '分享“' + this.appInfo.appName + '”小程序',
+      path: 'pages/home/home'
+    }
+  },
+
   onPullDownRefresh() {
     this.articleList = []
     this.page.index = 1
@@ -73,11 +90,7 @@ export default {
 
   onReachBottom() {
     if (this.isLastPage) {
-      uni.showToast({
-        icon: 'none',
-        title: '已经是最后一页了',
-        duration: 1000,
-      })
+      this.$tips.toast('已经是最后一页了')
       return
     }
 
@@ -104,8 +117,13 @@ export default {
       let swiperList = res[swiperKey] || []
       let navList = res[navKey] || []
 
-      this.swiperList = swiperList
-      this.navList = navList
+      if (this.$config.isH5 || this.$config.isAPP) {
+        this.swiperList = swiperList.filter(m => (m.type === 'apppage' && m.path !== '/pages/live/live') || (m.type === 'webpage'))
+        this.navList = navList.filter(m => (m.type === 'apppage' && m.path !== '/pages/live/live') || (m.type === 'webpage'))
+      } else {
+        this.swiperList = swiperList
+        this.navList = navList
+      }
     },
 
     // 标签

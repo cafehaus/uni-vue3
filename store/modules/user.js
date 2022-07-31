@@ -1,7 +1,7 @@
-import Tips from '/libs/tips'
-import * as api from '/common/api'
-import { isLogin } from '/libs/user'
-import storage from '/libs/storage'
+import Tips from '@/libs/tips'
+import * as api from '@/common/api'
+import { isLogin } from '@/libs/user'
+import storage from '@/libs/storage'
 
 export default {
   namespaced: true,

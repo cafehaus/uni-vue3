@@ -14,7 +14,8 @@
           @click="goto(item)"
         >
           <view>
-            <image class="img" mode="aspectFill" :src="item.image || $config.defaultImg" />
+            <image v-if="item.image" class="img" mode="aspectFill" :src="item.image" />
+            <image v-else class="img" mode="aspectFill" :src="defaultImg" />
           </view>
           <view>
             <text class="title">{{ item.title }}</text>
@@ -36,7 +37,9 @@ export default {
   },
 
   data() {
-    return {};
+    return {
+      defaultImg: this.$config.defaultImg
+    }
   },
 
   methods: {

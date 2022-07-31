@@ -8,6 +8,7 @@
 
       <!-- 赞赏 -->
       <view class="praisePost">
+        <!-- #ifdef MP-WEIXIN || MP-QQ || H5 || APP-PLUS  -->
         <view style="text-align: center">
           <button
             class="praise-button"
@@ -17,6 +18,7 @@
             赞赏鼓励
           </button>
         </view>
+        <!-- #endif  -->
 
         <!-- 头像 -->
         <view class="praiseTitle" v-if="praiseList.length">
@@ -68,10 +70,12 @@
         </view>
 
         <!-- 进入网站 -->
+        <!-- #ifndef MP-BAIDU  -->
         <view class="web">
           <text class="url">网站：{{ website }}</text>
           <view class="btn-web" @click="goWeb">进入网站</view>
         </view>
+        <!-- #endif  -->
       </view>
     </view>
 
@@ -118,28 +122,21 @@ export default {
   onLoad() {
     this.initData()
 
-    // #ifdef MP-WEIXIN
-    wx.showShareMenu({
-      withShareTicket: true,
-      menus: ['shareAppMessage', 'shareTimeline']
-    })
-    // #endif
+    this.$util.setShareMenu()
   },
 
-  // #ifdef MP-WEIXIN
   onShareTimeline: function () {
     return {
-      title: '关于“' + appInfo.appName 
+      title: '关于“' + this.appInfo.appName 
     }
   },
 
   onShareAppMessage: function () {
     return {
-      title: '关于“' + appInfo.appName,
+      title: '关于“' + this.appInfo.appName ,
       path: 'pages/common/about'
     }
   },
-  // #endif
 
   methods: {
     initData() {

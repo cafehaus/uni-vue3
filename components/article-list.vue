@@ -4,7 +4,7 @@
       <!-- #ifdef MP-WEIXIN -->
       <view v-if="index > 0 && (index % item.wxlistAdEvery === 0) && item.wxlistAd == '1' && item.wxlistAdId && showAd">
         <view class="article-ad" v-if="(index / item.wxlistAdEvery) % 2 == 0">
-          <ad unit-id="{{item.wxVideoAdId}}" ad-type="video" ad-theme="white" @error="onError"></ad>
+          <ad :unit-id="item.wxVideoAdId" ad-type="video" ad-theme="white" @error="onError"></ad>
         </view>
         <view class="article-ad" v-else>
           <ad :unit-id="item.wxlistAdId" ad-theme="white" @error="onError"></ad>

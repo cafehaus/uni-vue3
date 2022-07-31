@@ -1,7 +1,7 @@
 <template>
   <view>
     <view v-for="item in list" :key="item.id">
-      <view class="item">
+      <view class="item" @click="onReply(item)">
         <text class="author">{{item.author_name}}</text>
         <text>回复</text>
         <text class="author">{{father.author_name}}</text>
@@ -39,12 +39,11 @@
       return {}
     },
 
-    onLoad() {
-      // this.initData()
-    },
-
     methods: {
-      // initData() {},
+      onReply(e) {
+        console.log(e)
+        this.$emit('reply', { ...e })
+      },
 
       // 去文章详情
       goDetail(id) {

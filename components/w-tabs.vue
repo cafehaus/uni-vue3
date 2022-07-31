@@ -10,9 +10,9 @@
       >
         <span class="navbar-title">{{ item.name }}</span>
       </view>
-      <view class="navbar-slider" :class="'navbar-slider-' + activeTab" />
+      <!-- <view class="navbar-slider" :class="'navbar-slider-' + activeTab" /> -->
     </view>
-   <view class="tab-content">
+    <view class="tab-content">
       <slot></slot>
     </view>
   </view>
@@ -25,7 +25,7 @@
       tabs: {
         type: Array,
         default() {
-          return ['选项一', '选项二', '选项三']
+          return []
         }
       },
       activeTab: {
@@ -39,12 +39,6 @@
         activeIndex: this.activeTab
       }
     },
-
-    // watch: {
-    //   activeTab(val) {
-    //     this.activeTab = val
-    //   }
-    // },
 
     methods: {
       switchTab(index) {
@@ -77,10 +71,22 @@
       padding 8px 0
       text-align center
       color #666
+      transition all .6s
       &.navbar-item-on
-        color $red
+        color $base-color
+        position relative
+        &:after
+          content ''
+          width 40rpx
+          height 4rpx
+          background-color $base-color
+          position absolute
+          bottom -10rpx
+          left 50%
+          margin-left -20rpx
         .navbar-title
           font-weight 500
+
     .navbar-slider
       position absolute
       left 0
@@ -91,7 +97,7 @@
         content ''
         width 40rpx
         height 4rpx
-        background-color $red
+        background-color $base-color
         position absolute
         bottom 0
         left 50%

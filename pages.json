@@ -45,6 +45,18 @@
 		        "navigationBarTitleText": "登录"
 		      }
 		    },
+        {
+          "path": "pages/login/login-password",
+          "style": {
+            "navigationBarTitleText": "密码登录"
+          }
+        },
+		    {
+		      "path": "pages/login/register",
+		      "style": {
+		        "navigationBarTitleText": "注册"
+		      }
+		    },
 		    {
 		      "path": "pages/common/detail",
 		      "style": {
@@ -108,6 +120,17 @@
 		      "style": {
 		        "navigationBarTitleText": "搜索"
 		      }
+		    },
+            {
+		      "path": "pages/common/live",
+		      "style": {
+		        "navigationBarTitleText": "直播",
+				"mp-weixin": {
+					"usingComponents": {
+						"subscribe": "plugin-private://wx2b03c6e691cd7370/components/subscribe/subscribe"
+					}
+				}
+		      }
 		    }
 	],
 	"globalStyle": {
@@ -116,8 +139,8 @@
 		"navigationBarBackgroundColor": "#FFF",
 		"backgroundColor": "#FFF",
 		"usingComponents": {
-			"CommentChildren":"./components/comment-item/comment-children"  
-		}  
+			"CommentChildren":"./components/comment-item/comment-children"
+		}
 	},
   "tabBar": {
     "color": "#999",
@@ -143,7 +166,7 @@
         "selectedIconPath": "static/tab-hot-on.png",
         "text": "热门"
       }
-	  // #ifdef MP-WEIXIN ||  MP-ALIPAY || MP-QQ || MP-TOUTIAO || MP-BAIDU
+	  // #ifdef MP-WEIXIN ||  MP-ALIPAY || MP-QQ || MP-TOUTIAO || MP-BAIDU || H5
       ,{
         "pagePath": "pages/me/me",
         "iconPath": "static/tab-me.png",

@@ -1,6 +1,6 @@
 <template>
   <view class="page">
-    <view v-if="type < 4" class="header">
+    <view class="header">
       <image class="img" :src="info.img" mode="aspectFill" />
       <view class='info'>
         <view class="des">
@@ -20,7 +20,7 @@
 <script>
   import ArticleList from '@/components/article-list'
   import CustomAd from '@/components/custom-ad'
-  import { mapActions } from 'vuex'
+  import { mapState, mapActions } from 'vuex'
 
   export default {
     components: {
@@ -29,7 +29,7 @@
     },
     data() {
       return {
-        type: '1', // 1 分类 2 标签 3 搜索 4 我的浏览 5 我的评论 6 我的点赞 7 我的订阅
+        type: '1', // 1 分类 2 标签
         curId: '',
         articleList: [],
         info: {},
@@ -42,6 +42,10 @@
         isPullDown: false
       }
     },
+    computed: {
+      ...mapState('app', ['appInfo'])
+    },
+
     onLoad(e) {
       this.curId = e.id || ''
       this.type = e.type || '1'
@@ -49,6 +53,18 @@
 
       // 插屏广告
       this.getCpAd('list')
+
+      this.$util.setShareMenu()
+    },
+
+    onShareTimeline: function () {
+      let info = this.setShareInfo('shareTimeline')
+      return info
+    },
+
+    onShareAppMessage: function () {
+      let info =  this.setShareInfo()
+      return info
     },
 
     // 下拉刷新
@@ -194,7 +210,29 @@
         if ((res.length < 5) || (res.code === 'rest_post_invalid_page_number')) {
           this.isLastPage = true
         }
-      }
+      },
+
+      // 设置分享信息
+      setShareInfo(type) {
+        let title = ''
+        let path = ''
+
+        if (this.type === '1') {
+          title = '分享' + this.appInfo.appName + '的分类：' + this.info.name
+          path = `pages/common/list?type=1&id=${this.curId}`
+        } else if (this.type === '2') {
+          title = '分享' + this.appInfo.appName + '的标签：' + this.info.name
+          path = `pages/common/list?type=2&id=${this.curId}`
+        }
+
+        return type === 'shareTimeline' ? {
+          title,
+          query: { id: this.curId }
+        } : {
+          title,
+          path
+        } 
+      },
     }
   }
 </script>

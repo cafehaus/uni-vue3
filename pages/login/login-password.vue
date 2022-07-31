@@ -1,30 +1,25 @@
 <template>
   <div class="view login">
     <image class="logo" src="/static/logo.png" mode="aspectFit" />
-    <!-- #ifdef MP-TOUTIAO -->
-    <p class="btn-login" @click="onLogin">授权登录</p>
-    <!-- #endif -->
-    <!-- #ifdef MP-BAIDU || MP-QQ  -->
-    <button class="btn-login" open-type="getUserInfo" @getuserinfo="onLogin">授权登录</button>
-    <!-- #endif -->
-    <!-- #ifdef MP-ALIPAY -->
-    <button class="btn-login" open-type="getAuthorize" @GetAuthorize="onLogin" scope="userInfo">授权登录</button>
-    <!-- #endif -->
-    <!-- #ifdef MP-WEIXIN || H5 -->
-    <button class="btn-login" open-type="getPhoneNumber" @getphonenumber="getPhoneNumber">授权手机号快捷登录</button>
-    <!-- #endif -->
-    <p class="btn-user" @click="goto('login-password')">密码登录</p>
 
-    <p class="btn-box">
-      <span class="btn-register" @click="goto('register')">立即注册</span>
-      <span class="btn-cancel" @click="goto('back')">暂不登录</span>
-    </p>
-
-    <footer class="footer">
-      登录即代表同意：
-      <span @click="goto('user')">用户协议</span>、
-      <span @click="goto('privacy')">隐私协议</span>
-    </footer>
+    <view class="form">
+      <view class="form-item">
+        <input
+          v-model="userName"
+          class="input"
+          placeholder="请输入用户名"
+        />
+      </view>
+      <view class="form-item">
+        <input
+          v-model="password"
+          type="password"
+          class="input"
+          placeholder="请输入密码"
+        />
+      </view>
+    </view>
+    <p class="btn-register" @click="goBack">立即登录</p>
   </div>
 </template>
 
@@ -32,9 +27,8 @@
   export default {
     data() {
       return {
-        code: '',
-        userInfo: {},
-        redirect: '',
+        userName: '',
+        password: '',
       }
     },
 
@@ -46,28 +40,6 @@
     methods: {
       initData() {
         this.getWxCode()
-      },
-
-      async getPhoneNumber(e) {
-        const code = e.detail.code
-        const res = await this.$api.phoneLogin({
-          code
-        })
-        if (res.success && code) {
-          let user = res.user || {}
-          let userLevel = user.userLevel || {}
-          let userInfo = user
-
-          userInfo.userLevel =  userLevel.level || '0'
-          userInfo.levelName = userLevel.levelName || '订阅者'
-          userInfo.userId = user.userid
-          this.setUserInfo(userInfo)
-          this.onLoginSuccess({
-            openid: user.userid
-          })
-        } else {
-          this.$tips.toast(res.message || '出错了，请稍后再试')
-        }
       },
 
       // 获取微信登录code
@@ -221,10 +193,6 @@
         })
       },
 
-      setUserInfo(userInfo) {
-        this.$storage('userInfo', userInfo)
-      },
-
       _wxLogin() {
         let args = {}
         let data = {}
@@ -307,29 +275,9 @@
         }
       },
 
-      goto(e) {
-        // 返回
-        if (e === 'back') {
-          uni.navigateBack()
-          return
-        }
-
-        let path = ''
-        if (e === 'register') { // 注册
-          path = '/pages/login/register'
-        }
-        if (e === 'login-password') { // 密码登录
-          path = '/pages/login/login-password'
-        }       if (e === 'ruser') { // 用户协议
-          // path = '/pages/login/register'
-        }
-        if (e === 'privacy') { // 隐私协议
-          // path = '/pages/login/register'
-        }
-
-        path && uni.navigateTo({
-          url: path
-        })
+      // 返回
+      goBack() {
+        uni.navigateBack()
       }
     }
   }
@@ -346,12 +294,19 @@
       width 160rpx
       height 218rpx
       margin-top 100rpx
-    .btn-login
+    .form
+      padding 40rpx 0
+      &-item
+        border 1rpx solid #eee
+        margin-top 20rpx
+        padding 20rpx
+        text-align left
+    .btn-register
       width 100%
       height 88rpx
       background $base-color
-      // border-radius 49rpx
-      margin 200rpx auto 0
+      border-radius 49rpx
+      // margin 200rpx auto 0
       line-height 88rpx
       color #fff
       text-align center
@@ -360,34 +315,18 @@
       align-items center
       &::after
         border none
-    .btn-user
-      width 100%
-      height 80rpx
-      border 1px solid $base-color
-      // border-radius 49rpx
-      margin 30rpx auto 0
-      color $base-color
-      text-align center
-      line-height 80rpx
-    .btn-box
-      display flex
-      justify-content space-between
-      font-size 12px
-      line-height 100rpx
-      .btn-register
-        color $base-color
-      .btn-cancel
-        color $gray
+    // .btn-register
+    //   width 100%
+    //   height 80rpx
+    //   border 1px solid $base-color
+    //   border-radius 49rpx
+    //   margin 30rpx auto 0
+    //   color $base-color
+    //   text-align center
+    //   line-height 80rpx
+    // .btn-cancel
+    //   font-size 13px
+    //   color #bbb
+    //   line-height 100rpx
 
-    .footer
-      position absolute
-      bottom 80rpx
-      left 0
-      right 0
-      font-size 12px
-      color $gray
-      text-align center
-      span
-        text-decoration underline
-        cursor pointer
 </style>
