@@ -21,6 +21,12 @@ export const loginTT = params => http.post(`${wm}toutiao/getopenid`, params)
 // 授权手机号登录|post
 export const phoneLogin = params => http.post(`${wm}weixin/phonelogin`, params)
 
+// 用户名密码登录|post
+export const passwordLogin = params => http.post(`${wm}weixin/registeruserlogin`, params)
+
+// 注册|post
+export const register = params => http.post(`${wm}weixin/registeruser`, params)
+
 // 获取用户信息|get
 export const getUserInfo = params => http.post(`${wm}weixin/updateuserinfo`, params)
 

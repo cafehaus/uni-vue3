@@ -233,6 +233,7 @@
         .user-id
           margin-right 20rpx
         .btn-update
+          height 42rpx
           line-height 42rpx
           background #fff
           padding 0 16rpx

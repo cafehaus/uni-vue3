@@ -8,9 +8,9 @@
     <button class="btn-login" open-type="getUserInfo" @getuserinfo="onLogin">授权登录</button>
     <!-- #endif -->
     <!-- #ifdef MP-ALIPAY -->
-    <button class="btn-login" open-type="getAuthorize" @GetAuthorize="onLogin" scope="userInfo">授权登录</button>
+    <!-- <button class="btn-login" open-type="getAuthorize" @getAuthorize="onLogin" scope="userInfo">授权登录</button> -->
     <!-- #endif -->
-    <!-- #ifdef MP-WEIXIN || H5 -->
+    <!-- #ifdef MP-WEIXIN || MP-ALIPAY || H5 -->
     <button class="btn-login" open-type="getPhoneNumber" @getphonenumber="getPhoneNumber">授权手机号快捷登录</button>
     <!-- #endif -->
     <p class="btn-user" @click="goto('login-password')">密码登录</p>
@@ -20,11 +20,11 @@
       <span class="btn-cancel" @click="goto('back')">暂不登录</span>
     </p>
 
-    <footer class="footer">
+ <!--  <footer class="footer">
       登录即代表同意：
       <span @click="goto('user')">用户协议</span>、
       <span @click="goto('privacy')">隐私协议</span>
-    </footer>
+    </footer> -->
   </div>
 </template>
 
@@ -320,7 +320,8 @@
         }
         if (e === 'login-password') { // 密码登录
           path = '/pages/login/login-password'
-        }       if (e === 'ruser') { // 用户协议
+        }
+        if (e === 'ruser') { // 用户协议
           // path = '/pages/login/register'
         }
         if (e === 'privacy') { // 隐私协议
@@ -342,6 +343,7 @@
     background #fff
     padding 0 80rpx
     text-align center
+    min-height 100vh
     .logo
       width 160rpx
       height 218rpx
@@ -350,7 +352,7 @@
       width 100%
       height 88rpx
       background $base-color
-      // border-radius 49rpx
+      border-radius 49rpx
       margin 200rpx auto 0
       line-height 88rpx
       color #fff
@@ -358,13 +360,14 @@
       display flex
       justify-content center
       align-items center
+      border none
       &::after
         border none
     .btn-user
       width 100%
       height 80rpx
       border 1px solid $base-color
-      // border-radius 49rpx
+      border-radius 49rpx
       margin 30rpx auto 0
       color $base-color
       text-align center
@@ -372,8 +375,9 @@
     .btn-box
       display flex
       justify-content space-between
+      margin-top 30rpx
       font-size 12px
-      line-height 100rpx
+      // line-height 100rpx
       .btn-register
         color $base-color
       .btn-cancel
