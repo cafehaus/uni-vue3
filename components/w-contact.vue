@@ -39,6 +39,7 @@ export default {
     background transparent
     padding 0
     margin 0
+    justify-content center
     &::after
       border none
   .iconfont

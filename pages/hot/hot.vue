@@ -6,7 +6,9 @@
       @change="change"
     >
       <!-- 自定义广告 -->
+      <!-- # ifndef MP-KUAISHOU  -->
       <CustomAd style="margin-top: 16rpx;" from="hot" />
+      <!-- # endif -->
 
       <ArticleList :empty="empty" :article-list="articleList" />
     </w-tabs>
@@ -51,7 +53,7 @@
           list.push({ name: '点赞数', type: 'likethisyear' })
         }
 
-        if (!this.$config.isBD && !this.$config.isQQ && !this.$config.isTT && !this.$config.isAL) {
+        if (!this.$config.isBD && !this.$config.isQQ && !this.$config.isTT && !this.$config.isAL && !this.$config.isKS) {
           list.push({ name: '鼓励数', type: 'praisethisyear' })
         }
 

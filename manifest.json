@@ -88,5 +88,8 @@
         "router" : {
             "mode" : "history"
         }
+    },
+    "mp-kuaishou" : {
+        "appid" : "ks704813343795949016"
     }
 }

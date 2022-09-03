@@ -18,7 +18,9 @@
     <!-- 右边二级分类列表 -->
     <view class="cate-right">
       <!-- 自定义广告 -->
+      <!-- # ifndef MP-KUAISHOU  -->
       <CustomAd from="cate" btn-text="详情" />
+      <!-- # endif -->
       <view class="list">
         <view
           class="list-item"

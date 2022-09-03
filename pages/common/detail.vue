@@ -6,9 +6,14 @@
         <ad :unit-id="adInfo.detailAdId" @error="onErrorAd"></ad>
       </view>
 
+      <!-- # ifndef MP-KUAISHOU  -->
       <CustomAd v-else from="detail" />
+      <!-- # endif -->
     </template>
+    
+    <!-- # ifndef MP-KUAISHOU  -->
     <CustomAd v-else from="detail" />
+    <!-- # endif -->
 
     <view class="page detail">
       <h2 class="article-title">{{ title }}</h2>

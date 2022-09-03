@@ -80,7 +80,9 @@
     </view>
 
     <!-- 联系客服 -->
+    <!-- #ifdef MP-WEIXIN || MP-BAIDU -->
     <w-contact />
+    <!-- #endif  -->
   </view>
 </template>
 

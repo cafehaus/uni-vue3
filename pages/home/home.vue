@@ -13,7 +13,9 @@
     <VTag :tag-list="tagList" />
 
     <!-- 自定义广告 -->
+    <!-- # ifndef MP-KUAISHOU -->
     <CustomAd from="home" />
+    <!-- # endif -->
 
     <!-- 文章列表 -->
     <ArticleList :article-list="articleList" />
@@ -117,7 +119,7 @@ export default {
       let swiperList = res[swiperKey] || []
       let navList = res[navKey] || []
 
-      if (this.$config.isH5 || this.$config.isAPP) {
+      if (this.$config.isH5 || this.$config.isAPP || this.$config.isKS) {
         this.swiperList = swiperList.filter(m => (m.type === 'apppage' && m.path !== '/pages/live/live') || (m.type === 'webpage'))
         this.navList = navList.filter(m => (m.type === 'apppage' && m.path !== '/pages/live/live') || (m.type === 'webpage'))
       } else {

@@ -20,6 +20,7 @@ export let isTT = false
 export let isAL = false
 export let isH5 = false
 export let isAPP = false
+export let isKS = false
 
 // 通过条件编译设置平台名称
 export let platform = ''
@@ -60,6 +61,8 @@ isQQ = true
 // #endif
 // #ifdef MP-KUAISHOU
 platform = 'MP-KUAISHOU'
+// appType = 'ks'
+isKS = true
 // #endif
 // #ifdef MP-JD
 platform = 'MP-JD'
@@ -78,6 +81,7 @@ export default {
   isBD,
   isTT,
   isAL,
+  isKS,
   version: versionName,
   isProd: process.env.NODE_ENV === 'production',
   env,

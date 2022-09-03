@@ -157,15 +157,17 @@
 
 .search
   background #f5f6f7
-  padding 30rpx 20rpx
+  padding 0 20rpx
   display flex
   justify-content space-between
   align-items center
-  margin 16rpx 40rpx 40rpx
+  margin 0 40rpx 40rpx
   .input
     flex 1
   .icon-search
-    color #999  
+    color #999
+    display inline-block
+    padding 40rpx 20rpx
 
 .history
   line-height 100rpx

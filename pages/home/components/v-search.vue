@@ -22,7 +22,7 @@
     <!-- 搜索框 -->
     <view class="search">
       <input v-model="searchKey" placeholder="你感兴趣的内容..." class="input" />
-      <i class="iconfont icon-search" @click="goto('/pages/common/search')" />
+      <i class="iconfont icon-search" @click.stop="goto('/pages/common/search')" />
     </view>
   </view>
 </template>
@@ -66,7 +66,6 @@
     methods: {
       // 跳转
       goto(url) {
-        console.log(this.defValue)
         if (this.from === 'home') {
           if (url === '/pages/common/search') {
             url = url + '?search=' + this.searchKey
@@ -91,7 +90,7 @@
     border-bottom 16rpx solid #f5f7f7
   .search
     background #f5f6f7
-    padding 30rpx 20rpx
+    padding 0 20rpx
     display flex
     justify-content space-between
     align-items center
@@ -99,7 +98,9 @@
     .input
       flex 1
     .icon-search
-      color #999  
+      color #999
+      display inline-block
+      padding 40rpx 20rpx
 
   .nav
     display flex
