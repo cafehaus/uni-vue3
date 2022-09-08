@@ -3,7 +3,9 @@
     <view class="user">
       <view class="avatar">
         <image class="img" :src="item.author_url" />
+        <!-- #ifndef MP-KUAISHOU -->
         <image class="icon" :src="`/static/${item.usertype}.jpg`" />
+        <!-- #endif -->
       </view>
       <view class="info">
         <view class="author" @click="onReply(item)">{{ item.author_name }}</view>

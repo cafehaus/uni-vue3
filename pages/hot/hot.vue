@@ -6,9 +6,9 @@
       @change="change"
     >
       <!-- 自定义广告 -->
-      <!-- # ifndef MP-KUAISHOU  -->
+      <!-- #ifndef MP-KUAISHOU  -->
       <CustomAd style="margin-top: 16rpx;" from="hot" />
-      <!-- # endif -->
+      <!-- #endif -->
 
       <ArticleList :empty="empty" :article-list="articleList" />
     </w-tabs>

@@ -13,9 +13,9 @@
     <VTag :tag-list="tagList" />
 
     <!-- 自定义广告 -->
-    <!-- # ifndef MP-KUAISHOU -->
+    <!-- #ifndef MP-KUAISHOU -->
     <CustomAd from="home" />
-    <!-- # endif -->
+    <!-- #endif -->
 
     <!-- 文章列表 -->
     <ArticleList :article-list="articleList" />

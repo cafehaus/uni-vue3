@@ -18,9 +18,9 @@
     <!-- 右边二级分类列表 -->
     <view class="cate-right">
       <!-- 自定义广告 -->
-      <!-- # ifndef MP-KUAISHOU  -->
+      <!-- #ifndef MP-KUAISHOU  -->
       <CustomAd from="cate" btn-text="详情" />
-      <!-- # endif -->
+      <!-- #endif -->
       <view class="list">
         <view
           class="list-item"
@@ -193,7 +193,7 @@
           text-overflow ellipsis
           white-space nowrap
           &.active
-            color $maincolor
+            color $base-color
             font-weight 500
             background #f5f7f7
             &::before
@@ -201,7 +201,7 @@
               display block
               width 3px
               height 30rpx
-              background $maincolor
+              background $base-color
               position absolute
               top 35rpx
               left 0

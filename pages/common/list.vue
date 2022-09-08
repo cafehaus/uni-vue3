@@ -11,9 +11,9 @@
     </view>
 
     <!-- 自定义广告 -->
-    <!-- # ifndef MP-KUAISHOU  -->
+    <!-- #ifndef MP-KUAISHOU  -->
     <CustomAd from="list" />
-    <!-- # endif -->
+    <!-- #endif -->
 
     <ArticleList :article-list="articleList" />
   </view>

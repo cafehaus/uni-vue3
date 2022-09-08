@@ -2,18 +2,18 @@
   <view class="page-detail">
     <!-- 广告 -->
     <template v-if="showTopAd">
+      <!-- #ifdef MP-WEIXIN  -->
       <view class="ad-box" v-if="adSuccess && adInfo.detailAdId && adInfo.detailAd === '1'">
         <ad :unit-id="adInfo.detailAdId" @error="onErrorAd"></ad>
       </view>
 
-      <!-- # ifndef MP-KUAISHOU  -->
       <CustomAd v-else from="detail" />
-      <!-- # endif -->
+      <!-- #endif -->
     </template>
-    
-    <!-- # ifndef MP-KUAISHOU  -->
+
+    <!-- #ifndef MP-KUAISHOU  -->
     <CustomAd v-else from="detail" />
-    <!-- # endif -->
+    <!-- #endif -->
 
     <view class="page detail">
       <h2 class="article-title">{{ title }}</h2>
@@ -51,12 +51,14 @@
         <view class="avatar">
           <view class="avatar-item" v-for="(item, i) in likeList" :key="i">
             <image class="img" :src="item.avatarurl" />
+            <!-- #ifndef MP-KUAISHOU  -->
             <image v-if="item.userType === 'weixin'" class="icon" src="/static/weixin.jpg" />
             <image v-else-if="item.userType === 'qq'" class="icon" src="/static/qq.jpg" />
             <image v-else-if="item.userType === 'toutiao'" class="icon" src="/static/toutiao.jpg" />
             <image v-else-if="item.userType === 'baidu'" class="icon" src="/static/baidu.jpg" />
             <image v-else-if="item.userType === 'alipay'" class="icon" src="/static/alipay.jpg" />
             <image v-else class="icon" src="/static/web.jpg" />
+            <!-- #endif -->
           </view>
         </view>
       </section>
@@ -745,7 +747,7 @@ export default {
     },
 
     // 广告加载失败
-    onErrorAd(e) {  
+    onErrorAd(e) {
       if (e.detail.errCode) {
         this.adSuccess = false
       }
@@ -786,7 +788,7 @@ export default {
   .article-title
     font-size 20px
     font-weight 600
-    margin 40rpx 0 20rpx
+    padding 40rpx 0 20rpx
   .article-date
     font-size 24rpx
     line-height 1
