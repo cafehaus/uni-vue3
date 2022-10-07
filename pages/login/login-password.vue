@@ -33,7 +33,7 @@
     },
 
     onLoad(e) {
-      this.redirect = e.redirect
+      this.redirect = e.redirect || ''
       this.initData()
     },
 
@@ -53,43 +53,49 @@
           password: this.password
         }
         this.$tips.loading('正在登录...')
-        const res = await this.$api.passwordLogin(args)
+        const res = await this.$api.userLogin(args)
         this.$tips.loaded()
 
-        if (res.status == '200') {
-          let user = res.user || {}
-          user.openid = res.userid
-          user.userId = response.userid
-          let userLevel = res.userlevel || { level: '0', levelName: '订阅者' }
+        if (res.code == 'success') {
+          let user = res.userInfo || {}
+          // user.openid = res.userid
+          // user.userId = res.userId
+          let userLevel = user.userlevel || { level: '0', levelName: '订阅者' }
           user.userLevel = userLevel
           user.levelName = userLevel.levelName
 
           this.$storage('userInfo', user)
           this.onLoginSuccess(user)
+        } else {
+          this.$tips.toast(res.message)
         }
       },
 
       // 登录成功后
       onLoginSuccess({
-        openid: openId
+        openid: openId,
+        session
       }) {
         // const query = this.$Route.query
         // const redirect = query.redirect
 
         this.$tips.success('登录成功')
         this.$user.setLogin({
-          openId
+          openId,
+          token: session
         })
 
         if (this.redirect) {
-          uni.redirectTo({
+          // uni.redirectTo({ // 此方法不能跳 tabbar 页面
+          uni.reLaunch({
             url: decodeURIComponent(this.redirect)
           })
-        } else if (this.$uni.hasPrevPage()) {
-          this.$uni.refreshtPrevPage()
-          uni.navigateBack()
+        // } else if (this.$uni.hasPrevPage()) {
+        //   this.$uni.refreshtPrevPage()
+        //   uni.navigateBack()
         } else {
-          this.$uni.relaunch(query.relaunch || '/pages/home/home')
+          console.log('relaunch')
+          this.$uni.relaunch('/pages/home/home')
         }
       },
 

@@ -33,9 +33,21 @@ export default {
       // #ifndef APP-PLUS
       uni.showNavigationBarLoading()
       // #endif
+
+      const token = storage('token') || ''
+      // 前端直接判断 token 是否失效
+      // if (token) {
+      //   const expire = token.sessionexpire
+      //   const curTime = new Date()
+      //   const isExpire = expire && (new Date(expire) < curTime)
+      //   if (!isExpire) {
+      //     clearLogin()
+      //     login()
+      //   }
+      // }
       config.header = {
         ...config.header,
-        Token: storage('token') || '',
+        Token: token,
         clentkey: $config.appType,
       }
     },
@@ -45,6 +57,17 @@ export default {
       // #ifndef APP-PLUS
       uni.hideNavigationBarLoading()
       // #endif
+      const token = storage('token') || ''
+      // 前端直接判断 token 是否失效
+      if (token) {
+        const expire = token.sessionexpire
+        const curTime = new Date()
+        const isExpire = expire && (new Date(expire) < curTime)
+        if (isExpire) {
+          clearLogin()
+          login()
+        }
+      }
       const {
         statusCode,
         errMsg,

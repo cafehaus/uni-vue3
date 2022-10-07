@@ -9,6 +9,7 @@ export default {
     isLogin: isLogin(),
 		userInfo: {},
     openId: '',
+    token: '',
 	},
 	getters: {},
 	mutations: {

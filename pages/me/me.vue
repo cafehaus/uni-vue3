@@ -1,6 +1,6 @@
 <template>
   <view class="page">
-    <view class="user">
+    <view class="user"  :class="{'user-login': isLogin}">
       <view class="user-info">
         <view class="user-name">{{ userInfo.nickName || '游客' }}</view>
         <view class="user-des">
@@ -15,7 +15,7 @@
       </view>
 
       <!-- 头像 -->
-      <image class="avatar" :src="avatar" mode="aspectFill" />
+      <image class="avatar" :src="avatar" mode="aspectFill" @click="goto('/pages/me/profile')" />
     </view>
 
     <!-- 列表 -->
@@ -175,20 +175,25 @@
 
       // 跳转
       goto(e) {
+        let url = ''
         // 关于我们
         if (e === 'about') {
-          uni.navigateTo({
-            url: `/pages/me/about`
-          })
+          url = `/pages/me/about`
         } else {
           if(!this.$user.isLogin()) {
             this.$user.login('navigateTo')
             return
           }
-          uni.navigateTo({
-            url: `/pages/me/readlog?type=${e}`
-          })
+
+          if (['1', '2', '3', '5'].includes(e)) {
+            url = `/pages/me/readlog?type=${e}`
+          } else {
+            url = e
+          }
         }
+        uni.navigateTo({
+          url
+        })
       }
     }
   }
@@ -197,8 +202,8 @@
 <style lang="stylus" scoped>
 @import '../../styles/var'
 
-  page
-    background #f5f7f7
+  .page
+    // background #f5f7f7
     padding-bottom 40rpx
   .user
     display flex
@@ -207,6 +212,21 @@
     background-color #fff
     height 280rpx
     padding 0 40rpx
+    position relative
+    &.user-login
+      padding 0 70rpx 0 40rpx
+      position relative
+      &::after
+        content ""
+        display inline-block
+        border solid #c4c4c4
+        border-width 0 2px 2px 0
+        padding 3px
+        position absolute
+        right 40rpx
+        top 50%
+        transform translateY(-50%) rotate(-45deg)
+        -webkit-transform translateY(-50%) rotate(-45deg)
     .avatar
       width 128rpx
       height 128rpx
@@ -278,5 +298,5 @@
       padding 0
       background #fff
       &::after
-        border none  
+        border none
 </style>

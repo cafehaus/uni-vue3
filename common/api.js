@@ -2,6 +2,34 @@ import http from '../libs/http'
 const wp = 'wp-json/wp/v2/'
 const wm = 'wp-json/minapper-plus/v1/'
 
+// =================================================================== 登录注册
+// 获取用户openid|post (参数：js_code)
+export const getOpenid = params => http.post(`${wm}users/openid`, params)
+
+// 用户名密码注册|post
+// username,password
+export const userRegister = params => http.post(`${wm}users/registeruser`, params)
+
+// 用户名密码登录|post
+// username,password
+export const userLogin = params => http.post(`${wm}users/registeruserlogin`, params)
+
+// 微信授权登录|post
+// js_code，avatarUrl,nickname
+export const wxLogin = params => http.post(`${wm}weixin/webchatuserlogin`, params)
+
+// 微信手机登录|post
+// code，openid
+export const wxPhoneLogin = params => http.post(`${wm}weixin/phonelogin`, params)
+
+// 微信用户名密码登录|post
+// username,password,openid
+export const wxUserLogin = params => http.post(`${wm}weixin/registeruserlogin`, params)
+
+// 微信注册|post
+// username,password,openid
+export const wxRegister = params => http.post(`${wm}weixin/registeruser`, params)
+
 // =================================================================== 用户
 // 登录|post
 export const login = params => http.post(`${wm}weixin/userlogin`, params)

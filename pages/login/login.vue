@@ -39,7 +39,7 @@
     },
 
     onLoad(e) {
-      this.redirect = e.redirect
+      this.redirect = e.redirect || ''
       this.initData()
     },
 
@@ -313,13 +313,17 @@
           uni.navigateBack()
           return
         }
+        let redirect = this.redirect
+        if (!this.redirect && this.$uni.hasPrevPage()) {
+          redirect = this.$uni.getPrevPath() || ''
+        }
 
         let path = ''
         if (e === 'register') { // 注册
-          path = '/pages/login/register'
+          path = `/pages/login/register?redirect=${redirect}`
         }
         if (e === 'login-password') { // 密码登录
-          path = '/pages/login/login-password'
+          path = `/pages/login/login-password?redirect=${redirect}`
         }
         if (e === 'ruser') { // 用户协议
           // path = '/pages/login/register'
