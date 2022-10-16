@@ -168,7 +168,10 @@ export default {
   },
 
   get(url, data, options = {}) {
-    if (data) data.apptype = $config.appType
+    if (data) {
+      data.apptype = $config.appType
+      data.minapptype =  $config.minapptype
+    }
 
     options.url = url
     options.data = data
@@ -177,7 +180,10 @@ export default {
   },
 
   post(url, data, options = {}) {
-    if (data) data.apptype = $config.appType
+    if (data) {
+      data.apptype = $config.appType
+      data.minapptype =  $config.minapptype
+    }
 
     options.url = url
     options.data = data

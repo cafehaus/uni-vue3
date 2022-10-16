@@ -3,14 +3,14 @@
     <view class="list">
       <view class="list-item list-item-edit">
         <view class="label">头像</view>
-        <image :src="userInfo.avatarUrl" @click="previewImage" />
+        <image :src="userInfo.avatarUrl" @click="updateAvatar" />
       </view>
 
-      <view class="list-item list-item-edit">
+      <view class="list-item list-item-edit" @click="handleEdit('1')">
         <view class="label">昵称</view>
         <view class="val">{{ userInfo.nickName }}</view>
       </view>
-      <view class="list-item list-item-edit">
+      <view class="list-item list-item-edit" @click="handleEdit('2')">
         <view class="label">密码</view>
         <view class="val">修改密码</view>
       </view>
@@ -19,94 +19,60 @@
         <view class="val">{{ userInfo.userId }}</view>
       </view>
       <view class="list-item">
-        <view class="label">手机</view>
-        <view class="val">{{ userInfo.phone }}</view>
+        <view class="label">手机号</view>
+        <view class="val">{{ userInfo.phone || '' }}</view>
       </view>
     </view>
   </view>
 </template>
 
 <script>
-import ArticleList from "@/components/article-list";
 export default {
-  components: {
-    ArticleList,
-  },
   data() {
-    const userInfo = this.$storage("userInfo") || {};
+    const userInfo = this.$storage("userInfo") || {}
+    const token = this.$storage("token") || {}
     return {
       userInfo,
-    };
+      token
+    }
   },
-  onLoad(e) {},
+
+  onShow() {
+    this.userInfo = this.$storage("userInfo") || {}
+  },
 
   methods: {
-    async getList() {
-      let t = this.curType;
-      let listData = [];
-      let res = "";
-      let params = {
-        openid: this.$storage("openId") || "",
-        // apptype: 'wx',
-      };
-
-      if (t === "1") {
-        listData = this.$storage("readLogs") || [];
-        console.log(listData);
-      }
-      if (t === "2") {
-        res = await this.$api.getCommentArticle(params);
-        console.log(res);
-        listData = (res.data || []).map((m) => ({
-          id: m.post_id,
-          title: m.post_title,
-          img: m.post_medium_image,
-        }));
-        console.log(listData);
-      }
-      if (t === "3") {
-        res = await this.$api.getLikeArticle(params);
-        listData = (res.data || []).map((m) => ({
-          id: m.post_id,
-          title: m.post_title,
-          img: m.post_medium_image,
-        }));
-      }
-      if (t === "4") {
-        res = await this.$api.getPraiseArticle(params);
-        listData = (res.data || []).map((m) => ({
-          id: m.post_id,
-          title: m.post_title,
-          img: m.post_medium_image,
-        }));
-      }
-      if (t === "5") {
-        res = await this.$api.getSubscribeArticle(params);
-        listData = (res.usermetaList || []).map((m) => ({
-          id: m.ID,
-          title: m.post_title,
-          img: m.post_medium_image,
-        }));
-      }
-      this.listData = listData;
-      this.empty = !listData.length;
-
-      // if (res.code === '200') {
-      //   let list = res.data || []
-      //   this.listData = list
-      // } else {
-      //   this.$tips.toast(res.message || '出错啦')
-      // }
+    updateAvatar() {
+      uni.chooseImage({
+        count: 1,
+        sizeType: ['compressed'], // 'original', 'compressed' 可以指定是原图还是压缩图
+        sourceType: ['album'], //从相册选择
+        success: (res) => {
+          console.log(JSON.stringify(res.tempFilePaths));
+          this.uploadImg(JSON.stringify(res.tempFilePaths)[0])
+        }
+      });
     },
 
-    previewImage() {},
+    async uploadImg(imgfile) {
+      let params = {
+        imgfile,
+        userid: this.userInfo.userId,
+        sessionid: this.token.sessionid
+      }
+      const res = await this.$api.uploadImg(params)
+    },
 
-    // 跳转文章列表
-    goto(e) {
-      let url = "/pages/common/detail?id=" + e.id;
+    handleEdit(t) {
+      let url = `/pages/login/user-edit?type=${t}`
+      this.goto(url)
+    },
+
+    // 跳转
+    goto(url) {
       uni.navigateTo({
         url,
-      });
+      })
     },
   },
 };

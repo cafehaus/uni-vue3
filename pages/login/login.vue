@@ -1,18 +1,17 @@
 <template>
   <div class="view login">
     <image class="logo" src="/static/logo.png" mode="aspectFit" />
-    <!-- #ifdef MP-TOUTIAO -->
-    <p class="btn-login" @click="onLogin">授权登录</p>
+    <!-- #ifdef MP-WEIXIN || MP-TOUTIAO -->
+    <button v-if="systemInfo.isCompany" class="btn-login" open-type="getPhoneNumber" @getphonenumber="getPhoneNumber">授权手机号快捷登录</button>
+    <p v-else class="btn-login" @click="onLogin">授权登录</p>
     <!-- #endif -->
     <!-- #ifdef MP-BAIDU || MP-QQ  -->
     <button class="btn-login" open-type="getUserInfo" @getuserinfo="onLogin">授权登录</button>
     <!-- #endif -->
     <!-- #ifdef MP-ALIPAY -->
-    <!-- <button class="btn-login" open-type="getAuthorize" @getAuthorize="onLogin" scope="userInfo">授权登录</button> -->
+    <button class="btn-login" open-type="getAuthorize" @getAuthorize="onLogin" scope="userInfo">授权登录</button>
     <!-- #endif -->
-    <!-- #ifdef MP-WEIXIN || MP-ALIPAY || H5 -->
-    <button class="btn-login" open-type="getPhoneNumber" @getphonenumber="getPhoneNumber">授权手机号快捷登录</button>
-    <!-- #endif -->
+
     <p class="btn-user" @click="goto('login-password')">密码登录</p>
 
     <p class="btn-box">
@@ -20,7 +19,7 @@
       <span class="btn-cancel" @click="goto('back')">暂不登录</span>
     </p>
 
- <!--  <footer class="footer">
+    <!--  <footer class="footer">
       登录即代表同意：
       <span @click="goto('user')">用户协议</span>、
       <span @click="goto('privacy')">隐私协议</span>
@@ -29,6 +28,7 @@
 </template>
 
 <script>
+  import { mapState } from 'vuex'
   export default {
     data() {
       return {
@@ -36,6 +36,10 @@
         userInfo: {},
         redirect: '',
       }
+    },
+
+    computed: {
+      ...mapState('app', ['appInfo', 'systemInfo'])
     },
 
     onLoad(e) {
@@ -49,8 +53,9 @@
       },
 
       async getPhoneNumber(e) {
+        // this.getOpenId()
         const code = e.detail.code
-        const res = await this.$api.phoneLogin({
+        const res = await this.$api.wxPhoneLogin({
           code
         })
         if (res.success && code) {
@@ -68,6 +73,13 @@
         } else {
           this.$tips.toast(res.message || '出错了，请稍后再试')
         }
+      },
+
+      async getOpenId() {
+        const res = await this.$api.getOpenId({
+          js_code: this.code
+        })
+        console.log(res)
       },
 
       // 获取微信登录code
@@ -243,30 +255,20 @@
             data.userInfo = userInfo
 
             this.$tips.loading('正在登录...')
-            let apiName = this.$config.isWX ? 'login' : 'loginTT'
+            let apiName = this.$config.isWX ? 'wxLogin' : 'loginTT'
             const response = await this.$api[apiName](args)
             this.$tips.loaded()
 
             if (response.status == '200') {
-              data.openid = response.openid
-              var userLevel = {}
-              if (response.userLevel) {
-                userLevel = response.userLevel
-              } else {
-                userLevel.level = '0'
-                userLevel.levelName = '订阅者'
-              }
+              let user = response.userInfo || {}
+              // user.openid = res.userid
+              // user.userId = res.userId
+              let userLevel = user.userlevel || { level: '0', levelName: '订阅者' }
+              user.userLevel = userLevel
+              user.levelName = userLevel.levelName
 
-              data.userLevel = userLevel
-              data.levelName = userLevel.levelName
-              data.errcode = ''
-              data.userId = response.userId
-
-              userInfo.userLevel = userLevel
-              userInfo.levelName = userLevel.levelName
-              userInfo.userId = response.userId
-              this.$storage('userInfo', userInfo)
-              this.onLoginSuccess(data)
+              this.$storage('userInfo', user)
+              this.onLoginSuccess(user)
             }
           },
           fail: err => {
@@ -285,14 +287,16 @@
 
       // 登录成功后
       onLoginSuccess({
-        openid: openId
+        openid: openId,
+        session
       }) {
         // const query = this.$Route.query
         // const redirect = query.redirect
 
         this.$tips.success('登录成功')
         this.$user.setLogin({
-          openId
+          openId,
+          token: session
         })
 
         if (this.redirect) {

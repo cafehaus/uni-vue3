@@ -11,6 +11,7 @@ switch (process.env.NODE_ENV) {
 
 // 历史接口请求要的平台来源参数
 export let appType = 'wx'
+export let minapptype = 'weixin'
 
 // 判断来源平台
 export let isWX = false
@@ -39,16 +40,19 @@ isWX = true
 // #ifdef MP-ALIPAY
 platform = 'MP-ALIPAY'
 appType = 'alipay'
+minapptype = 'alipay'
 isAL = true
 // #endif
 // #ifdef MP-BAIDU
 platform = 'MP-BAIDU'
 appType = 'bd'
+minapptype = 'baidu'
 isBD = true
 // #endif
 // #ifdef MP-TOUTIAO
 platform = 'MP-TOUTIAO'
 appType = 'tt'
+minapptype = 'toutiao'
 isTT = true
 // #endif
 // #ifdef MP-LARK
@@ -57,11 +61,13 @@ platform = 'MP-LARK'
 // #ifdef MP-QQ
 platform = 'MP-QQ'
 appType = 'qq'
+minapptype = 'qq'
 isQQ = true
 // #endif
 // #ifdef MP-KUAISHOU
 platform = 'MP-KUAISHOU'
-// appType = 'ks'
+appType = 'ks'
+minapptype = 'kuaishou'
 isKS = true
 // #endif
 // #ifdef MP-JD
@@ -74,6 +80,7 @@ platform = 'MP-360'
 export default {
   platform,
   appType,
+  minapptype,
   isH5,
   isAPP,
   isWX,

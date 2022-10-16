@@ -4,7 +4,7 @@ const wm = 'wp-json/minapper-plus/v1/'
 
 // =================================================================== 登录注册
 // 获取用户openid|post (参数：js_code)
-export const getOpenid = params => http.post(`${wm}users/openid`, params)
+export const getOpenId = params => http.post(`${wm}weixin/userlogin`, params)
 
 // 用户名密码注册|post
 // username,password
@@ -29,6 +29,12 @@ export const wxUserLogin = params => http.post(`${wm}weixin/registeruserlogin`, 
 // 微信注册|post
 // username,password,openid
 export const wxRegister = params => http.post(`${wm}weixin/registeruser`, params)
+
+// 修改用户名|post
+export const updateUserName = params => http.post(`${wm}users/updatenickname`, params)
+
+// 修改用户密码|post
+export const updatePassword = params => http.post(`${wm}users/updatepassword`, params)
 
 // =================================================================== 用户
 // 登录|post
@@ -61,6 +67,9 @@ export const getUserInfo = params => http.post(`${wm}weixin/updateuserinfo`, par
 // =================================================================== 公共
 // 获取应用信息|get
 export const getAppInfo = params => http.get(`${wm}options/config`, params)
+
+// 上传图片|post
+export const uploadImg = params => http.post(`${wm}attachments`, params)
 
 // 获取wp页面详情|get
 export const getWpPageDetail = id => http.get(`${wp}pages/${id}`)
