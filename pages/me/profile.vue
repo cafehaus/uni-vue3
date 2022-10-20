@@ -10,7 +10,11 @@
         <view class="label">昵称</view>
         <view class="val">{{ userInfo.nickName }}</view>
       </view>
-      <view class="list-item list-item-edit" @click="handleEdit('2')">
+      <view class="list-item list-item-edit list-item-edit" @click="handleEdit('2')">
+        <view class="label">登录名</view>
+        <view class="val">{{ userInfo.username || '设置登录名' }}</view>
+      </view>
+      <view v-if="userInfo.username" class="list-item list-item-edit" @click="handleEdit('3')">
         <view class="label">密码</view>
         <view class="val">修改密码</view>
       </view>
@@ -48,19 +52,42 @@ export default {
         sizeType: ['compressed'], // 'original', 'compressed' 可以指定是原图还是压缩图
         sourceType: ['album'], //从相册选择
         success: (res) => {
-          console.log(JSON.stringify(res.tempFilePaths));
-          this.uploadImg(JSON.stringify(res.tempFilePaths)[0])
+          const temp = JSON.stringify(res.tempFilePaths) || []
+          this.uploadImg(temp[0])
         }
-      });
+      })
     },
 
     async uploadImg(imgfile) {
       let params = {
-        imgfile,
         userid: this.userInfo.userId,
         sessionid: this.token.sessionid
       }
-      const res = await this.$api.uploadImg(params)
+
+      this.$tips.loading('上传中...')
+      const url = this.$config + 'wp-json/minapper-plus/v1/attachments'
+      uni.uploadFile({
+        url,
+        filePath: imgfile,
+        name: 'file',
+        formData: params,
+        success: res => {
+          console.log(res)
+          const data = res.data || {}
+          const img = data.imageurl
+          if (img) {
+            let user = {
+              ...this.userInfo,
+              avatarUrl: img
+            }
+            this.$storage('userInfo', user)
+            this.$tips.toast('头像更新成功')
+          }
+        },
+        complete: () => {
+          this.$tips.loaded()
+        }
+      })
     },
 
     handleEdit(t) {

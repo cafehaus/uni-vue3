@@ -12,7 +12,7 @@
           placeholder="请输入用户名"
         />
       </view>
- 
+
       <!-- 修改密码 -->
       <template v-if="editType === '2'">
         <view class="form-item">
@@ -82,6 +82,9 @@
         if (this.editType === '2') {
           this.updatePassword()
         }
+        if (this.editType === '3') {
+          this.bindUser()
+        }
       },
 
        async updateUserName() {
@@ -136,6 +139,31 @@
         }
       },
 
+      async bindUser() {
+        if (!this.userName || !this.password) {
+          let msg = !this.userName ? '请输入用户名' : '请输入密码'
+          this.$tips.toast(msg)
+          return
+        }
+
+        let args = {
+          username: this.userName,
+          password: this.password,
+          openid: this.newPassword
+        }
+        const apiName = this.$config.appType + 'BindUserNamePassword'
+        this.$tips.loading('正在更新...')
+        const res = await this.$api[apiName](args)
+        this.$tips.loaded()
+
+        if (res.code == 'success') {
+          this.$tips.toast('密码修改成功')
+          this.goBack()
+        } else {
+          this.$tips.toast(res.message)
+        }
+      },
+
       // 返回
       goBack() {
         uni.navigateBack()
@@ -157,7 +185,7 @@
       border-radius 50%
       margin-top 100rpx
     .nickname
-      margin-top 20rpx  
+      margin-top 20rpx
     .form
       padding 80rpx 0
       &-item

@@ -2,8 +2,8 @@
   <div class="view login">
     <image class="logo" src="/static/logo.png" mode="aspectFit" />
     <!-- #ifdef MP-WEIXIN || MP-TOUTIAO -->
-    <button v-if="systemInfo.isCompany" class="btn-login" open-type="getPhoneNumber" @getphonenumber="getPhoneNumber">授权手机号快捷登录</button>
-    <p v-else class="btn-login" @click="onLogin">授权登录</p>
+    <!-- <button v-if="systemInfo.isCompany" class="btn-login" open-type="getPhoneNumber" @getphonenumber="getPhoneNumber">授权手机号快捷登录</button> -->
+    <p class="btn-login" @click="onLogin">授权登录</p>
     <!-- #endif -->
     <!-- #ifdef MP-BAIDU || MP-QQ  -->
     <button class="btn-login" open-type="getUserInfo" @getuserinfo="onLogin">授权登录</button>

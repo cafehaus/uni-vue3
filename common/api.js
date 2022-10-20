@@ -3,9 +3,6 @@ const wp = 'wp-json/wp/v2/'
 const wm = 'wp-json/minapper-plus/v1/'
 
 // =================================================================== 登录注册
-// 获取用户openid|post (参数：js_code)
-export const getOpenId = params => http.post(`${wm}weixin/userlogin`, params)
-
 // 用户名密码注册|post
 // username,password
 export const userRegister = params => http.post(`${wm}users/registeruser`, params)
@@ -18,17 +15,43 @@ export const userLogin = params => http.post(`${wm}users/registeruserlogin`, par
 // js_code，avatarUrl,nickname
 export const wxLogin = params => http.post(`${wm}weixin/webchatuserlogin`, params)
 
-// 微信手机登录|post
+// 微信绑定手机号|post
 // code，openid
-export const wxPhoneLogin = params => http.post(`${wm}weixin/phonelogin`, params)
+export const wxBindPhone = params => http.post(`${wm}weixin/phonebind`, params)
 
-// 微信用户名密码登录|post
+// 微信绑定用户名密码|post
 // username,password,openid
-export const wxUserLogin = params => http.post(`${wm}weixin/registeruserlogin`, params)
+export const wxBindUserNamePassword = params => http.post(`${wm}weixin/binduser`, params)
 
-// 微信注册|post
-// username,password,openid
-export const wxRegister = params => http.post(`${wm}weixin/registeruser`, params)
+// QQ绑定手机号|post
+// export const qqBindPhone = params => http.post(`${wm}qq/phonebind`, params)
+
+// QQ绑定用户名密码|post
+export const qqBindUserNamePassword = params => http.post(`${wm}qq/binduser`, params)
+
+// 百度绑定手机号|post
+export const bdBindPhone = params => http.post(`${wm}baidu/phonebind`, params)
+
+// 百度绑定用户名密码|post
+export const bdBindUserNamePassword = params => http.post(`${wm}baidu/binduser`, params)
+
+// 头条绑定手机号|post
+export const ttBindPhone = params => http.post(`${wm}toutiao/phonebind`, params)
+
+// 头条绑定用户名密码|post
+export const ttBindUserNamePassword = params => http.post(`${wm}toutiao/binduser`, params)
+
+// 支付宝绑定手机号|post
+export const alipayBindPhone = params => http.post(`${wm}alipay/phonebind`, params)
+
+// 支付宝绑定用户名密码|post
+export const alipayBindUserNamePassword = params => http.post(`${wm}alipay/binduser`, params)
+
+// 快手绑定手机号|post
+export const ksBindPhone = params => http.post(`${wm}kuaishou/phonebind`, params)
+
+// 快手绑定用户名密码|post
+export const ksBindUserNamePassword = params => http.post(`${wm}kuaishou/binduser`, params)
 
 // 修改用户名|post
 export const updateUserName = params => http.post(`${wm}users/updatenickname`, params)
