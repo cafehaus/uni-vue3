@@ -22,15 +22,24 @@
         <view class="label">用户ID</view>
         <view class="val">{{ userInfo.userId }}</view>
       </view>
-      <view class="list-item">
+      <view class="list-item" :class="{'list-item-edit': canGetPhone}">
         <view class="label">手机号</view>
-        <view class="val">{{ userInfo.phone || '' }}</view>
+        <view class="val" v-if="!canGetPhone">{{ userInfo.phone || '' }}</view>
+        <button
+          v-else
+          class="val btn-phone"
+          open-type="getPhoneNumber"
+          @getphonenumber="getPhoneNumber"
+        >
+          <text>{{ userInfo.phone || '绑定手机号' }}</text>
+        </button>
       </view>
     </view>
   </view>
 </template>
 
 <script>
+import { mapState } from 'vuex'
 export default {
   data() {
     const userInfo = this.$storage("userInfo") || {}
@@ -38,6 +47,15 @@ export default {
     return {
       userInfo,
       token
+    }
+  },
+
+  computed: {
+    ...mapState('app', ['appInfo', 'systemInfo']),
+    canGetPhone() {
+      const t = this.$config.minapptype || ''
+      const isCompany = this.systemInfo.isCompany
+      return t && isCompany && ['weixin', 'baidu', 'toutiao', 'alipay', 'kuaishou'].includes(t)
     }
   },
 
@@ -88,6 +106,27 @@ export default {
           this.$tips.loaded()
         }
       })
+    },
+
+    async getPhoneNumber(e) {
+      let args = {
+        code: e.detail.code,
+        openid: this.userInfo.openid
+      }
+      const apiName = this.$config.appType + 'BindPhone'
+      const res = await this.$api[apiName](args)
+      if (res.success && code) {
+        this.$tips.toast('手机号绑定成功')
+        let userInfo = res.userInfo || {}
+        let user = {
+          ...this.userInfo,
+          phone: userInfo.phone
+        }
+        this.userInfo = user
+        this.$storage('userInfo', user)
+      } else {
+        this.$tips.toast(res.message || '出错了，请稍后再试')
+      }
     },
 
     handleEdit(t) {

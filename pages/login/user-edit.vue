@@ -2,38 +2,32 @@
   <div class="view login">
     <image class="logo" :src="avatar" mode="aspectFit" />
     <p class="nickname">{{ userInfo.nickName }}</p>
-
     <view class="form">
-      <!-- 修改昵称 -->
-      <view v-if="editType === '1'" class="form-item">
+      <view v-if="editType === '1' || editType === '2'" class="form-item">
         <input
           v-model="userName"
           class="input"
           placeholder="请输入用户名"
         />
       </view>
-
-      <!-- 修改密码 -->
-      <template v-if="editType === '2'">
-        <view class="form-item">
-          <input
-            v-model="password"
-            type="password"
-            class="input"
-            placeholder="请输入旧密码"
-          />
-        </view>
-        <view class="form-item">
-          <input
-            v-model="newPassword"
-            type="password"
-            class="input"
-            placeholder="请输入新密码"
-          />
-        </view>
-      </template>
+      <view class="form-item" v-if="editType === '2' || editType === '3'">
+        <input
+          v-model="password"
+          type="password"
+          class="input"
+          :placeholder="editType === '2' ? '请输入密码' : '请输入旧密码'"
+        />
+      </view>
+      <view class="form-item" v-if="editType === '3'">
+        <input
+          v-model="newPassword"
+          type="password"
+          class="input"
+          placeholder="请输入新密码"
+        />
+      </view>
     </view>
-    <p class="btn-register" @click="handleSubmit">确认修改</p>
+    <p class="btn-register" @click="handleSubmit">{{ editType === '2' ? '确认' : '确认修改' }}</p>
   </div>
 </template>
 
@@ -80,10 +74,10 @@
           this.updateUserName()
         }
         if (this.editType === '2') {
-          this.updatePassword()
+          this.bindUser()
         }
         if (this.editType === '3') {
-          this.bindUser()
+          this.updatePassword()
         }
       },
 
@@ -123,7 +117,7 @@
         }
 
         let args = {
-          username: this.userInfo.nickName,
+          username: this.userInfo.username,
           oldpassword: this.password,
           newpassword: this.newPassword
         }
@@ -157,7 +151,12 @@
         this.$tips.loaded()
 
         if (res.code == 'success') {
-          this.$tips.toast('密码修改成功')
+          this.$tips.toast('用户名密码设置成功')
+          let user = {
+            ...this.userInfo,
+            username: this.userName
+          }
+          this.$storage('userInfo', user)
           this.goBack()
         } else {
           this.$tips.toast(res.message)
