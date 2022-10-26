@@ -83,7 +83,7 @@ export default {
       }
 
       this.$tips.loading('上传中...')
-      const url = this.$config + 'wp-json/minapper-plus/v1/attachments'
+      const url = this.$config.api + 'wp-json/minapper-plus/v1/attachments'
       uni.uploadFile({
         url,
         filePath: imgfile,
