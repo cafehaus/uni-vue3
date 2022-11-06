@@ -1,19 +1,36 @@
 <template>
   <view class="page">
     <view class="list">
-      <view class="list-item list-item-edit">
-        <view class="label">头像</view>
-        <image :src="userInfo.avatarUrl" @click="updateAvatar" />
-      </view>
-
-      <view class="list-item list-item-edit" @click="handleEdit('1')">
-        <view class="label">昵称</view>
-        <view class="val">{{ userInfo.nickName }}</view>
-      </view>
-      <view class="list-item list-item-edit list-item-edit" @click="handleEdit('2')">
-        <view class="label">登录名</view>
-        <view class="val">{{ userInfo.username || '设置登录名' }}</view>
-      </view>
+      <template v-if="canEdit">
+        <view class="list-item list-item-edit">
+          <image :src="userInfo.avatarUrl" @click="previewImg" />
+          <view class="val" @click="updateAvatar">修改头像</view>
+        </view>
+        <view class="list-item list-item-edit" @click="handleEdit('1')">
+          <view class="label">昵称</view>
+          <view class="val">{{ userInfo.nickName }}</view>
+        </view>
+        <view class="list-item list-item-edit" @click="handleEdit('2')">
+          <view class="label">登录名</view>
+          <view class="val">{{ userInfo.username || '设置登录名' }}</view>
+        </view>
+      </template>
+      
+      <!-- H5 和 APP 暂不支持修改 -->
+      <template v-else>
+        <view class="list-item">
+          <view class="label">头像</view>
+          <image :src="userInfo.avatarUrl" @click="previewImg" />
+        </view>
+        <view class="list-item">
+          <view class="label">昵称</view>
+          <view class="val">{{ userInfo.nickName }}</view>
+        </view>
+        <view class="list-item">
+          <view class="label">登录名</view>
+          <view class="val">{{ userInfo.username || '' }}</view>
+        </view>
+      </template>
       <view v-if="userInfo.username" class="list-item list-item-edit" @click="handleEdit('3')">
         <view class="label">密码</view>
         <view class="val">修改密码</view>
@@ -56,6 +73,11 @@ export default {
       const t = this.$config.minapptype || ''
       const isCompany = this.systemInfo.isCompany
       return t && isCompany && ['weixin', 'baidu', 'toutiao', 'alipay', 'kuaishou'].includes(t)
+    },
+
+    canEdit() {
+      const t = this.$config.minapptype || ''
+      return t && ['weixin', 'qq', 'baidu', 'toutiao', 'alipay', 'kuaishou'].includes(t)
     }
   },
 
@@ -65,13 +87,22 @@ export default {
 
   methods: {
     updateAvatar() {
+      const sizeLimit = this.$config.uploadSize || 2
       uni.chooseImage({
         count: 1,
-        sizeType: ['compressed'], // 'original', 'compressed' 可以指定是原图还是压缩图
-        sourceType: ['album'], //从相册选择
+        sizeType: ['original', 'compressed'],
+        sourceType: ['album', 'camera'],
         success: (res) => {
-          const temp = JSON.stringify(res.tempFilePaths) || []
-          this.uploadImg(temp[0])
+          const temp = res.tempFiles || []
+          const info = temp[0]
+          const img = info.path
+          const size = info.size / 1024
+          if (size > sizeLimit) {
+            this.$tips.toast(`图片大小超过最大限制：${sizeLimit}M，请重新选择`)
+            return
+          }
+
+          img && this.uploadImg(img)
         }
       })
     },
@@ -90,21 +121,45 @@ export default {
         name: 'file',
         formData: params,
         success: res => {
-          console.log(res)
-          const data = res.data || {}
+          const data = JSON.parse(res.data || '')
           const img = data.imageurl
           if (img) {
-            let user = {
-              ...this.userInfo,
-              avatarUrl: img
-            }
-            this.$storage('userInfo', user)
-            this.$tips.toast('头像更新成功')
+            this.submitUpdateAvatar(img)
           }
+        },
+        fail: err => {
+          console.log(err)
         },
         complete: () => {
           this.$tips.loaded()
         }
+      })
+    },
+
+    async submitUpdateAvatar(avatarUrl) {
+      const res = await this.$api.updateAvatar({
+        userid: this.userInfo.userId,
+        sessionid: this.token.sessionid,
+        avatarUrl
+      })
+      if (res.code === 'success') {
+        let user = {
+          ...this.userInfo,
+          avatarUrl,
+        }
+        this.$storage('userInfo', user)
+        this.userInfo = user
+        this.$tips.toast('头像更新成功')
+      }
+      else {
+        this.$tips.toast(res.message || '出错了，请稍后再试')
+      }
+    },
+
+    previewImg() {
+      const img = this.userInfo.avatarUrl
+      uni.previewImage({
+        urls: [img]
       })
     },
 

@@ -7,7 +7,7 @@
         <input
           v-model="userName"
           class="input"
-          placeholder="请输入用户名"
+          :placeholder="'请输入' + userNameTxt"
         />
       </view>
       <view class="form-item" v-if="editType === '2' || editType === '3'">
@@ -35,7 +35,7 @@
   export default {
     data() {
       const userInfo = this.$storage('userInfo')
-      const token = this.$storage("token") || {};
+      const token = this.$storage("token") || {}
       return {
         userInfo,
         token,
@@ -49,6 +49,18 @@
     computed: {
       avatar() { // 头像
         return this.userInfo.avatarUrl || '/static/avatar.png'
+      },
+
+      isBind() {
+        return !!this.userInfo.username
+      },
+
+      userNameTxt() {
+        let txts = {
+          1: '昵称',
+          2: '登录名'
+        }
+        return txts[this.editType] || '用户名'
       }
     },
 
@@ -60,13 +72,21 @@
     methods: {
       initData() {
         let titles = {
-          1: '修改用户名',
-          2: '修改密码'
+          1: '修改昵称',
+          2: this.isBind ? '修改登录名' : '设置登录名',
+          3: '修改密码'
         }
         // 设置页面标题
         uni.setNavigationBarTitle({
           title: titles[this.editType] || '修改'
         })
+
+        if (this.editType === '1') {
+          this.userName = this.userInfo.nickName || ''
+        }
+        if (this.editType === '2' && this.isBind) {
+          this.userName = this.userInfo.username || ''
+        }
       },
 
       handleSubmit() {
@@ -83,7 +103,7 @@
 
        async updateUserName() {
         if (!this.userName) {
-          this.$tips.toast('请输入用户名')
+          this.$tips.toast('请输入昵称')
           return
         }
 
@@ -97,7 +117,7 @@
         this.$tips.loaded()
 
         if (res.code == 'success') {
-          this.$tips.toast('用户名修改成功')
+          this.$tips.toast('昵称修改成功')
           let user = {
             ...this.userInfo,
             nickName: this.userName
@@ -135,7 +155,7 @@
 
       async bindUser() {
         if (!this.userName || !this.password) {
-          let msg = !this.userName ? '请输入用户名' : '请输入密码'
+          let msg = !this.userName ? '请输入登录名' : '请输入密码'
           this.$tips.toast(msg)
           return
         }
@@ -143,7 +163,7 @@
         let args = {
           username: this.userName,
           password: this.password,
-          openid: this.newPassword
+          openid: this.userInfo.openid
         }
         const apiName = this.$config.appType + 'BindUserNamePassword'
         this.$tips.loading('正在更新...')
@@ -151,7 +171,7 @@
         this.$tips.loaded()
 
         if (res.code == 'success') {
-          this.$tips.toast('用户名密码设置成功')
+          this.$tips.toast('登录名密码设置成功')
           let user = {
             ...this.userInfo,
             username: this.userName

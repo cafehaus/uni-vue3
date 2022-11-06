@@ -59,6 +59,9 @@ export const updateUserName = params => http.post(`${wm}users/updatenickname`, p
 // 修改用户密码|post
 export const updatePassword = params => http.post(`${wm}users/updatepassword`, params)
 
+// 修改用户头像|post
+export const updateAvatar = params => http.post(`${wm}users/updateavatar`, params)
+
 // =================================================================== 用户
 // 登录|post
 export const login = params => http.post(`${wm}weixin/userlogin`, params)
@@ -187,3 +190,11 @@ export const getLiveInfo = params => http.get(`${wm}live/weixin/getliveinfo`)
 
 // 更新直播数据|get
 export const updateLiveInfo = params => http.get(`${wm}live/weixin/refreshliveinfo`)
+
+// =================================================================== 留言
+// 获取我的留言|get
+export const getMyLeaveword = params => http.get(`${wm}form/mymessage`, params)
+
+// 提交留言|post
+export const submitLeaveword = params => http.post(`${wm}form/message`, params)
+

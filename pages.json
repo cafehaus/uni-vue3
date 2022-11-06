@@ -123,6 +123,18 @@
       }
     },
     {
+      "path": "pages/me/leaveword-log",
+      "style": {
+        "navigationBarTitleText": "我的留言"
+      }
+    },
+    {
+      "path": "pages/me/leaveword",
+      "style": {
+        "navigationBarTitleText": "预约留言"
+      }
+    },
+    {
       "path": "pages/common/web",
       "style": {
         "navigationBarTitleText": "网页"

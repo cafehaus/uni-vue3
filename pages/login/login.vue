@@ -250,8 +250,8 @@
             let userInfo = res.userInfo || {}
 
             userInfo.isLogin = true
-            args.avatarUrl = userInfo.avatarUrl
-            args.nickname = userInfo.nickName
+            // args.avatarUrl = userInfo.avatarUrl
+            // args.nickname = userInfo.nickName
             data.userInfo = userInfo
 
             this.$tips.loading('正在登录...')

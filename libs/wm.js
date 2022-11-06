@@ -10,8 +10,8 @@ switch (process.env.NODE_ENV) {
 }
 
 // 历史接口请求要的平台来源参数
-export let appType = 'wx'
-export let minapptype = 'weixin'
+export let appType = 'wx' // 不给默认值部分接口拿不到数据，暂时默认 wx
+export let minapptype = ''
 
 // 判断来源平台
 export let isWX = false
@@ -35,6 +35,8 @@ isH5 = true
 // #endif
 // #ifdef MP-WEIXIN
 platform = 'MP-WEIXIN'
+appType = 'wx'
+minapptype = 'weixin'
 isWX = true
 // #endif
 // #ifdef MP-ALIPAY

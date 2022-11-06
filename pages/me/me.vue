@@ -30,6 +30,7 @@
       <view class="list-sub">
         <!-- 关于我们 -->
         <view class="list-item" @click="goto('about')">关于我们</view>
+        <view class="list-item" @click="goto('/pages/me/leaveword-log')">预约留言</view>
         <!-- #ifdef MP-WEIXIN || MP-BAIDU -->
         <view class="list-item">
           <button openType="contact" class='list-item-btn'>联系客服</button>
