@@ -5,19 +5,32 @@
     <!-- <button v-if="systemInfo.isCompany" class="btn-login" open-type="getPhoneNumber" @getphonenumber="getPhoneNumber">授权手机号快捷登录</button> -->
     <p class="btn-login" @click="onLogin">授权登录</p>
     <!-- #endif -->
-    <!-- #ifdef MP-BAIDU || MP-QQ  -->
+    <!-- #ifdef MP-BAIDU || MP-QQ || MP-KUAISHOU  -->
     <button class="btn-login" open-type="getUserInfo" @getuserinfo="onLogin">授权登录</button>
     <!-- #endif -->
     <!-- #ifdef MP-ALIPAY -->
     <button class="btn-login" open-type="getAuthorize" @getAuthorize="onLogin" scope="userInfo">授权登录</button>
     <!-- #endif -->
 
-    <p class="btn-user" @click="goto('login-password')">密码登录</p>
+    <!-- #ifdef APP-PLUS  -->
+    <p class="btn-login" @click="handleAppLogin">微信小程序授权登录</p>
+    <!-- #endif -->
 
+    <!-- #ifndef MP  -->
+    <p class="btn-user" @click="goto('login-password')">密码登录</p>
+    <!-- #endif -->
+
+    <!-- #ifdef MP  -->
+    <p class="btn-box btn-box-center">
+      <span class="btn-cancel" @click="goto('back')">暂不登录</span>
+    </p>
+    <!-- #endif -->
+    <!-- #ifndef MP  -->
     <p class="btn-box">
       <span class="btn-register" @click="goto('register')">立即注册</span>
       <span class="btn-cancel" @click="goto('back')">暂不登录</span>
     </p>
+    <!-- #endif -->
 
     <!--  <footer class="footer">
       登录即代表同意：
@@ -47,9 +60,20 @@
       this.initData()
     },
 
+    onShow()  {
+      this.setAppLogin()
+    },
+
+    onHide() {
+      // #ifdef APP-PLUS
+      plus.runtime.arguments = null
+      plus.runtime.arguments = '' 
+      // #endif
+    },
+
     methods: {
       initData() {
-        this.getWxCode()
+        this.getLoginCode()
       },
 
       async getPhoneNumber(e) {
@@ -82,9 +106,9 @@
         console.log(res)
       },
 
-      // 获取微信登录code
-      getWxCode() {
-        // #ifdef MP-WEIXIN || MP-QQ || MP-TOUTIAO || MP-ALIPAY
+      // 获取登录code
+      getLoginCode() {
+        // #ifdef MP-WEIXIN || MP-QQ || MP-TOUTIAO || MP-ALIPAY || MP-KUAISHOU
         uni.login({
           success: (r) => {
             if (r.code) {
@@ -113,6 +137,7 @@
       },
 
       async onLogin(e) {
+        console.log(e)
         // #ifdef MP-WEIXIN || MP-TOUTIAO
         if (this.code) {
           this._wxLogin()
@@ -121,7 +146,7 @@
         }
         // #endif
 
-        // #ifdef MP-BAIDU || MP-QQ
+        // #ifdef MP-BAIDU || MP-QQ || MP-KUAISHOU
         if (this.code) {
           let args = {}
           let data = {}
@@ -150,31 +175,41 @@
           if (this.$config.isTT) {
             apiName = 'loginTT'
           }
+          if (this.$config.isKS) {
+            apiName = 'loginKS'
+          }
 
           this.$tips.loading('正在登录...')
           const response = await this.$api[apiName](args)
           this.$tips.loaded()
 
           if (response.status == '200') {
-            data.openid = response.openid
-            let userLevel = {}
-            if (response.userLevel) {
-              userLevel = response.userLevel
-            } else {
-              userLevel.level = '0'
-              userLevel.levelName = '订阅者'
-            }
+            // data.openid = response.openid
+            // let userLevel = {}
+            // if (response.userLevel) {
+            //   userLevel = response.userLevel
+            // } else {
+            //   userLevel.level = '0'
+            //   userLevel.levelName = '订阅者'
+            // }
 
-            data.userLevel = userLevel
-            data.levelName = userLevel.levelName
-            data.errcode = ''
-            data.userId = response.userId
+            // data.userLevel = userLevel
+            // data.levelName = userLevel.levelName
+            // data.errcode = ''
+            // data.userId = response.userId
 
-            userInfo.userLevel = userLevel
-            userInfo.levelName = userLevel.levelName
-            userInfo.userId = response.userId
-            this.$storage('userInfo', userInfo)
-            this.onLoginSuccess(data)
+            // userInfo.userLevel = userLevel
+            // userInfo.levelName = userLevel.levelName
+            // userInfo.userId = response.userId
+            // this.$storage('userInfo', userInfo)
+            // this.onLoginSuccess(data)
+            let user = response.userInfo || {}
+            let userLevel = user.userlevel || { level: '0', levelName: '订阅者' }
+            user.userLevel = userLevel
+            user.levelName = userLevel.levelName
+
+            this.$storage('userInfo', user)
+            this.onLoginSuccess(user)
           }
         }
         // #endif
@@ -200,31 +235,39 @@
               let args = {}
               args.authCode = resAuth.authCode
               args.nickName = userInfo.nickName || '支付宝企业用户'
+              args.nickname = args.nickName
               args.avatarUrl = userInfo.avatar
 
               this.$tips.loading('正在登录...')
               const res = await this.$api.loginAL(args)
               this.$tips.loaded()
               if (res.status === '200') {
-                data.openid = res.alipayUserid
-                var userLevel = {}
-                if (res.userLevel) {
-                  userLevel = res.userLevel
-                } else {
-                  userLevel.level = '0'
-                  userLevel.levelName = '订阅者'
-                }
+                // data.openid = res.alipayUserid
+                // var userLevel = {}
+                // if (res.userLevel) {
+                //   userLevel = res.userLevel
+                // } else {
+                //   userLevel.level = '0'
+                //   userLevel.levelName = '订阅者'
+                // }
 
-                data.userLevel = userLevel
-                data.levelName = userLevel.levelName
-                data.errcode = ''
-                data.userId = res.userId
+                // data.userLevel = userLevel
+                // data.levelName = userLevel.levelName
+                // data.errcode = ''
+                // data.userId = res.userId
 
-                userInfo.userLevel = userLevel
-                userInfo.levelName = userLevel.levelName
-                userInfo.userId = res.userId
-                this.$storage('userInfo', userInfo)
-                this.onLoginSuccess(data)
+                // userInfo.userLevel = userLevel
+                // userInfo.levelName = userLevel.levelName
+                // userInfo.userId = res.userId
+                // this.$storage('userInfo', userInfo)
+                // this.onLoginSuccess(data)
+                let user = res.userInfo || {}
+                let userLevel = user.userlevel || { level: '0', levelName: '订阅者' }
+                user.userLevel = userLevel
+                user.levelName = userLevel.levelName
+
+                this.$storage('userInfo', user)
+                this.onLoginSuccess(user)
               } else {
                 this.$tips.toast('登录失败', 'error')
               }
@@ -241,32 +284,30 @@
         let args = {}
         let data = {}
         args.js_code = this.code
-
-        let func = this.$config.isWX ? 'getUserProfile' : 'getUserInfo'
-        uni[func]({
+        uni['getUserProfile']({
+          // #ifdef MP-WEIXIN
           lang: 'zh_CN',
+          // #endif
           desc: '登录后信息展示',
           success: async(res) => {
+            console.log(res)
             let userInfo = res.userInfo || {}
 
             userInfo.isLogin = true
-            // args.avatarUrl = userInfo.avatarUrl
-            // args.nickname = userInfo.nickName
+            args.avatarUrl = userInfo.avatarUrl
+            args.nickname = userInfo.nickName
             data.userInfo = userInfo
 
             this.$tips.loading('正在登录...')
-            let apiName = this.$config.isWX ? 'wxLogin' : 'loginTT'
+            let apiName = this.$config.isWX ? 'login' : 'loginTT'
             const response = await this.$api[apiName](args)
             this.$tips.loaded()
 
             if (response.status == '200') {
               let user = response.userInfo || {}
-              // user.openid = res.userid
-              // user.userId = res.userId
-              let userLevel = user.userlevel || { level: '0', levelName: '订阅者' }
-              user.userLevel = userLevel
+              let userLevel = user.userLevel
+              user.userLevel = userLevel.level
               user.levelName = userLevel.levelName
-
               this.$storage('userInfo', user)
               this.onLoginSuccess(user)
             }
@@ -299,14 +340,14 @@
           token: session
         })
 
-        if (this.redirect) {
+        if (this.redirect) {        
           uni.redirectTo({
             url: decodeURIComponent(this.redirect)
           })
-        } else if (this.$uni.hasPrevPage()) {
+        } else if (this.$uni.hasPrevPage()) {       
           this.$uni.refreshtPrevPage()
           uni.navigateBack()
-        } else {
+        } else {        
           this.$uni.relaunch(query.relaunch || '/pages/home/home')
         }
       },
@@ -339,6 +380,52 @@
         path && uni.navigateTo({
           url: path
         })
+      },
+
+      /**
+       * app 跳转微信小程序授权登录
+       * 需调用plus.share.getServices获取微信分享服务对象
+       */
+      handleAppLogin() {
+        const path='/pages/me/userprofile'
+        plus.share.getServices((s) => {
+          let sweixin = {}
+          for (let i = 0; i < s.length; i++) {
+            let share = s[i]
+            if (share.id === 'weixin') {
+              sweixin = share
+            }
+          }
+          // 小程序参数，必填
+          let WeixinMiniProgramOptions = {
+            id: this.appInfo.wxghid,
+            path: path, // 可指定打开的页面
+            type:0  // 0-正式版； 1-测试版； 2-体验版。 默认值为0。
+          }
+          if (sweixin) {
+            sweixin.launchMiniProgram(WeixinMiniProgramOptions)
+          } else {
+            plus.nativeUI.alert('当前环境不支持微信操作!')
+          }
+        }, function(e) {
+          console.log('获取分享服务列表失败：' + e.message)
+        })
+      },
+
+      setAppLogin() {
+        // #ifdef APP-PLUS
+        if(plus.runtime.arguments) {
+          let userInfo = JSON.parse(plus.runtime.arguments);
+          if(userInfo) {             
+            if(userInfo.errcode == '0') {
+              this.$storage('userInfo', userInfo)
+              this.onLoginSuccess(userInfo)
+            } else {
+              this.$tips.toast('授权登录失败')
+            }
+          }
+        }
+        // #endif
       }
     }
   }
@@ -385,7 +472,8 @@
       justify-content space-between
       margin-top 30rpx
       font-size 12px
-      // line-height 100rpx
+      &.btn-box-center
+        justify-content center
       .btn-register
         color $base-color
       .btn-cancel

@@ -1,5 +1,5 @@
 <template>
-  <view class="page-detail">
+  <view class="page-detail" v-show="!loading">
     <!-- 广告 -->
     <template v-if="showTopAd">
       <!-- #ifdef MP-WEIXIN  -->
@@ -27,7 +27,7 @@
         <text class="txt">{{ commentNum }}</text>
         <i class="iconfont icon-preview" />
         <text class="txt">{{ info.pageviews }}</text>
-        <i class="iconfont icon-like" />
+        <i class="iconfont icon-love" />
         <text class="txt">{{ likeNum }}</text>
       </section>
 
@@ -41,12 +41,10 @@
 
       <!-- 点赞 -->
       <section class="like">
-        <!-- #ifdef MP-WEIXIN ||  MP-ALIPAY || MP-QQ || MP-TOUTIAO || MP-BAIDU -->
         <view class="btn" :class="{ 'btn-active': isLike }" @click="onLike">
           <i class="iconfont" :class="[isLike ? 'icon-zan-fill' : 'icon-zan']" />
           <text class="txt">{{ isLike ? '已点赞' : '点个赞' }}</text>
         </view>
-        <!-- #endif -->
         <view class="num" v-if="likeNum"><text>{{ likeNum }} 人已赞</text></view>
         <view class="avatar">
           <view class="avatar-item" v-for="(item, i) in likeList" :key="i">
@@ -140,39 +138,47 @@
       <w-empty v-if="empty" />
       <!-- #endif -->
 
-      <!-- #ifdef MP-WEIXIN || MP-QQ || MP-TOUTIAO -->
-      <CommentBar ref="commentBar" :show-bar="canComment" :article="info" :reply-user="replyUser" @cancel="replyUser = null" @success="commentSuccess" />
+      <!-- #ifndef MP-BAIDU -->
+      <CommentBar
+        ref="commentBar"
+        :show-bar="canComment"
+        :article="info"
+        :reply-user="replyUser"
+        @unishare="handleUniShare"
+        @cancel="replyUser = null"
+        @success="commentSuccess"
+      />
       <!-- #endif -->
     </view>
 
-      <!-- #ifdef MP-BAIDU -->
-      <template v-if="showBdComment">
-        <view style="padding: 0 40rpx">
-          <view class="subtitle">
-            <view>在百度APP里评论交流</view>
-          </view>
+    <!-- #ifdef MP-BAIDU -->
+    <template v-if="showBdComment">
+      <view style="padding: 0 40rpx">
+        <view class="subtitle">
+          <view>在百度APP里评论交流</view>
         </view>
-        <comment-list
-          :comment-param="commentParam"
-          :add-comment="true"
-          :is-page-scroll="true"
-          :need-toolbar="true"
-          :toolbar-config="toolbarInfo"
-          bindclickcomment="goCommentDetail"
-        ></comment-list>
-      </template>
-      <template v-else>
-        <view style="padding: 0 40rpx">
-          <view class="subtitle">
-            <view>在WordPress里评论交流</view>
-            <view v-if="commentNum" class="num">有{{ commentNum }}条评论</view>
-          </view>
-          <CommentItem v-for="c in commentList" :key="c.id" :item="c" @reply="handleReply" />
-          <w-empty v-if="empty" />
+      </view>
+      <comment-list
+        :comment-param="commentParam"
+        :add-comment="true"
+        :is-page-scroll="true"
+        :need-toolbar="true"
+        :toolbar-config="toolbarInfo"
+        bindclickcomment="goCommentDetail"
+      ></comment-list>
+    </template>
+    <template v-else>
+      <view style="padding: 0 40rpx">
+        <view class="subtitle">
+          <view>在WordPress里评论交流</view>
+          <view v-if="commentNum" class="num">有{{ commentNum }}条评论</view>
         </view>
-        <CommentBar ref="commentBar" :show-bar="canComment" :article="info" :reply-user="replyUser" @cancel="replyUser = null" @success="commentSuccess" />
-      </template>
-      <!-- #endif -->
+        <CommentItem v-for="c in commentList" :key="c.id" :item="c" @reply="handleReply" />
+        <w-empty v-if="empty" />
+      </view>
+      <CommentBar ref="commentBar" :show-bar="canComment" :article="info" :reply-user="replyUser" @cancel="replyUser = null" @success="commentSuccess" />
+    </template>
+    <!-- #endif -->
   </view>
 </template>
 
@@ -182,9 +188,19 @@ import mpHtml from '@/components/mp-html/mp-html'
 import CommentItem from '@/components/comment-item/comment-item'
 import CommentBar from '@/components/comment-bar'
 import CustomAd from '@/components/custom-ad'
+import UniShare from 'uni_modules/uni-share/js_sdk/uni-share.js'
+const uniShare = new UniShare()
 let rewardedVideoAd = null
 
 export default {
+  onBackPress({ from }) {
+    if(from === 'backbutton'){
+      this.$nextTick(function() {
+        uniShare.hide()
+      })
+      return uniShare.isShow
+    }
+  },
   components: {
     mpHtml,
     CommentItem,
@@ -203,6 +219,7 @@ export default {
       },
       commentList: [],
       empty: false,
+      loading: false,
       hasMore: true,
       commentNum: 0,
       likeNum: 0,
@@ -223,6 +240,7 @@ export default {
         excitationAdId: ''
       },
       adSuccess: true,
+      seoInfo: {}
     }
   },
   computed: {
@@ -249,6 +267,9 @@ export default {
 
     this.$util.setShareMenu()
   },
+  onShow() {
+    this.$util.setPageInfo(this.seoInfo)
+  },
 
   onShareTimeline: function () {
     return {
@@ -267,7 +288,6 @@ export default {
       imageUrl: this.info.post_thumbnail_image
     }
   },
-
   onUnload: function() {
     if (rewardedVideoAd && rewardedVideoAd.destroy) {
       rewardedVideoAd.destroy()
@@ -280,8 +300,87 @@ export default {
     }
   },
 
+
   methods: {
     ...mapActions('app', ['getCpAd']),
+
+    handleUniShare() {
+      let wxghid = this.appInfo.wxghid
+      let path = 'pages/common/detail?id=' + this.articleId
+      let title = this.title
+      let href = this.info.link
+      let imageUrl = this.info.post_thumbnail_image
+
+      uniShare.show({
+        content: { //公共的分享参数配置  类型（type）、链接（herf）、标题（title）、summary（描述）、imageUrl（缩略图）
+          type: 0,
+          href: href,
+          title: title,
+          //summary: '描述',
+          imageUrl: imageUrl
+        },
+        menus: [{
+            "img": "/static/app-plus/sharemenu/wechatfriend.png",
+            "text": "微信好友",
+            "share": { //当前项的分享参数配置。可覆盖公共的配置如下：分享到微信小程序，配置了type=5
+              "provider": "weixin",
+              "scene": "WXSceneSession"
+            }
+          },
+          {
+            "img": "/static/app-plus/sharemenu/wechatmoments.png",
+            "text": "微信朋友圈",
+            "share": {
+              "provider": "weixin",
+              "scene": "WXSceneTimeline"
+            }
+          },
+          {
+            "img": "/static/app-plus/sharemenu/mp_weixin.png",
+            "text": "微信小程序",
+            "share": {
+              provider: "weixin",
+              scene: "WXSceneSession",
+              type: 5,
+              miniProgram: {
+                id: wxghid,
+                path: path,
+                webUrl: '/#/pages/list/detail',
+                type: 0
+              },
+            }
+          },
+          {
+            "img": "/static/app-plus/sharemenu/weibo.png",
+            "text": "微博",
+            "share": {
+              "provider": "sinaweibo"
+            }
+          },
+          {
+            "img": "/static/app-plus/sharemenu/qq.png",
+            "text": "QQ",
+            "share": {
+              "provider": "qq"
+            }
+          },
+          {
+            "img": "/static/app-plus/sharemenu/copyurl.png",
+            "text": "复制",
+            "share": "copyurl"
+          },
+          {
+            "img": "/static/app-plus/sharemenu/more.png",
+            "text": "更多",
+            "share": "shareSystem"
+          }
+        ],
+        cancelText: "取消分享",
+      }, e => { //callback
+        console.log(uniShare.isShow)
+        console.log(e)
+      })
+    },
 
     initData() {
       let logs = this.$storage('readLogs') || []
@@ -290,15 +389,16 @@ export default {
 
       this.getArticleComment()
       this.getCanComment()
+      // #ifdef MP
       this.getIsLike()
+      // #endif
     },
+
 
     async onLike() {
       if (this.$user.isLogin()) {
         if (this.isLike) return
-
         let params = {
-          openid: this.$storage('openId') || '',
           postid: this.articleId,
         }
 
@@ -322,7 +422,7 @@ export default {
           userType = 'qq'
           // #endif
 
-          let user = uni.getStorageSync('userInfo') || {}
+          let user = this.$storage('userInfo') || {}
           this.likeList.unshift({
             avatarurl: user.avatarUrl,
             userType,
@@ -330,11 +430,14 @@ export default {
 
           this.isLike = true
           this.$tips.success('谢谢点赞')
-        } else if (res.status === '501') {
-          this.$tips.success('谢谢，已赞过啦！')
+        } else if (res.message === '已点赞') {
+          this.$tips.toast('谢谢，已赞过啦！')
+          this.isLike = true
+        } else if (res.code === 'error') {
+          this.$tips.toast(res.message || '出错了，请稍后再试')
         }
       } else {
-        this.$user.login('navigateTo')
+        this.$user.login('redirectTo', '/pages/common/detail?id=' + this.articleId)
       }
     },
 
@@ -355,7 +458,35 @@ export default {
 
     async getCanComment() {
       const res = await this.$api.getCanComment()
-      this.canComment = res.enableComment === '1'
+      const appType=this.$config.appType
+      switch(appType)
+      {
+        case 'wx':
+          this.canComment = res.enableComment === '1'
+          break
+        case 'ks':
+          this.canComment = res.kuaishouEnableComment === '1'
+        break
+        case 'bd':
+          this.canComment = res.baiduEnableComment === '1'
+          break
+        case 'tt':
+          this.canComment = res.toutiaoEnableComment === '1'
+        break
+        case 'qq':
+          this.canComment = res.QQEnableComment === '1'
+          break
+        case 'alipay':
+          this.canComment = res.alipayEnableComment === '1'
+          break        
+        case 'app':
+          this.canComment = true
+          break;
+        case 'h5':
+          this.canComment = true
+          break
+      }
+
     },
 
     commentSuccess() {
@@ -382,6 +513,7 @@ export default {
       }
 
       this.$tips.loading()
+      this.loading = true
       const res = await this.$api.getArticleDetail(
         {
           id: this.articleId,
@@ -390,6 +522,7 @@ export default {
         { header: { [key]: e || '0' } }
       )
       this.$tips.loaded()
+      this.loading = false
       if (!res || !res.content) {
         this.$tips.toast('出错了，请稍后再试')
         return
@@ -495,6 +628,17 @@ export default {
         let tagIds = res.tags.join(',')
         this.getTagArticle(tagIds)
       }
+
+      // 设置页面SEO信息
+      const seoInfo = {
+        title: this.title,
+        keywords: info.keywords,
+        description: info.description,
+        articleTitle: this.title,
+        image: info.post_thumbnail_image
+      }
+      this.seoInfo = seoInfo
+      this.$util.setPageInfo(seoInfo)
     },
 
     goCommentDetail(e) {
@@ -576,7 +720,7 @@ export default {
             url: '../common/pay?flag=1&openid=' + openid + '&postid=' + this.articleId
           })
         } else {
-          this.$user.login('navigateTo')
+          this.$user.login('redirectTo', '/pages/common/detail?id=' + this.articleId)
         }
       } else {
         uni.previewImage({
@@ -626,11 +770,6 @@ export default {
           uni.getClipboardData({
             success: function(res) {
               this.$tips.toast('链接已复制')
-              // wx.showToast({
-              //   title: '链接已复制',
-              //   image: '../../images/src/link.png',
-              //   duration: 2000
-              // })
             }
           })
         }
@@ -659,7 +798,12 @@ export default {
             .then(() => rewardedVideoAd.show())
             .catch(err => {
               this.adInfo.isShowExcitation = false
+              /**
+               * 百度小程序不提示报错，审核找茬儿
+               */
+              // #ifndef MP-BAIDU
               this.$tips.toast('激励视频广告获取失败！')
+              // #endif
             })
         })
       } else {
@@ -671,8 +815,8 @@ export default {
     loadInterstitialAd() {
       var self = this
 
-      if (this.$config.isWX && wx.createRewardedVideoAd) {
-        rewardedVideoAd = wx.createRewardedVideoAd({
+      if (this.$config.isWX && uni.createRewardedVideoAd) {
+        rewardedVideoAd = uni.createRewardedVideoAd({
           adUnitId: this.adInfo.excitationAdId
         })
         rewardedVideoAd.onLoad(() => {})
@@ -791,17 +935,19 @@ export default {
     padding 40rpx 0 20rpx
   .article-date
     font-size 24rpx
-    line-height 1
+    line-height 1.4
     color #959595
-    margin-bottom 30rpx
+    margin-bottom 24rpx
     display flex
     align-items center
+    flex-wrap wrap
     .iconfont
       margin-right 8rpx
+      margin-left 40rpx
       font-size 24rpx
       color #c4c4c4
-    .txt
-      margin-right 40rpx
+    // .txt
+    //   margin-right 40rpx
   .article-content
     line-height 1.6
   // 点个赞

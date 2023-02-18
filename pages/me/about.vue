@@ -70,12 +70,10 @@
         </view>
 
         <!-- 进入网站 -->
-        <!-- #ifndef MP-BAIDU  -->
-        <view class="web">
+        <view v-if="!hideWebsite" class="web">
           <text class="url">网站：{{ website }}</text>
           <view class="btn-web" @click="goWeb">进入网站</view>
         </view>
-        <!-- #endif  -->
       </view>
     </view>
 
@@ -115,27 +113,35 @@ export default {
       // copyright: app.globalData.copyright,
       // website: config.getDomain,
       copyright: '',
-      website: this.$config.api
+      website: this.$config.api,
+      seoInfo: {}
     }
   },
   computed: {
-    ...mapState('app', ['appInfo', 'systemInfo'])
+    ...mapState('app', ['appInfo', 'systemInfo']),
+    hideWebsite() {
+      const t = this.$config.minapptype || ''
+      return t && ['baidu', 'toutiao','kuaishou'].includes(t)
+    }
   },
   onLoad() {
     this.initData()
 
     this.$util.setShareMenu()
   },
+  onShow() {
+    this.$util.setPageInfo(this.seoInfo)
+  },
 
   onShareTimeline: function () {
     return {
-      title: '关于“' + this.appInfo.appName 
+      title: '关于' + this.appInfo.appName 
     }
   },
 
   onShareAppMessage: function () {
     return {
-      title: '关于“' + this.appInfo.appName ,
+      title: '关于' + this.appInfo.appName,
       path: 'pages/common/about'
     }
   },
@@ -152,7 +158,17 @@ export default {
         title: res.post_title
       })
 
-      this.pageData = res || {}
+      const data = res || {}
+      this.pageData = data
+
+      const seoInfo = {
+        title: '关于我们',
+        keywords: data.tags,
+        description: data.post_content,
+        articleTitle: data.post_title,
+      }
+      this.seoInfo = seoInfo
+      this.$util.setPageInfo(seoInfo)
 
       // 地图覆盖物
       let r = res || {}

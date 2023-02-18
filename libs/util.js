@@ -1,3 +1,4 @@
+import store from '@/store'
 
 // 时间格式化
 // format(new Date(), 'yyyy-M-d h:m:s.S')      => 2006-7-2 8:9:4.18
@@ -54,6 +55,15 @@ export function goto(v) {
     path = path.replace('/pages/postags/postags', '/pages/common/tags')
     path = path.replace('/pages/list/list?categoryID=', '/pages/common/list?id=')
     path = path.replace('/pages/live/live', '/pages/common/live')
+    path = path.replace('/pages/index/index', '/pages/home/home')
+    path = path.replace('/pages/page/page', '/pages/common/page-detail')
+    path = path.replace('/pages/about/about', '/pages/me/about')
+    path = path.replace('/pages/readlog/readlog', '/pages/me/readlog')
+    path = path.replace('/pages/pay/pay', '/pages/common/pay')
+    path = path.replace('/pages/my/my', '/pages/me/me')
+    path = path.replace('/pages/webpage/webpage', '/pages/common/web')
+    path = path.replace('/pages/comments/comments', '/pages/common/comment')
+    path = path.replace('/pages/channels/channels', '/pages/common/channels')
 
     uni.navigateTo({
       url: path
@@ -80,21 +90,69 @@ export function goto(v) {
     }
   }
   // #endif
+
+  //#ifdef APP-PLUS
+  if (type === 'miniapp') { // 跳转微信小程序
+    //const state = store.state || {}
+   // const app = state.app || {}
+    //const appInfo = app.appInfo || {}
+    plus.share.getServices((s) => {
+      let sweixin = {}
+      for (let i = 0; i < s.length; i++) {
+        let share = s[i]
+        if (share.id === 'weixin') {
+          sweixin = share
+        }
+      }
+      // 小程序参数，必填
+      let WeixinMiniProgramOptions = {
+        id:appid,
+        path:path, // 可指定打开的页面
+        type:0  // 0-正式版； 1-测试版； 2-体验版。 默认值为0。
+      }
+      if (sweixin) {
+        sweixin.launchMiniProgram(WeixinMiniProgramOptions)
+      } else {
+        plus.nativeUI.alert('当前环境不支持微信操作!')
+      }
+    }, function(e) {
+      console.log('获取分享服务列表失败：' + e.message)
+    })
+  }
+  // #endif
 }
 
 export function setShareMenu() {
-  // #ifdef MP
+  // #ifdef MP-WEIXIN
   uni.showShareMenu({
     withShareTicket: true,
-    // #ifdef MP-WEIXIN
     menus: ['shareAppMessage', 'shareTimeline']
-    // #endif
   })
   // #endif
 }
 
+export function setPageInfo({ title, keywords, description, articleTitle, image}) {
+  // 设置百度 seo 信息
+  // #ifdef MP-BAIDU
+  const state = store.state || {}
+  const app = state.app || {}
+  const appInfo = app.appInfo || {}
+  const appName = appInfo.appName
+  if (title && appName) title += `-${appName}`
+  swan.setPageInfo({
+    title: title || '',
+    keywords: keywords || '',
+    description: description || '',
+    articleTitle: articleTitle || '',
+    image: image || '',
+  })
+  // #endif
+}
+
+
 export default {
   setShareMenu,
   fmtDate,
-  goto
+  goto,
+  setPageInfo
 }

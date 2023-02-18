@@ -36,12 +36,20 @@ export default {
   computed: {
     ...mapState('app', ['appInfo'])
   },
-
   onLoad() {
     this.initData()
     this.getCpAd('comment')
 
     this.$util.setShareMenu()
+  },
+  onShow() {
+    this.$util.setPageInfo({
+      title: '最新评论',
+      keywords: '评论,最新评论,用户评论,评论列表,评论内容',
+      description: "最新的评论留言",
+      image: '../../static/src/comments_bg.jpg',
+      articleTitle: this.appInfo.appName + '的最新评论'
+    })
   },
 
   onShareTimeline: function () {

@@ -21,6 +21,14 @@ export default {
     this.curType = e.type || '1'
     this.initData()
   },
+  onShow() {
+    this.$util.setPageInfo({
+      title: '我的',
+      keywords: '浏览,评论,点赞,订阅,关于',
+      description: '我的浏览,评论,点赞,订阅,关于我们',
+      articleTitle: '我的浏览,评论,点赞,订阅'
+    })
+  },
 
   // 下拉刷新
   onPullDownRefresh: function () {

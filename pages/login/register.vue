@@ -10,7 +10,7 @@
           placeholder="请输入用户名"
         />
       </view>
-<!--      <view class="form-item">
+      <!-- <view class="form-item">
         <input
           v-model="phone"
           class="input"

@@ -37,9 +37,7 @@
             <view class="name">
               <text>{{itm.name}}</text>
             </view>
-            <!-- #ifdef MP-WEIXIN ||  MP-ALIPAY || MP-QQ || MP-TOUTIAO || MP-BAIDU -->
-            <text class="btn-sub" @click.stop="subscribeCate(itm)">{{itm.subflag === '1' ? '取消' : '订阅'}}</text>
-            <!-- #endif -->
+            <!-- <text class="btn-sub" @click.stop="subscribeCate(itm)">{{itm.subflag === '1' ? '取消' : '订阅'}}</text> -->
           </view>
           <view class="content-brief">
             <span>{{ itm.description }}</span>
@@ -63,12 +61,16 @@
         defaultImg: this.$config.defaultImg,
         categoriesList: [],
         cateSubList: [],
-        activeIndex: 0
+        activeIndex: 0,
+        seoInfo: {}
       }
     },
     onLoad() {
       this.initData()
       this.getCpAd('cate')
+    },
+    onShow() {
+      this.$util.setPageInfo(this.seoInfo)
     },
 
     methods: {
@@ -82,16 +84,29 @@
       async getCategory() {
         const res = await this.$api.getCategory()
         if (res.length) {
+          let keywords = []
           let list = res.map(item => {
             if (!item.children.length) {
               item.children[0] = { ...item, children: []}
             }
+            keywords.push(item.name)
             return item
           })
 
           let index = this.activeIndex
           this.categoriesList = list
           this.cateSubList = list[index].children
+
+          const txt = keywords.join(',')
+          const seoInfo = {
+            title: '文章分类',
+            keywords: txt,
+            description: txt,
+            articleTitle: '文章分类列表',
+            image: this.cateSubList[0].category_thumbnail_image
+          }
+          this.seoInfo = seoInfo
+          this.$util.setPageInfo(seoInfo)
         }
       },
 
@@ -253,7 +268,8 @@
             color #666
 
         .content-brief
-          width 70%
+          // width 70%
+          width 90%
           padding 4rpx 0 30rpx 30rpx
           font-size 13px
           overflow hidden

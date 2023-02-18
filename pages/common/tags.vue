@@ -34,10 +34,17 @@
     computed: {
       ...mapState('app', ['appInfo'])
     },
-
     onLoad() {
       this.initData()
       this.$util.setShareMenu()
+    },
+    onShow() {
+      this.$util.setPageInfo({ 
+        title: '热门标签',
+        keywords: '热门标签,tag,标签',
+        description: '引用最多的热门标签',       
+        articleTitle: this.appInfo.appName + '的热门标签'
+      })
     },
 
     onShareTimeline: function () {

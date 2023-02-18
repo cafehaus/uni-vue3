@@ -25,14 +25,18 @@ export default {
         let appInfo = data.appInfo || {}
         let wxInfo = data.weixinInfo || {}
         let bdInfo = data.bdInfo || {}
-  
+        let ksInfo = data.ksInfo || {}
         let info = {
           appName: appInfo.name,
           logo: appInfo.logo,
+          privacylink: appInfo.privacylink,
+          channelenableapp:appInfo.channelenableapp,
           downloadUrl: data.downloadfiledomain,
           qrCode: wxInfo.wx_praiseQrCode,
           isCompany: wxInfo.wx_enterprise_minapp === '1',
+          wxghid: wxInfo.wx_ghid,          
           bdInfo,
+          ksInfo
         }
         commit('setAppInfo', info)
       } else {
@@ -84,7 +88,7 @@ export default {
 
       if(enableAd) {
         if (res.status !== '200') return
-        let interstitialAd = wx.createInterstitialAd({
+        let interstitialAd = uni.createInterstitialAd({
           adUnitId: res[`${key}_interstitial_ad_id`]
         })
         // 监听插屏错误事件

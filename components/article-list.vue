@@ -80,11 +80,21 @@
 </script>
 
 <style lang="stylus" scoped>
-  @import '../styles/var'
+@import '../styles/var'
 
+.article
+  &:not(:last-child)
+    position relative
+    &:after
+      content ''
+      position absolute
+      bottom 1rpx
+      left 40rpx
+      right 40rpx
+      height 1rpx
+      background #EEE
   .article-ad
     margin-bottom 16rpx
-
   .article-item
     display flex
     padding 40rpx

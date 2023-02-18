@@ -1,8 +1,9 @@
 <template>
   <view>
     <view v-if="showBar" class="comment-box">
-      <image src="@/static/detail_home.png" class="icon-img" @click="goHome" />
+      <image src="@/static/detail_home.png" class="icon-home" @click="goHome" />
       <view class="input" @click="onComment">请输入评论...</view>
+      <!-- #ifdef MP -->
       <button
         class="btn-share"
         hover-class="none"
@@ -10,10 +11,29 @@
       >
         <image src="@/static/detail_share.png" class="icon-img" />
       </button>
+      <!-- #endif -->
+      <!-- #ifdef APP-PLUS -->
+      <button
+        class="btn-share"
+        hover-class="none"
+        @click="handleUniShare"
+      >
+        <image src="@/static/detail_share.png" class="icon-img" />
+      </button>
+      <!-- #endif -->
     </view>
-    <button v-else class="circle-share" hover-class="none"  open-type="share">
-      <image class="icon-img" src="@/static/detail_share.png"></image>
-    </button>
+    <template v-if="!showBar">
+      <!-- #ifdef MP -->
+      <button class="circle-share" hover-class="none" open-type="share">
+        <image class="icon-img" src="@/static/detail_share.png"></image>
+      </button>
+      <!-- #endif -->
+      <!-- #ifdef APP-PLUS -->
+      <button class="circle-share" hover-class="none" @click="handleUniShare">
+        <image class="icon-img" src="@/static/detail_share.png"></image>
+      </button>
+      <!-- #endif -->
+    </template>
 
     <view v-show="showInput" class="textarea-box">
       <view class="textarea-mask" @click="cancel"></view>
@@ -39,8 +59,6 @@
 </template>
 
 <script>
-import uni from '../libs/uni'
-
 export default {
   name: 'comment-bar',
   props: {
@@ -60,7 +78,6 @@ export default {
 
   data() {
     return {
-      // placeholder: '请输入评论',
       focus: false,
       showInput: false,
       showPopup: false,
@@ -86,10 +103,9 @@ export default {
       }
 
       if (this.$user.isLogin()) {
-        // this.$emit('send', this.content)
         this.submitComment()
       } else {
-        this.$user.login('navigateTo')
+        this.$user.login('redirectTo', '/pages/common/detail?id=' + this.article.id)
       }
     },
 
@@ -97,8 +113,8 @@ export default {
       this.showPopup = true
     },
 
-    onCreatePoster() {
-
+    handleUniShare() {
+      this.$emit('unishare')
     },
 
     goHome() {
@@ -109,7 +125,7 @@ export default {
 
     onComment() {
       if (!this.$user.isLogin()) {
-        this.$user.login('navigateTo')
+        this.$user.login('navigateTo', '/pages/common/detail?id=' + this.article.id)
         return
       }
       this.focus = false
@@ -140,13 +156,13 @@ export default {
       let author_url = user.avatarUrl
       let email = openid + "@weixin.com"
 
-      var data = {
-        post: postID,
+      let data = {
+        postid: postID,
         author_name: name,
         author_email: email,
         content: this.content,
         author_url: author_url,
-        parent: parent,
+        parentid: parent || 0,
         openid: openid,
         userid: userid,
         formId: formId
@@ -162,21 +178,6 @@ export default {
       } else {
         this.$tips.toast('评论失败，请稍后重试')
       }
-      // if (res.statusCode == 200) {
-      //   if (res.data.status == '200') {
-      //     this.$emit('success')
-      //   } else if (res.data.status == '500') {
-      //     this.$tips.toast('评论失败，请稍后重试')
-      //   }
-      // } else {
-      //   if (res.data.code == 'rest_comment_login_required') {
-      //     this.$tips.toast('需要开启在WordPress rest api 的匿名评论功能！')
-      //   } else if (res.data.code == 'rest_invalid_param' && res.data.message.indexOf('author_email') > 0) {
-      //     this.$tips.toast('email填写错误！')
-      //   } else {
-      //     this.$tips.toast('评论失败,' + res.data.message)
-      //   }
-      // }
     },
   },
 }
@@ -197,22 +198,26 @@ export default {
   box-shadow 0 0 6px rgba(30, 20, 20, 0.1)
   z-index 100
   padding-bottom calc(20rpx + env(safe-area-inset-bottom))
-  .icon-img
+  .icon-home
     width 36rpx
     height 36rpx
+    margin-right 40rpx
   .btn-share
     width 36rpx
     height 36rpx
     padding 0
-    margin 0
+    margin 0 0 0 40rpx
     line-height 36rpx
     &::after
       border none
+    .icon-img
+      width 36rpx
+      height 36rpx
   .input
     flex 1
     background-color #f4f6f9
     padding 0 24rpx
-    margin 0 40rpx
+    // margin 0 40rpx
     font-size 14px
     height 80rpx
     line-height 80rpx
@@ -294,10 +299,13 @@ export default {
   position fixed
   bottom 40rpx
   right 40rpx
-  line-height 98rpx
   background-color #fff
-  box-shadow 2px 4px 8px #ccc
+  box-shadow 2px 4px 8px rgba(120, 120, 120, .2)
   z-index 3
+  display flex
+  justify-content center
+  align-items center
+  border none
   &::after
     border none
   .icon-img

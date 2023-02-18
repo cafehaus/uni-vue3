@@ -24,6 +24,7 @@
 </template>
 
 <script>
+  import { mapState } from 'vuex'
   export default {
     data() {
       return {
@@ -31,16 +32,15 @@
         password: '',
       }
     },
+    computed: {
+      ...mapState('app', ['appInfo', 'systemInfo'])
+    },
 
     onLoad(e) {
       this.redirect = e.redirect || ''
-      this.initData()
     },
 
     methods: {
-      initData() {
-      },
-
       async handleLogin() {
         if (!this.userName || !this.password) {
           let msg = !this.userName ? '请输入用户名' : '请输入密码'

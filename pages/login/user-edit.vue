@@ -7,6 +7,8 @@
         <input
           v-model="userName"
           class="input"
+          type="nickname"
+          @blur="onblur"
           :placeholder="'请输入' + userNameTxt"
         />
       </view>
@@ -100,13 +102,17 @@
           this.updatePassword()
         }
       },
+      onblur(e)
+      {
+        this.userName=e.detail.value
+        
+      },
 
        async updateUserName() {
         if (!this.userName) {
           this.$tips.toast('请输入昵称')
           return
         }
-
         let args = {
           nickname: this.userName,
           userid: this.userInfo.userId,

@@ -4,7 +4,7 @@
       <div class="header">
         <p class="title">{{ itm.title }}</p>
         <p class="info">{{ itm.content }}</p>
-        <p class="contact">联系方式：{{ itm.contact }}</p>
+        <p class="contact">手机号：{{ itm.contact }}</p>
       </div>
       <div class="footer">
         <p class="time">{{ itm.creatdate }}</p>
@@ -31,7 +31,7 @@ export default {
     }
   },
 
-  onLoad() {
+  onShow() {
     this.initData()
   },
 
@@ -55,7 +55,7 @@ export default {
     },
 
     previewReply(itm) {
-      wx.showModal({
+      uni.showModal({
         title: '回复',
         content: itm.replay,
         showCancel: false,

@@ -2,7 +2,7 @@
   <view class="comment" @click="goto">
     <view class="user">
       <view class="avatar">
-        <image class="img" :src="item.author_url" />
+        <image class="img" :src="avatar" />
         <!-- #ifndef MP-KUAISHOU -->
         <image class="icon" :src="`/static/${item.usertype}.jpg`" />
         <!-- #endif -->
@@ -37,6 +37,17 @@
 
     data() {
       return {}
+    },
+
+    computed: {
+      avatar() {
+        const a = this.item.author_url
+        if (!a || a === '../../images/gravatar.png') {
+          return '/static/avatar.png'
+        } else {
+          return a
+        }
+      }
     },
 
     methods: {

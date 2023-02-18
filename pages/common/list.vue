@@ -41,7 +41,8 @@
           size: 5
         },
         isLastPage: false,
-        isPullDown: false
+        isPullDown: false,
+        seoInfo: {}
       }
     },
     computed: {
@@ -57,6 +58,10 @@
       this.getCpAd('list')
 
       this.$util.setShareMenu()
+    },
+
+    onShow() {
+      this.$util.setPageInfo(this.seoInfo)
     },
 
     onShareTimeline: function () {
@@ -138,9 +143,10 @@
       // 获取分类信息
       async getCategoryInfo() {
         const res = await this.$api.getCategoryInfo(this.curId)
+        const img = res.category_thumbnail_image || this.$config.defaultImg
         this.info = {
           ...res,
-          img: res.category_thumbnail_image || this.$config.defaultImg,
+          img,
           des: res.description,
         }
 
@@ -148,14 +154,24 @@
         uni.setNavigationBarTitle({
           title: res.name
         })
+
+        const seoInfo = {
+          title: res.name,
+          keywords: res.bd_keywords,
+          description: res.bd_description,             
+          image: img
+        }
+        this.seoInfo = seoInfo
+        this.$util.setPageInfo(seoInfo)
       },
 
       async getTagDetail() {
         // per_page=' + pageCount + '&orderby=date&order=desc&page=' + args.page + '&tags=' + args.tag
         const res = await this.$api.getTagDetail(this.curId)
+        const img = res.tag_thumbnail_image || this.$config.defaultImg
         this.info = {
           ...res,
-          img: res.tag_thumbnail_image || this.$config.defaultImg,
+          img,
           des: res.name,
         }
 
@@ -163,6 +179,14 @@
         uni.setNavigationBarTitle({
           title: res.name
         })
+        const seoInfo = {
+          title: res.name,
+          keywords: res.tag_keywords,
+          description: res.tag_description,             
+          image: img
+        }
+        this.seoInfo = seoInfo
+        this.$util.setPageInfo(seoInfo)
       },
 
       async getTagArticle() {

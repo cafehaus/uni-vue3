@@ -75,7 +75,7 @@ export default {
   },
   beforeDestroy () {
     this._ctx.destroy()
-    context.remove(this.properties.audioId)
+    context.remove(this.aid)
   },
   onPageShow () {
     if (this.playing && this._ctx.paused) {
@@ -107,6 +107,10 @@ export default {
       this._ctx.pause()
       this.playing = false
       this.$emit('pause')
+    },
+    // 设置播放速率
+    playbackRate (rate) {
+      this._ctx.playbackRate = rate
     },
     // 移动进度条
     seek (sec) {

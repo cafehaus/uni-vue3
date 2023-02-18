@@ -1,5 +1,5 @@
 <template>
-  <view class="custom-ad">
+  <view class="custom-ad" v-if="info.enable === 'yes'">
     <!-- banner图 -->
     <view
       v-if="styleType === '1'"

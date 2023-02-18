@@ -16,12 +16,16 @@
         pageId: '',
 
         title: '',
-        content: ''
+        content: '',
+        seoInfo: {}
       }
     },
     onLoad(e) {
       this.pageId = e.id
       this.initData()
+    },
+    onShow() {
+      this.$util.setPageInfo(this.seoInfo)
     },
 
     methods: {
@@ -36,8 +40,17 @@
         this.title = res.title.rendered
 
         uni.setNavigationBarTitle({
-          title: res.title.rendered || '页面详情'
+          title: this.title || '页面详情'
         })
+
+        const seoInfo = {
+          title: '网站页面',
+          keywords:res.tags,
+          description: this.content,
+          articleTitle: this.title
+        }
+        this.seoInfo = seoInfo
+        this.$util.setPageInfo(seoInfo)
       },
     }
   }

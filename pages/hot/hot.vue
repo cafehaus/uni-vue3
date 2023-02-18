@@ -53,19 +53,26 @@
           list.push({ name: '点赞数', type: 'likethisyear' })
         }
 
-        if (!this.$config.isBD && !this.$config.isQQ && !this.$config.isTT && !this.$config.isAL && !this.$config.isKS) {
+        if (!this.$config.isBD && !this.$config.isQQ && !this.$config.isTT && !this.$config.isAL && !this.$config.isKS && !this.$config.isAPP) {
           list.push({ name: '鼓励数', type: 'praisethisyear' })
         }
 
         return list
       }
     },
-
     onLoad() {
       this.initData()
       this.getCpAd('hot')
 
       this.$util.setShareMenu()
+    },
+    onShow() {
+      this.$util.setPageInfo({
+        title: '热门文章排行榜',
+        keywords: '浏览数,评论数,点赞数,排行',
+        description: '关于文章浏览数、评论数、点赞数排行榜',
+        articleTitle: '热门文章排行榜'
+      })
     },
 
     onShareTimeline: function () {

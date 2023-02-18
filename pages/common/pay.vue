@@ -50,7 +50,7 @@ export default {
       }
       const response = await this.$api.postPraiseUrl(params)
       if (response.data) {
-        wx.requestPayment({
+        uni.requestPayment({
           'timeStamp': response.data.timeStamp,
           'nonceStr': response.data.nonceStr,
           'package': response.data.package,

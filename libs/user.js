@@ -12,7 +12,7 @@ export function login(type = 'redirectTo', redirect = '') {
   let route = pages[pages.length - 1].route
   if (route !== 'pages/login/login') {
     uni[type]({
-      url: `/pages/login/login?redirect=${redirect}`,
+      url: `/pages/login/login?redirect=${redirect ? encodeURIComponent(redirect) : ''}`,
     })
   }
 }

@@ -9,7 +9,7 @@
 
           <button v-if="!isLogin" class="btn-update" @click="login">立即登录</button>
           <!-- #ifdef  MP-BAIDU || MP-QQ || MP-TOUTIAO || MP-ALIPAY -->
-          <button v-else class="btn-update" open-type="getUserInfo" @getuserinfo="updateUserInfo">更新信息</button>
+         <!-- <button v-else class="btn-update" open-type="getUserInfo" @getuserinfo="updateUserInfo">更新信息</button> -->
           <!-- #endif -->
        </view>
       </view>
@@ -24,16 +24,18 @@
         <view class="list-item" @click="goto('1')">我的浏览</view>
         <view class="list-item" @click="goto('2')">我的评论</view>
         <view class="list-item" @click="goto('3')">我的点赞</view>
-        <view class="list-item" @click="goto('5')">我的订阅</view>
+         <!-- #ifdef MP-WEIXIN -->
+        <!-- <view class="list-item"  @click="goto('/pages/me/userprofile')">授权</view> -->
+        <!-- #endif -->
+
       </view>
 
       <view class="list-sub">
-        <!-- 关于我们 -->
-        <view class="list-item" @click="goto('about')">关于我们</view>
+        <ScanLogin />
         <view class="list-item" @click="goto('/pages/me/leaveword-log')">预约留言</view>
         <!-- #ifdef MP-WEIXIN || MP-BAIDU -->
         <view class="list-item">
-          <button openType="contact" class='list-item-btn'>联系客服</button>
+          <button open-type="contact" class='list-item-btn'>联系客服</button>
         </view>
         <!-- #endif -->
         <!-- #ifdef MP-WEIXIN || MP-QQ -->
@@ -41,10 +43,19 @@
           <button open-type="feedback" class='list-item-btn'>意见反馈</button>
         </view>
         <!-- #endif -->
-        <view class="list-item" @click="clearStorage">清除缓存</view>
-        <view v-if="isLogin" class="list-item" @click="logout">退出登录</view>
-
         <view v-if="isLogin && userInfo.levelName === '管理者'" class="list-item" @click="updateLiveInfo">更新直播数据</view>
+      </view>
+
+      <view class="list-sub">
+        <view class="list-item" @click="goto('privacy')">隐私政策</view>
+        <view class="list-item" @click="goto('about')">关于我们</view>
+        <!-- <view class="list-item" @click="clearStorage">清除缓存</view> -->
+        <template v-if="isLogin">
+          <view class="list-item" @click="logout">退出登录</view>
+          <!-- #ifdef APP-PLUS -->
+          <view class="list-item" @click="deleteAccount">注销账号</view>
+          <!-- #endif -->
+        </template>
       </view>
     </view>
   </view>
@@ -52,8 +63,11 @@
 
 <script>
   import { mapState } from 'vuex'
-
+  import ScanLogin from '@/components/scan-login'
   export default {
+    components: {
+      ScanLogin,
+    },
     data() {
       const userInfo = this.$storage('userInfo')
       return {
@@ -68,10 +82,19 @@
       if (this.isLogin) {
         this.getUserInfo()
       }
+
+      this.$util.setPageInfo({
+        title: '用户个人中心',
+        keywords: '我的浏览,评论,点赞,订阅,关于我们',
+        description: '用户昵称,用户头像,用户信息,我的浏览,评论,点赞,订阅,关于我们',
+        image: '../../static/avatar.png',
+        articleTitle: '个人中心'
+      })
     },
 
     computed: {
       ...mapState('user', ['isLogin']),
+      ...mapState('app', ['appInfo', 'systemInfo']),
       avatar() { // 头像
         return this.userInfo.avatarUrl || '/static/avatar.png'
       }
@@ -158,6 +181,24 @@
         })
       },
 
+      // 注销账号：小米应用商店需提供账号注销功能
+      deleteAccount() {
+        const email = 'account@minapper.com'
+        const content =  `如需注销账号，请使用原注册邮箱，发送申请至${email}，邮件中注明您将要注销的账号即可，我们将在5个工作日内完成相关账号的注销删除。`
+        uni.showModal({
+          title: '注销账号',
+          content,
+          confirmText: '复制邮箱',
+          success (res) {
+            if (res.confirm) {
+              uni.setClipboardData({
+                data: email
+              })
+            }
+          }
+        })
+      },
+
       // 更新直播数据
       async updateLiveInfo() {
         this.$tips.loading('更新中...')
@@ -177,10 +218,17 @@
       // 跳转
       goto(e) {
         let url = ''
+        console.log(e);
         // 关于我们
         if (e === 'about') {
           url = `/pages/me/about`
-        } else {
+        }
+        else if (e === 'privacy') {
+         uni.navigateTo({
+           url: '/pages/common/web?url=' + this.appInfo.privacylink
+         })
+        }
+        else {
           if(!this.$user.isLogin()) {
             this.$user.login('navigateTo')
             return
@@ -211,11 +259,11 @@
     align-items center
     justify-content space-between
     background-color #fff
-    height 280rpx
-    padding 0 40rpx
+    // height 280rpx
+    padding 40rpx 40rpx 60rpx
     position relative
     &.user-login
-      padding 0 70rpx 0 40rpx
+      padding 40rpx 70rpx 60rpx 40rpx
       position relative
       &::after
         content ""
@@ -240,7 +288,7 @@
         max-width 400rpx
         font-size 40rpx
         font-weight 500
-        line-height 1
+        line-height 1.2
         nowrap()
 
       .user-des
@@ -252,6 +300,7 @@
         line-height 1
         .user-member,
         .user-id
+          white-space nowrap
           margin-right 20rpx
         .btn-update
           height 42rpx
@@ -266,7 +315,7 @@
             border none
 
   .list .list-sub
-    margin 0 40rpx 40rpx
+    margin 40rpx
     padding 0 40rpx
     border-radius 24rpx
     background #fff

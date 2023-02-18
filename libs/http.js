@@ -168,9 +168,14 @@ export default {
   },
 
   get(url, data, options = {}) {
-    if (data) {
-      data.apptype = $config.appType
-      data.minapptype =  $config.minapptype
+    if (!data) data =  {}
+    data.apptype = $config.appType
+    data.minapptype =  $config.minapptype
+
+    const token = storage('token')
+    if (token) {
+      data.userid = token.userid || undefined
+      data.sessionid = data.sessionid || token.sessionid || undefined
     }
 
     options.url = url
@@ -180,28 +185,19 @@ export default {
   },
 
   post(url, data, options = {}) {
-    if (data) {
-      data.apptype = $config.appType
-      data.minapptype =  $config.minapptype
+    if (!data) data =  {}
+    data.apptype = ($config.isAPP || $config.ish5) ? '' : $config.appType
+    data.minapptype =  $config.minapptype
+
+    const token = storage('token')
+    if (token) {
+      data.userid = token.userid || undefined
+      data.sessionid = data.sessionid || token.sessionid || undefined
     }
 
     options.url = url
     options.data = data
     options.method = 'POST'
-    return this.request(options)
-  },
-
-  put(url, data, options = {}) {
-    options.url = url
-    options.data = data
-    options.method = 'PUT'
-    return this.request(options)
-  },
-
-  delete(url, data, options = {}) {
-    options.url = url
-    options.data = data
-    options.method = 'DELETE'
     return this.request(options)
   },
 }

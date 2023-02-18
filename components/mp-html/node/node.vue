@@ -3,26 +3,32 @@
     <block v-for="(n, i) in childs" v-bind:key="i">
       <!-- 图片 -->
       <!-- 占位图 -->
-      <image v-if="n.name==='img'&&((opts[1]&&!ctrl[i])||ctrl[i]<0)" class="_img" :style="n.attrs.style" :src="ctrl[i]<0?opts[2]:opts[1]" mode="widthFix" />
+      <image v-if="n.name==='img'&&!n.t&&((opts[1]&&!ctrl[i])||ctrl[i]<0)" class="_img" :style="n.attrs.style" :src="ctrl[i]<0?opts[2]:opts[1]" mode="widthFix" />
       <!-- 显示图片 -->
       <!-- #ifdef H5 || (APP-PLUS && VUE2) -->
       <img v-if="n.name==='img'" :id="n.attrs.id" :class="'_img '+n.attrs.class" :style="(ctrl[i]===-1?'display:none;':'')+n.attrs.style" :src="n.attrs.src||(ctrl.load?n.attrs['data-src']:'')" :data-i="i" @load="imgLoad" @error="mediaError" @tap.stop="imgTap" @longpress="imgLongTap" />
       <!-- #endif -->
-      <!-- <image v-if="n.name==='img'" :id="n.attrs.id" :class="'_img '+n.attrs.class" :style="(ctrl[i]===-1?'display:none;':'')+'width:'+(ctrl[i]||1)+'px;height:1px;'+n.attrs.style" :src="n.attrs.src" :mode="!n.h?'widthFix':(!n.w?'heightFix':'')" :lazy-load="opts[0]" :webp="n.webp" :show-menu-by-longpress="opts[3]&&!n.attrs.ignore" :image-menu-prevent="!opts[3]||n.attrs.ignore" :data-i="i" @load="imgLoad" @error="mediaError" @tap.stop="imgTap" @longpress="imgLongTap" /> -->
+      <!-- #ifndef H5 || (APP-PLUS && VUE2) -->
+      <!-- 表格中的图片，使用 rich-text 防止大小不正确 -->
+      <rich-text v-if="n.name==='img'&&n.t" :style="'display:'+n.t" :nodes="'<img class=\'_img\' style=\''+n.attrs.style+'\' src=\''+n.attrs.src+'\'>'" :data-i="i" @tap.stop="imgTap" />
+      <!-- #endif -->
       <!-- #ifndef H5 || APP-PLUS -->
-      <image v-if="n.name==='img'" :id="n.attrs.id" :class="'_img '+n.attrs.class" :style="(ctrl[i]===-1?'display:none;':'')+'width:'+(ctrl[i]||1)+'px;'+n.attrs.style" :src="n.attrs.src" :mode="!n.h?'widthFix':(!n.w?'heightFix':'')" :lazy-load="opts[0]" :webp="n.webp" :show-menu-by-longpress="opts[3]&&!n.attrs.ignore" :image-menu-prevent="!opts[3]||n.attrs.ignore" :data-i="i" @load="imgLoad" @error="mediaError" @tap.stop="imgTap" @longpress="imgLongTap" />
+      <image v-else-if="n.name==='img'" :id="n.attrs.id" :class="'_img '+n.attrs.class" :style="(ctrl[i]===-1?'display:none;':'')+'width:'+(ctrl[i]||1)+'px;height:1px;'+n.attrs.style" :src="n.attrs.src" :mode="!n.h?'widthFix':(!n.w?'heightFix':'')" :lazy-load="opts[0]" :webp="n.webp" :show-menu-by-longpress="opts[3]&&!n.attrs.ignore" :image-menu-prevent="!opts[3]||n.attrs.ignore" :data-i="i" @load="imgLoad" @error="mediaError" @tap.stop="imgTap" @longpress="imgLongTap" />
       <!-- #endif -->
       <!-- #ifdef APP-PLUS && VUE3 -->
-      <image v-if="n.name==='img'" :id="n.attrs.id" :class="'_img '+n.attrs.class" :style="(ctrl[i]===-1?'display:none;':'')+'width:'+(ctrl[i]||1)+'px;'+n.attrs.style" :src="n.attrs.src||(ctrl.load?n.attrs['data-src']:'')" :mode="!n.h?'widthFix':(!n.w?'heightFix':'')" :data-i="i" @load="imgLoad" @error="mediaError" @tap.stop="imgTap" @longpress="imgLongTap" />
+      <image v-else-if="n.name==='img'" :id="n.attrs.id" :class="'_img '+n.attrs.class" :style="(ctrl[i]===-1?'display:none;':'')+'width:'+(ctrl[i]||1)+'px;'+n.attrs.style" :src="n.attrs.src||(ctrl.load?n.attrs['data-src']:'')" :mode="!n.h?'widthFix':(!n.w?'heightFix':'')" :data-i="i" @load="imgLoad" @error="mediaError" @tap.stop="imgTap" @longpress="imgLongTap" />
       <!-- #endif -->
       <!-- 文本 -->
-      <!-- #ifndef MP-BAIDU || MP-ALIPAY || MP-TOUTIAO || MP-KUAISHOU -->
-      <text v-else-if="n.text" :user-select="n.us" decode>{{n.text}}</text>
+      <!-- #ifdef MP-WEIXIN -->
+      <text v-else-if="n.text" :user-select="opts[4]=='force'&&isiOS" decode>{{n.text}}</text>
+      <!-- #endif -->
+      <!-- #ifndef MP-WEIXIN || MP-BAIDU || MP-ALIPAY || MP-TOUTIAO || MP-KUAISHOU -->
+      <text v-else-if="n.text" decode>{{n.text}}</text>
       <!-- #endif -->
       <text v-else-if="n.name==='br'">\n</text>
       <!-- 链接 -->
       <view v-else-if="n.name==='a'" :id="n.attrs.id" :class="(n.attrs.href?'_a ':'')+n.attrs.class" hover-class="_hover" :style="'display:inline;'+n.attrs.style" :data-i="i" :appid="n.attrs.appid" :redirectype="n.attrs.redirectype" :jumptype="n.attrs.jumptype" :feedid="n.attrs.feedid" :path="n.attrs.path" :src="n.attrs.href" :filetype="n.attrs.filetype" @tap.stop="linkTap">
-        <node name="span" :childs="n.children" :opts="opts" style="display:inherit" />
+        <node name="span" :childs="n.children" :opts="opts" style="display:inherit;" />
         <text v-if="n.attrs.redirectype === 'miniapp' || n.attrs.redirectype === 'apppage'" class="iconfont icon-miniapp-logo" />
       </view>
       <!-- 视频 -->
@@ -142,7 +148,12 @@
       </block>
       <!-- 广告短代码 -->
       <block v-else-if="n.name==='minapperad'">
+        <!-- #ifndef MP-KUAISHOU -->
         <ad :unit-id="n.attrs.unitid" :ad-type="n.attrs.adtype" :ad-theme="n.attrs.adtheme" :ad-intervals="n.attrs.adintervals" />
+        <!-- #endif -->
+        <!-- #ifdef MP-KUAISHOU -->
+        <ad :unit-id="n.attrs.unitid" :type="n.attrs.adtype" :ad-theme="n.attrs.adtheme" :ad-intervals="n.attrs.adintervals" />
+        <!-- #endif -->
       </block>
       <!-- 地图短代码 -->
       <block v-else-if="n.name==='minappermap'">
@@ -228,13 +239,13 @@
           </swiper-item>
         </swiper>
       </block>
-      <my-audio v-else-if="n.name=='audio'" :class="n.attrs.class" :style="n.attrs.style" :aid="n.attrs.id" :author="n.attrs.author" :controls="n.attrs.controls" :autoplay="n.attrs.autoplay" :loop="n.attrs.loop" :name="n.attrs.name" :poster="n.attrs.poster" :src="n.src[ctrl[i]||0]" :data-i="i" data-source="audio" @play="play" @error="mediaError" /><rich-text v-else-if="n.attrs['data-content']" :nodes="[n]" :data-content="n.attrs['data-content']" :data-lang="n.attrs['data-lang']" @longpress="copyCode" />
+      <my-audio v-else-if="n.name=='audio'" :class="n.attrs.class" :style="n.attrs.style" :aid="n.attrs.id" :author="n.attrs.author" :controls="n.attrs.controls" :autoplay="n.attrs.autoplay" :loop="n.attrs.loop" :name="n.attrs.name" :poster="n.attrs.poster" :src="n.src[ctrl[i]||0]" :data-i="i" data-source="audio" @play="play" @error="mediaError" /><rich-text v-else-if="n.attrs&&n.attrs['data-content']" :nodes="[n]" :data-content="n.attrs['data-content']" :data-lang="n.attrs['data-lang']" @longpress="copyCode" />
       <!-- 富文本 -->
       <!-- #ifdef H5 || ((MP-WEIXIN || MP-QQ || APP-PLUS || MP-360) && VUE2) -->
-      <rich-text v-else-if="!n.c&&!handler.isInline(n.name, n.attrs.style)" :id="n.attrs.id" :style="n.f+';line-height:1.8;text-align:justify;word-break:break-all;'" :nodes="[n]" />
+      <rich-text v-else-if="!n.c&&!handler.isInline(n.name, n.attrs.style)" :id="n.attrs.id" :style="n.f+';line-height:1.8;text-align:justify;word-break:break-all;'" :user-select="opts[4]" :nodes="[n]" />
       <!-- #endif -->
       <!-- #ifndef H5 || ((MP-WEIXIN || MP-QQ || APP-PLUS || MP-360) && VUE2) -->
-      <rich-text v-else-if="!n.c" :id="n.attrs.id" :style="n.f+';display:inline;line-height:1.8;text-align:justify;word-break:break-all;'" :preview="false" :nodes="[n]" />
+      <rich-text v-else-if="!n.c" :id="n.attrs.id" :style="n.f+';display:inline;line-height:1.8;text-align:justify;word-break:break-all;'" :preview="false"  :selectable="opts[4]" :user-select="opts[4]" :nodes="[n]" />
       <!-- #endif -->
       <!-- 继续递归 -->
       <view v-else-if="n.c===2" :id="n.attrs.id" :class="'_block _'+n.name+' '+n.attrs.class" :style="n.f+';'+n.attrs.style">
@@ -288,7 +299,10 @@ export default {
   },
   data () {
     return {
-      ctrl: {}
+      ctrl: {},
+      // #ifdef MP-WEIXIN
+      isiOS: uni.getSystemInfoSync().system.includes('iOS')
+      // #endif
     }
   },
   props: {
@@ -351,7 +365,7 @@ myAudio,
       })
     },
     // #ifdef MP-WEIXIN
-    toJSON () { },
+    toJSON () { return this },
     // #endif
     /**
      * @description 播放视频事件
@@ -378,6 +392,9 @@ myAudio,
             // #endif
           )
           ctx.id = id
+          if (this.root.playbackRate) {
+            ctx.playbackRate(this.root.playbackRate)
+          }
           this.root._videos.push(ctx)
         }
       }
@@ -463,6 +480,23 @@ myAudio,
         // 加载完毕，取消加载中占位图
         this.$set(this.ctrl, i, 1)
       }
+      this.checkReady()
+    },
+
+    /**
+     * @description 检查是否所有图片加载完毕
+     */
+     checkReady () {
+      if (!this.root.lazyLoad) {
+        this.root._unloadimgs -= 1
+        if (!this.root._unloadimgs) {
+          setTimeout(() => {
+            this.root.getRect().then(rect => {
+              this.root.$emit('ready', rect)
+            })
+          },350)
+        }
+      }
     },
 
     /**
@@ -473,6 +507,9 @@ myAudio,
       const node = e.currentTarget ? this.childs[e.currentTarget.dataset.i] : {}
       const attrs = node.attrs || e
       const href = attrs.href
+      console.log(e)
+      console.log(node)
+      console.log(attrs)
       this.root.$emit('linktap', Object.assign({
         innerText: this.root.getText(node.children || []) // 链接内的文本内容
       }, attrs))
@@ -487,13 +524,23 @@ myAudio,
             window.open(href)
             // #endif
             // #ifdef MP
-            uni.setClipboardData({
-              data: href,
-              success: () =>
-                uni.showToast({
-                  title: '链接已复制'
-                })
-            })
+            if (attrs.redirectype) {
+              this.goTo(null, {
+                appid: attrs.appid,
+                redirectype: attrs.redirectype,
+                path: attrs.path,
+                jumptype: attrs.jumptype,
+                url: attrs.href
+              })
+            } else {
+              uni.setClipboardData({
+                data: href,
+                success: () =>
+                  uni.showToast({
+                    title: '链接已复制'
+                  })
+              })
+            }
             // #endif
             // #ifdef APP-PLUS
             plus.runtime.openWeb(href)
@@ -501,14 +548,21 @@ myAudio,
           }
         } else {
           // 跳转页面
-          uni.navigateTo({
-            url: href,
-            fail () {
-              uni.switchTab({
-                url: href,
-                fail () { }
-              })
-            }
+          // uni.navigateTo({
+          //   url: href,
+          //   fail () {
+          //     uni.switchTab({
+          //       url: href,
+          //       fail () { }
+          //     })
+          //   }
+          // })
+          this.goTo(null, {
+            appid: attrs.appid,
+            redirectype: attrs.redirectype,
+            path: attrs.path,
+            jumptype: attrs.jumptype,
+            url: attrs.href
           })
         }
       }
@@ -539,6 +593,7 @@ myAudio,
         if (this.opts[2]) {
           this.$set(this.ctrl, i, -1)
         }
+        this.checkReady()
       }
       if (this.root) {
         this.root.$emit('error', {
@@ -562,37 +617,73 @@ myAudio,
     },
 
     // 跳转
-    goTo(e){
-      var appid=e.currentTarget.dataset.appid;
-      var redirectype=e.currentTarget.dataset.redirectype;   
-      var path=e.currentTarget.dataset.path;
-      var url=e.currentTarget.dataset.url;
-      var jumptype=e.currentTarget.dataset.jumptype;
+    goTo(e, info = {}){
+      const eInfo = (e && e.currentTarget && e.currentTarget.dataset) ? e.currentTarget.dataset : {}
+      let appid = info.appid || eInfo.appid
+      let redirectype = info.redirectype || eInfo.redirectype  
+      let path = info.path || eInfo.path
+      let url = info.url || eInfo.url
+      let jumptype = info.jumptype || eInfo.jumptype
 
       if (redirectype == 'apppage') { //跳转到小程序内部页面         
         uni.navigateTo({
           url: path
         })
-      } else if (redirectype == 'webpage') //跳转到web-view内嵌的页面
-      {
+      }
+      
+      if (redirectype == 'webpage') { //跳转到web-view内嵌的页面
         url = '../webview/webview?url=' + url;
         uni.navigateTo({
           url: url
         })
       }
-      else if (redirectype == 'miniapp') //跳转其他小程序
-       {
-          if(jumptype=='embedded') {
-            uni.openEmbeddedMiniProgram({
-              appId: appid,
-              path: path
-            })
-          } else {
-            uni.navigateToMiniProgram({
-              appId: appid,
-              path: path
-            })
-          }
+      
+      let isWx = false
+      let isMp = false
+      // #ifdef MP-WEIXIN
+      isWx = true
+      // #endif
+      // #ifdef MP
+      isMp = true
+      // #endif
+      
+      if (appid && isMp && redirectype == 'miniapp') { //跳转其他小程序
+        let appidList =  appid.split(',')
+        let reg = /^weixin-.*/
+        // #ifdef MP-WEIXIN
+        reg = /^weixin-.*/
+        // #endif
+        // #ifdef MP-BAIDU
+        reg = /^baidu-.*/
+        // #endif
+        // #ifdef MP-TOUTIAO
+        reg = /^toutiao-.*/
+        // #endif
+        // #ifdef MP-QQ
+        reg = /^qq-.*/
+        // #endif
+        // #ifdef MP-ALIPAY
+        reg = /^alipay-.*/
+        // #endif
+        // #ifdef MP-KUAISHOU
+        reg = /^kuaishou-.*/
+        // #endif
+        let appId = appidList.find(m => reg.test(m)) || ''
+        if (!appId) return
+        
+        // 去掉前缀
+        appId = appId.replace(/(weixin|baidu|toutiao|alipay|kuaishou|qq)-/, '')
+        if(isWx && jumptype === 'embedded') {
+          uni.openEmbeddedMiniProgram({
+            appId,
+            path
+          })
+        } else {
+          uni.navigateToMiniProgram({
+            appId,
+            path
+          })
+        }
       }
     },
 
@@ -651,10 +742,12 @@ myAudio,
 
     // a标签跳转和复制链接
     onTapATag(e) {
+      console.log(e)
       let href = e.currentTarget.dataset.src
       let appid = e.currentTarget.dataset.appid
       let redirectype = e.currentTarget.dataset.redirectype
       let path = e.currentTarget.dataset.path
+      let jumptype = e.currentTarget.dataset.jumptype
 
       // 判断a标签src里是不是插入的文档链接
       let isDoc = /\.(doc|docx|xls|xlsx|ppt|pptx|pdf)$/.test(href)
@@ -665,24 +758,13 @@ myAudio,
       }
 
       if(redirectype) {
-        if (redirectype == 'apppage') { //跳转到小程序内部页面         
-          uni.navigateTo({
-            url: path
-          })
-        } else if (redirectype == 'webpage') //跳转到web-view内嵌的页面
-        {
-          href = '../webview/webview?url=' + href;
-          uni.navigateTo({
-            url: href
-          })
-        }
-        else if (redirectype == 'miniapp') //跳转其他小程序
-        {
-          uni.navigateToMiniProgram({
-            appId: appid,
-            path: path
-          })
-        }
+        this.goTo(null, {
+          appid,
+          redirectype,
+          path,
+          jumptype,
+          url: href
+        })
       } else {
         uni.setClipboardData({
           data: href,
@@ -809,7 +891,7 @@ myAudio,
   border-top: 1px solid #c6cbd1;
 }
 
-/deep/ .md-table .md-tr:nth-child(2n) {
+.md-table .md-tr:nth-child(2n) {
   background-color: #f6f8fa;
 }
 
@@ -1051,6 +1133,10 @@ myAudio,
 ._sub,
 ._sup {
   display: inline;
+}
+
+._span {
+  display: inline !important;
 }
 
 /* #ifdef APP-PLUS */

@@ -7,14 +7,17 @@
     <NiceColumn :nav-list="navList" />
 
     <!-- 搜索 -->
-    <VSearch from="home" />
+    <VSearch v-if="showSearch" from="home" />
 
     <!-- 标签 -->
-    <VTag :tag-list="tagList" />
+    <VTag v-if="showTag" :tag-list="tagList" />
 
     <!-- 自定义广告 -->
-    <!-- #ifndef MP-KUAISHOU -->
-    <CustomAd from="home" />
+    <CustomAd v-if="!isKS" from="home" />
+
+    <!-- 视频号 -->
+    <!-- #ifdef  MP-WEIXIN || APP-PLUS -->
+    <VideoChannels />
     <!-- #endif -->
 
     <!-- 文章列表 -->
@@ -26,6 +29,7 @@
 import { mapState, mapMutations, mapActions } from 'vuex'
 import ArticleList from '@/components/article-list'
 import CustomAd from '@/components/custom-ad'
+import VideoChannels from '@/components/video-channels'
 import VSwiper from './components/v-swiper'
 import NiceColumn from './components/nice-column'
 import VSearch from './components/v-search'
@@ -35,6 +39,7 @@ export default {
   components: {
     ArticleList,
     CustomAd,
+    VideoChannels,
     VSwiper,
     NiceColumn,
     VSearch,
@@ -58,14 +63,29 @@ export default {
   computed: {
     ...mapState('user', ['isLogin', 'userInfo']),
     ...mapState('app', ['appInfo']),
+    isKS() { // 快手
+      return this.$config.isKS
+    },
+    showSearch() {
+      let ksInfo = this.appInfo.ksInfo || {}
+      return !this.isKS || (this.isKS && ksInfo.enableseach === '1')
+    },
+    showTag() {
+      let ksInfo = this.appInfo.ksInfo || {}
+      return !this.isKS || (this.isKS && ksInfo.enablehometag === '1')
+    },
   },
   onLoad() {
     this.initData()
 
     // 插屏广告
     this.getCpAd('home')
-
     this.$util.setShareMenu()
+  },
+  onShow() {
+    // #ifdef MP-BAIDU
+    this.getBaiduSeo()
+    // #endif
   },
 
   onShareTimeline: function () {
@@ -106,7 +126,6 @@ export default {
 
     initData() {
       this.getOptionsExpand()
-      // this.getCustomAd()
       this.getTagList()
       this.getArticleList()
     },
@@ -114,12 +133,13 @@ export default {
     // 轮播/精选
     async getOptionsExpand() {
       const res = await this.$api.getOptionsExpand()
-      let swiperKey = this.$config.appType + '_swipe_nav'
-      let navKey = this.$config.appType + '_selected_nav'
-      let swiperList = res[swiperKey] || []
-      let navList = res[navKey] || []
+      let appType = this.$config.appType === 'ks' ? 'kuaishou' : this.$config.appType
+      let swiperKey = appType + '_swipe_nav'
+      let navKey = appType + '_selected_nav'
+      let swiperList = res.expand.swipe_nav || [] || []
+      let navList = res.expand.selected_nav || []
 
-      if (this.$config.isH5 || this.$config.isAPP || this.$config.isKS) {
+      if (this.$config.isH5 || this.isKS) {
         this.swiperList = swiperList.filter(m => (m.type === 'apppage' && m.path !== '/pages/live/live') || (m.type === 'webpage'))
         this.navList = navList.filter(m => (m.type === 'apppage' && m.path !== '/pages/live/live') || (m.type === 'webpage'))
       } else {
@@ -139,17 +159,22 @@ export default {
       this.tagList = res || []
     },
 
-    // 自定义广告
-    // async getCustomAd() {
-    //   const res = await this.$api.getCustomAd()
-    //   let banner = res.home_list_top_ad || {}
-
-    //   this.banner = banner
-    // },
+    // 百度 seo
+    async getBaiduSeo() {
+      const res = await this.$api.getBaiduSeo()
+      if (res.status === '200') {
+        this.$util.setPageInfo({
+          title:  res.bd_home_title,
+          keywords: res.bd_home_keywords,
+          description: res.bd_home_description,
+          image: res.bd_home_img
+        })
+      }
+    },
 
     // 获取文章列表
     async getArticleList() {
-      const res = await this.$api.getArticleList({
+      const res = await this.$api.getHomeArticle({
         page: this.page.index,
         per_page: this.page.size,
         orderby: 'date',

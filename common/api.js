@@ -1,6 +1,6 @@
 import http from '../libs/http'
 const wp = 'wp-json/wp/v2/'
-const wm = 'wp-json/minapper-plus/v1/'
+const wm = 'wp-json/minapper/v1/'
 
 // =================================================================== 登录注册
 // 用户名密码注册|post
@@ -10,10 +10,6 @@ export const userRegister = params => http.post(`${wm}users/registeruser`, param
 // 用户名密码登录|post
 // username,password
 export const userLogin = params => http.post(`${wm}users/registeruserlogin`, params)
-
-// 微信授权登录|post
-// js_code，avatarUrl,nickname
-export const wxLogin = params => http.post(`${wm}weixin/webchatuserlogin`, params)
 
 // 微信绑定手机号|post
 // code，openid
@@ -64,19 +60,22 @@ export const updateAvatar = params => http.post(`${wm}users/updateavatar`, param
 
 // =================================================================== 用户
 // 登录|post
-export const login = params => http.post(`${wm}weixin/userlogin`, params)
+export const login = params => http.post(`${wm}weixin/webchatuserlogin`, params)
 
 // 百度登录|post
-export const loginBD = params => http.post(`${wm}baidu/getopenid`, params)
+export const loginBD = params => http.post(`${wm}baidu/webchatuserlogin`, params)
 
 // 阿里登录|post
-export const loginAL = params => http.post(`${wm}alipay/getUserid`, params)
+export const loginAL = params => http.post(`${wm}alipay/webchatuserlogin`, params)
 
 // QQ登录|post
-export const loginQQ = params => http.post(`${wm}qq/getopenid`, params)
+export const loginQQ = params => http.post(`${wm}qq/webchatuserlogin`, params)
 
 // 头条登录|post
-export const loginTT = params => http.post(`${wm}toutiao/getopenid`, params)
+export const loginTT = params => http.post(`${wm}toutiao/webchatuserlogin`, params)
+
+// 快手登录|post
+export const loginKS = params => http.post(`${wm}kuaishou/webchatuserlogin`, params)
 
 // 授权手机号登录|post
 export const phoneLogin = params => http.post(`${wm}weixin/phonelogin`, params)
@@ -103,12 +102,18 @@ export const getWpPageDetail = id => http.get(`${wp}pages/${id}`)
 // 获取标签详情|get
 export const getTagDetail = id => http.get(`${wp}tags/${id}`)
 
+// 获取百度 seo 信息|get
+export const getBaiduSeo = id => http.get(`${wm}options/baiduseo`)
+
 // =================================================================== 首页
-// 获取轮播、精选|get
-export const getOptionsExpand = params => http.get(`${wm}options/expand`, params)
+// 获取轮播|get
+export const getOptionsExpand = params => http.get(`${wm}settings/homeconfig`, params)
+
+// 获取首页文章列表：根据插件设置要显示的分类|get
+export const getHomeArticle = params => http.get(`${wm}posts/items`, params)
 
 // 获取文章列表|get
-export const getArticleList = params => http.get(`${wp}posts`, params)
+export const getArticleList = params => http.get(`${wm}posts/items`, params)
 
 // 获取标签列表|get
 export const getTagList = params => http.get(`${wp}tags?per_page=7&orderby=count&order=desc&page=1`)
@@ -118,13 +123,13 @@ export const getCommentList = params => http.get(`${wm}comment/new`)
 
 // =================================================================== 分类
 // 获取分类树|get
-export const getCategory = params => http.get(`${wm}category?apptype=wx`, params)
+export const getCategory = params => http.get(`${wm}category`, params)
 
 // 获取分类信息|get
 export const getCategoryInfo = id => http.get(`${wp}categories/${id}`)
 
 // 订阅分类|post
-export const subscribeCate = params => http.post(`${wm}category/postsubscription`, params)
+export const subscribeCate = params => http.post(`${wm}category/addsubscription`, params)
 
 // =================================================================== 热门
 // 获取热门文章|get
@@ -132,16 +137,16 @@ export const getHotArticle = params => http.get(`${wm}post/${params.type}?apptyp
 
 // =================================================================== 我的
 // 阅读记录-我的评论|get
-export const getCommentArticle = params => http.get(`${wm}comment/get?openid=${params.openid}&apptype=${params.apptype}`)
+export const getCommentArticle = params => http.get(`${wm}comment/getmyitems`)
 
 // 阅读记录-我的点赞|get
-export const getLikeArticle = params => http.get(`${wm}post/mylike?openid=${params.openid}&apptype=${params.apptype}`)
+export const getLikeArticle = params => http.get(`${wm}post/getmylikes`)
 
 // 阅读记录-我的赞赏|get
 export const getPraiseArticle = params => http.get(`${wm}post/mypraise?openid=${params.openid}&apptype=${params.apptype}`)
 
 // 阅读记录-我的订阅|get
-export const getSubscribeArticle = params => http.get(`${wm}category/getsubscription?openid=${params.openid}`)
+export const getSubscribeArticle = params => http.get(`${wm}category/getmysubscription`)
 
 // 鼓励获取支付密钥|post
 export const postPraiseUrl = params => http.post(`${wm}payment`, params)
@@ -166,13 +171,13 @@ export const getCanComment = (params, config) => http.get(`${wm}options/enableCo
 export const getArticleComment = params => http.get(`${wm}comment/getcomments`, params)
 
 // 提交评论|get
-export const submitComment = params => http.post(`${wm}comment/add`, params)
+export const submitComment = params => http.post(`${wm}comment/post`, params)
 
 // 获取标签相关文章|get
 export const getTagArticle = params => http.get(`${wp}posts`, params)
 
 // 点赞|post
-export const submitLike = params => http.post(`${wm}post/like`, params)
+export const submitLike = params => http.post(`${wm}post/presslike`, params)
 
 // 获取是否点赞|post
 export const getIsLike = params => http.post(`${wm}post/islike`, params)
@@ -189,7 +194,7 @@ export const getInterstitialAd = params => http.get(`${wm}options/enableOption`,
 export const getLiveInfo = params => http.get(`${wm}live/weixin/getliveinfo`)
 
 // 更新直播数据|get
-export const updateLiveInfo = params => http.get(`${wm}live/weixin/refreshliveinfo`)
+export const updateLiveInfo = params => http.get(`${wm}live/weixin/refreshliveinfo`, params)
 
 // =================================================================== 留言
 // 获取我的留言|get
@@ -198,3 +203,15 @@ export const getMyLeaveword = params => http.get(`${wm}form/mymessage`, params)
 // 提交留言|post
 export const submitLeaveword = params => http.post(`${wm}form/message`, params)
 
+// =================================================================== 付费插件
+// 扫码登录|post
+export const scanLogin = params => http.post(`${wm}users/scanqrcode`, params)
+
+// 获取视频号信息|get
+export const getChannelsInfo = params => http.get('wp-json/minapper/v1/channels', params)
+
+// 获取视频号视频|get
+export const getChannelsActivity = params => http.get('wp-json/minapper/v1/channels/activity', params)
+
+// 获取视频号活动|get
+export const getChannelsEvent = params => http.get('wp-json/minapper/v1/channels/event', params)

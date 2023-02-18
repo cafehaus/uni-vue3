@@ -2,7 +2,7 @@
   <view id="_root" :class="(selectable?'_select ':'')+'_root'" :style="containerStyle">
     <slot v-if="!nodes[0]" />
     <!-- #ifndef APP-PLUS-NVUE -->
-    <node v-else :childs="nodes" :opts="[lazyLoad,loadingImg,errorImg,showImgMenu]" name="span" />
+    <node v-else :childs="nodes" :opts="[lazyLoad,loadingImg,errorImg,showImgMenu,selectable]" name="span" />
     <!-- #endif -->
     <!-- #ifdef APP-PLUS-NVUE -->
     <web-view ref="web" src="/static/app-plus/mp-html/local.html" :style="'margin-top:-2px;height:' + height + 'px'" @onPostMessage="_onMessage" />
@@ -12,7 +12,7 @@
 
 <script>
 /**
- * mp-html v2.3.0
+ * mp-html v2.4.0
  * @description 富文本组件
  * @tutorial https://github.com/jin-yufeng/mp-html
  * @property {String} container-style 容器的样式
@@ -134,7 +134,6 @@ export default {
   },
   beforeDestroy () {
     this._hook('onDetached')
-    clearInterval(this._timer)
   },
   methods: {
     /**
@@ -290,6 +289,28 @@ export default {
       // #endif
       // #endif
     },
+    
+    /**
+     * @description 设置媒体播放速率
+     * @param {Number} rate 播放速率
+     */
+     setPlaybackRate (rate) {
+      this.playbackRate = rate
+      for (let i = (this._videos || []).length; i--;) {
+        this._videos[i].playbackRate(rate)
+      }
+      // #ifdef APP-PLUS
+      const command = 'for(var e=document.getElementsByTagName("video"),i=e.length;i--;)e[i].playbackRate=' + rate
+      // #ifndef APP-PLUS-NVUE
+      let page = this.$parent
+      while (!page.$scope) page = page.$parent
+      page.$scope.$getAppWebview().evalJS(command)
+      // #endif
+      // #ifdef APP-PLUS-NVUE
+      this.$refs.web.evalJs(command)
+      // #endif
+      // #endif
+    },
 
     /**
      * @description 设置内容
@@ -316,18 +337,29 @@ export default {
       })
 
       // 等待图片加载完毕
-      let height
-      clearInterval(this._timer)
-      this._timer = setInterval(() => {
-        this.getRect().then(rect => {
+      if (this.lazyLoad || this.imgList._unloadimgs < this.imgList.length / 2) {
+        // 设置懒加载，每 350ms 获取高度，不变则认为加载完毕
+        let height
+        const callback = rect => {
           // 350ms 总高度无变化就触发 ready 事件
           if (rect.height === height) {
             this.$emit('ready', rect)
-            clearInterval(this._timer)
+          } else {
+            height = rect.height
+            setTimeout(() => {
+              this.getRect().then(callback)
+            }, 350)
           }
-          height = rect.height
-        }).catch(() => { })
-      }, 350)
+        }
+        this.getRect().then(callback)
+      } else {
+        // 未设置懒加载，等待所有图片加载完毕
+        if (!this.imgList._unloadimgs) {
+          this.getRect(rect => {
+            this.$emit('ready', rect)
+          })
+        }
+      }
       // #endif
     },
 

@@ -144,6 +144,26 @@ function decodeEntity (str, amp) {
 }
 
 /**
+ * @description 合并多个块级标签，加快长内容渲染
+ * @param {Array} nodes 要合并的标签数组
+ */
+ function mergeNodes (nodes) {
+  let i = nodes.length - 1
+  for (let j = i; j >= -1; j--) {
+    if (j === -1 || nodes[j].c || !nodes[j].name || (nodes[j].name !== 'div' && nodes[j].name !== 'p' && nodes[j].name[0] !== 'h') || (nodes[j].attrs.style || '').includes('inline')) {
+      if (i - j >= 5) {
+        nodes.splice(j + 1, i - j, {
+          name: 'div',
+          attrs: {},
+          children: nodes.slice(j + 1, i + 1)
+        })
+      }
+      i = j - 1
+    }
+  }
+}
+
+/**
  * @description html 解析器
  * @param {Object} vm 组件实例
  */
@@ -151,6 +171,7 @@ function Parser (vm) {
   this.options = vm || {}
   this.tagStyle = Object.assign({}, config.tagStyle, this.options.tagStyle)
   this.imgList = vm.imgList || []
+  this.imgList._unloadimgs = 0
   this.plugins = vm.plugins || []
   this.attrs = Object.create(null)
   this.stack = []
@@ -174,6 +195,9 @@ Parser.prototype.parse = function (content) {
   // 出栈未闭合的标签
   while (this.stack.length) {
     this.popNode()
+  }
+  if (this.nodes.length > 50) {
+    mergeNodes(this.nodes)
   }
   return this.nodes
 }
@@ -222,9 +246,15 @@ Parser.prototype.getUrl = function (url) {
     } else if (domain) {
       // 否则补充整个域名
       url = domain + url
-    }
-  } else if (domain && !url.includes('data:') && !url.includes('://')) {
-    url = domain + '/' + url
+    } /* #ifdef APP-PLUS */ else {
+      url = plus.io.convertLocalFileSystemURL(url)
+    } /* #endif */
+  } else if (!url.includes('data:') && !url.includes('://')) {
+    if (domain) {
+      url = domain + '/' + url
+    } /* #ifdef APP-PLUS */ else {
+      url = plus.io.convertLocalFileSystemURL(url)
+    } /* #endif */
   }
   return url
 }
@@ -491,11 +521,18 @@ Parser.prototype.onOpenTag = function (selfClose) {
             const item = this.stack[i]
             if (item.name === 'a') {
               node.a = item.attrs
-              break
+            }
+            if (item.name === 'table' && !node.webp && !attrs.src.includes('cloud://')) {
+              if (!styleObj.display || styleObj.display.includes('inline')) {
+                node.t = 'inline-block'
+              } else {
+                node.t = styleObj.display
+              }
+              styleObj.display = undefined
             }
             // #ifndef H5 || APP-PLUS
             const style = item.attrs.style || ''
-            if (style.includes('flex:') && !style.includes('flex:0') && !style.includes('flex: 0') && (!styleObj.width || !styleObj.width.includes('%'))) {
+            if (style.includes('flex:') && !style.includes('flex:0') && !style.includes('flex: 0') && (!styleObj.width || parseInt(styleObj.width) > 100)) {
               styleObj.width = '100% !important'
               styleObj.height = ''
               for (let j = i + 1; j < this.stack.length; j++) {
@@ -539,6 +576,9 @@ Parser.prototype.onOpenTag = function (selfClose) {
           }
           // #endif
           this.imgList.push(src)
+          if (!node.t) {
+            this.imgList._unloadimgs += 1
+          }
           // #ifdef H5 || APP-PLUS
           if (this.options.lazyLoad) {
             attrs['data-src'] = attrs.src
@@ -579,6 +619,11 @@ Parser.prototype.onOpenTag = function (selfClose) {
       }
     }
     attrs.style = attrs.style.substr(1) || undefined
+    // #ifdef (MP-WEIXIN || MP-QQ) && VUE3
+    if (!attrs.style) {
+      delete attrs.style
+    }
+    // #endif
   } else {
     if ((node.name === 'pre' || ((attrs.style || '').includes('white-space') && attrs.style.includes('pre'))) && this.pre !== 2) {
       this.pre = node.pre = 1
@@ -612,8 +657,8 @@ Parser.prototype.onCloseTag = function (name) {
     siblings.push({
       name,
       attrs: {
-        class: tagSelector[name],
-        style: this.tagStyle[name]
+        class: tagSelector[name] || '',
+        style: this.tagStyle[name] || ''
       }
     })
   }
@@ -835,6 +880,8 @@ Parser.prototype.popNode = function () {
     let padding = parseFloat(attrs.cellpadding)
     let spacing = parseFloat(attrs.cellspacing)
     const border = parseFloat(attrs.border)
+    const bordercolor = styleObj['border-color']
+    const borderstyle = styleObj['border-style']
     if (node.c) {
       // padding 和 spacing 默认 2
       if (isNaN(padding)) {
@@ -845,7 +892,7 @@ Parser.prototype.popNode = function () {
       }
     }
     if (border) {
-      attrs.style += ';border:' + border + 'px solid gray'
+      attrs.style += `;border:${border}px ${borderstyle || 'solid'} ${bordercolor || 'gray'}`
     }
     if (node.flag && node.c) {
       // 有 colspan 或 rowspan 且含有链接的表格通过 grid 布局实现
@@ -883,7 +930,7 @@ Parser.prototype.popNode = function () {
               col++
             }
             let style = td.attrs.style || ''
-            const start = style.indexOf('width') ? style.indexOf(';width') : 0
+            let start = style.indexOf('width') ? style.indexOf(';width') : 0
             // 提取出 td 的宽度
             if (start !== -1) {
               let end = style.indexOf(';', start + 6)
@@ -895,7 +942,30 @@ Parser.prototype.popNode = function () {
               }
               style = style.substr(0, start) + style.substr(end)
             }
-            style += (border ? `;border:${border}px solid gray` + (spacing ? '' : ';border-right:0;border-bottom:0') : '') + (padding ? `;padding:${padding}px` : '')
+            // 设置竖直对齐
+            style += ';display:flex'
+            start = style.indexOf('vertical-align')
+            if (start !== -1) {
+              const val = style.substr(start + 15, 10)
+              if (val.includes('middle')) {
+                style += ';align-items:center'
+              } else if (val.includes('bottom')) {
+                style += ';align-items:flex-end'
+              }
+            } else {
+              style += ';align-items:center'
+            }
+            // 设置水平对齐
+            start = style.indexOf('text-align')
+            if (start !== -1) {
+              const val = style.substr(start + 11, 10)
+              if (val.includes('center')) {
+                style += ';justify-content: center'
+              } else if (val.includes('right')) {
+                style += ';justify-content: right'
+              }
+            }
+            style = (border ? `;border:${border}px ${borderstyle || 'solid'} ${bordercolor || 'gray'}` + (spacing ? '' : ';border-right:0;border-bottom:0') : '') + (padding ? `;padding:${padding}px` : '') + ';' + style
             // 处理列合并
             if (td.attrs.colspan) {
               style += `;grid-column-start:${col};grid-column-end:${col + parseInt(td.attrs.colspan)}`
@@ -948,7 +1018,7 @@ Parser.prototype.popNode = function () {
             const td = nodes[i]
             if (td.name === 'th' || td.name === 'td') {
               if (border) {
-                td.attrs.style = `border:${border}px solid gray;${td.attrs.style || ''}`
+                td.attrs.style = `border:${border}px ${borderstyle || 'solid'} ${bordercolor || 'gray'};${td.attrs.style || ''}`
               }
               if (padding) {
                 td.attrs.style = `padding:${padding}px;${td.attrs.style || ''}`
@@ -999,18 +1069,20 @@ Parser.prototype.popNode = function () {
       }
     }
   } else if (node.c) {
-    node.c = 2
-    for (let i = node.children.length; i--;) {
-      const child = node.children[i]
-      // #ifdef (MP-WEIXIN || MP-QQ || APP-PLUS || MP-360) && VUE3
-      if (child.name && (config.inlineTags[child.name] || (child.attrs.style || '').includes('inline'))) {
-        child.c = 1
+    (function traversal (node) {
+      node.c = 2
+      for (let i = node.children.length; i--;) {
+        const child = node.children[i]
+        // #ifdef (MP-WEIXIN || MP-QQ || APP-PLUS || MP-360) && VUE3
+        if (child.name && (config.inlineTags[child.name] || ((child.attrs.style || '').includes('inline') && child.children)) && !child.c) {
+          traversal(child)
+        }
+        // #endif
+        if (!child.c || child.name === 'table') {
+          node.c = 1
+        }
       }
-      // #endif
-      if (!child.c || child.name === 'table') {
-        node.c = 1
-      }
-    }
+    })(node)
   }
 
   if ((styleObj.display || '').includes('flex') && !node.c) {
@@ -1035,22 +1107,8 @@ Parser.prototype.popNode = function () {
     node.f = ';max-width:100%'
   }
 
-  // 优化长内容加载速度
   if (children.length >= 50 && node.c && !(styleObj.display || '').includes('flex')) {
-    let i = children.length - 1
-    for (let j = i; j >= -1; j--) {
-      // 合并多个块级标签
-      if (j === -1 || children[j].c || !children[j].name || (children[j].name !== 'div' && children[j].name !== 'p' && children[j].name[0] !== 'h') || (children[j].attrs.style || '').includes('inline')) {
-        if (i - j >= 5) {
-          children.splice(j + 1, i - j, {
-            name: 'div',
-            attrs: {},
-            children: node.children.slice(j + 1, i + 1)
-          })
-        }
-        i = j - 1
-      }
-    }
+    mergeNodes(children)
   }
   // #endif
 
@@ -1070,8 +1128,10 @@ Parser.prototype.popNode = function () {
   }
   attrs.style = attrs.style.substr(1) || undefined
   // #ifdef (MP-WEIXIN || MP-QQ) && VUE3
-  if (!attrs.style) {
-    delete attrs.style
+  for (const key in attrs) {
+    if (!attrs[key]) {
+      delete attrs[key]
+    }
   }
   // #endif
 }
@@ -1098,7 +1158,15 @@ Parser.prototype.onText = function (text) {
       }
     }
     // 去除含有换行符的空串
-    if (trim === ' ' && flag) return
+    if (trim === ' ') {
+      if (flag) return
+      // #ifdef VUE3
+      else {
+        const parent = this.stack[this.stack.length - 1]
+        if (parent && parent.name[0] === 't') return
+      }
+      // #endif
+    }
     text = trim
   }
   const node = Object.create(null)
@@ -1109,9 +1177,8 @@ Parser.prototype.onText = function (text) {
   node.text = decodeEntity(text)
   if (this.hook(node)) {
     // #ifdef MP-WEIXIN
-    if (this.options.selectable === 'force' && system.includes('iOS')) {
+    if (this.options.selectable === 'force' && system.includes('iOS') && !uni.canIUse('rich-text.user-select')) {
       this.expose()
-      node.us = 'T'
     }
     // #endif
     const siblings = this.stack.length ? this.stack[this.stack.length - 1].children : this.nodes

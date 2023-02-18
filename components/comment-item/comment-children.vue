@@ -15,13 +15,13 @@
 
 <script>
   // #ifdef MP
-  // import CommentChildren from './comment-children'
+  import CommentChildren from './comment-children'
   // #endif
   export default {
     name: 'CommentChildren',
     components: {
       // #ifdef MP
-      // CommentChildren,
+      CommentChildren,
       // #endif
     },
     props: {

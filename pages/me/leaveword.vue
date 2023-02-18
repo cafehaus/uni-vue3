@@ -10,8 +10,8 @@
         <textarea v-model="form.content" placeholder="请输入内容" />
       </view>
       <view class='form-item'>
-        <view class="label">联系方式</view>
-        <input v-model="form.contact" placeholder="请输入联系方式" />
+        <view class="label">手机号</view>
+        <input v-model="form.contact" placeholder="请输入手机号" />
       </view>
     </view>
 
@@ -47,8 +47,13 @@ export default {
         this.$tips.toast('请输入内容')
         return
       }
-      if (!this.form.contact) {
-        this.$tips.toast('请输入联系方式')
+      const contact = this.form.contact
+      if (!contact) {
+        this.$tips.toast('请输入手机号')
+        return
+      }
+      if (!/^1[3-9]\d{9}$/.test(contact)) {
+        this.$tips.toast('手机号格式错误')
         return
       }
 
